@@ -1,0 +1,431 @@
+/* Header styles */
+#header {
+  width: 100%;
+  background-color: white;
+  color: #a1a1a1;
+  margin-bottom: -20px;
+  border-bottom: 1px solid #f4f4f4;
+  height: 55px;
+}
+
+#header ul li {
+  list-style-type: none;
+  font-family: Arial;
+  font-size: .8em;
+  font-weight: bold;
+  display: inline-block;
+}
+
+#logo {
+  float: left;
+}
+
+#logo img {
+  width: 35px;
+  float: left;
+}
+
+#search {
+  width: 50%;
+  float: left;
+  margin-left: 240px;
+  padding-top: 10px;
+}
+
+#search-box {
+  width: 150%;
+  height: 25px;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #e9e9e9;
+  margin: -190px;
+  border: 0px;
+}
+
+#nav-buttons {
+  float: right;
+  margin-top: 2px;
+  margin-right: 20px;
+}
+
+#nav-buttons a {
+  color: #bababa;
+  text-decoration: none;
+  font-size: 1.9em;
+  margin-left: 30px;
+}
+
+#nav-buttons a:hover {
+  color: #5f5f5f;
+}
+
+/* Wrapper/container styles */
+#wrapper {
+  width: 100%;
+  margin: 50px auto;
+}
+
+/* Pins */
+.pin {
+  display: inline-block;
+  background: #FEFEFE;
+  border: 2px solid #FAFAFA;
+  box-shadow: 0 1px 2px rgba(34, 25, 25, 0.4);
+  margin: 0px 10px 15px 0px;
+  padding: 15px;
+  width: calc(20% - 20px); /* Adjusted width for one-by-one row format */
+}
+
+.pin img {
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 15px;
+  margin-bottom: 5px;
+}
+
+.pin p {
+  font: 12px/18px Arial, sans-serif;
+  color: #333;
+  margin: 0;
+} 
+
+.pin:hover {
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+
+
+
+
+
+/* skillll      css  */
+
+
+.skills .container {
+  flex-direction: column;
+}
+
+/*---------skill--------*/
+/*---------portfolio--------*/
+.portfolio .content {
+  flex-direction: column;
+}
+
+.portfolio .filter-menu {
+  margin-top: 30px;
+}
+
+/*---------portfolio--------*/
+/*---------experience--------*/
+.experience .content {
+  flex-direction: column;
+}
+
+.experience .left img {
+  width: 100%;
+}
+
+.experience .left, .right {
+  width: 100%;
+}
+
+/*---------experience--------*/
+/*---------Testimonials--------*/
+.Testimonials .container {
+  flex-direction: column;
+}
+
+/*---------Testimonials--------*/
+/*---------contact--------*/
+.contact .container {
+  flex-direction: column;
+}
+
+.contact .left {
+  width: 100%;
+}
+
+.contact .right {
+  width: 100%;
+}
+
+/*---------contact--------*/
+/*---------social_media--------*/
+footer .content,
+.social_media .content {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/*---------social_media--------*/
+
+@media only screen and (max-width:511px) {
+.heading h2 {
+  font-size: 30px;
+}
+
+.heading h3 {
+  font-size: 20px;
+}
+
+.heading h4 {
+  font-size: 17px;
+}
+
+/*---------about--------*/
+.about .box {
+  margin: 5px;
+}
+
+.about .items {
+  margin-left: 0%;
+}
+
+.about .items:nth-child(1) {
+  margin-left: 0%;
+}
+
+
+
+  /*---------services--------*/
+  /*---------skills--------*/
+  /*---------line skills--------*/
+  .line_content .line {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  
+  .line_content p {
+
+    width: 35%;
+  }
+  
+  .line_content h5 {
+    background: skyblue;
+    width: 50px;
+    height: 40px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
+    position: relative;
+    margin-top: 12px;
+  }
+  
+  .line_content h5::after {
+    position: absolute;
+    content: '';
+    left: -4px;
+    top: 12px;
+    width: 10px;
+    height: 10px;
+    background: skyblue;
+    transform: rotate(45deg);
+  }
+  
+  .line_content .line:nth-child(2) h5::after,
+  .line_content .line:nth-child(2) h5 {
+    background: #FF761B;
+  }
+  
+  .line_content .line:nth-child(3) h5::after,
+  .line_content .line:nth-child(3) h5 {
+    background:yellow;
+  }
+  
+  .line_content .bar {
+    width: 60%;
+    background: #ffffff;
+    height: 5px;
+    margin-top: 30px;
+    margin-right: 20px;
+  }
+  
+  .line_content .line_bar {
+    animation: bar 2.8s;
+    height: 5px;
+    background: #30D3FF;
+    width: 85%;
+  }
+  
+  .line_content .css {
+    width: 70%;
+    background: orange;
+  }
+  .line_content .js {
+    width: 70%;
+    background: yellow;
+  }
+  
+  .line_content .python {
+    width: 78%;
+    background: pink;
+  }
+  
+  @keyframes bar {
+    0% {
+      width: 0%;
+    }
+  }
+  
+  @keyframes write {
+    0% {
+      left: 0;
+    }
+  
+    20% {
+      content: "15%";
+    }
+  
+    40% {
+      content: "30%";
+    }
+  
+    60% {
+      content: "45%";
+    }
+  
+    80% {
+      content: "60%";
+    }
+  
+    100% {
+      content: "70%";
+    }
+  }
+  
+  /*---------line skills--------*/
+  @keyframes circle_animation {
+    0% {
+      stroke-dashoffset: 340px;
+    }
+  
+    100% {
+      stroke-dashoffset: 0px;
+    }
+  }
+  
+  .skill-container {
+    margin-top: 50px;
+  }
+  
+  circle {
+    stroke-width: 5px;
+    stroke: #D593FF;
+    fill: transparent;
+    animation: circle_animation 2s linear backwards;
+  }
+  
+  .skill-container .circle_box:nth-child(2) circle {
+    stroke: #35FC00;
+  }
+  
+  .skill-container .circle_box:nth-child(3) circle {
+    stroke: #FFA726;
+  }
+  
+  .skill-container .circle_box:nth-child(4) circle {
+    stroke: #00A0D2;
+  }
+  
+  circle p {
+    vertical-align: middle;
+    display: table-cell;
+  }
+  
+  /*---------skills--------*/
+  /*---------portfolio--------*/
+  .portfolio {
+    height: 90vh;
+  }
+  
+  .portfolio h2 {
+    margin: 0;
+  }
+  
+  .filter_container {
+    position: relative;
+    width: 50%;
+  }
+  
+  .filter_container .image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  .filter_container .overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 17px;
+    right: 0px;
+    background-color: #20C863;
+    overflow: hidden;
+    width: 90%;
+    height: 90%;
+    transform: scale(0);
+    transition: .3s ease;
+  }
+  
+  .filter_container:hover .overlay {
+    transform: scale(1);
+  }
+  
+  .filter_container .text {
+    color: white;
+    position: absolute;
+    text-align: center;
+    top: 20%;
+    left: 10%;
+  }
+  
+  .filter-item img {
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* filter  */
+  .filter_container {
+    margin-top: 50px;
+  }
+  
+  .filter-menu {
+    margin-bottom: 20px;
+  }
+  
+  .filter-menu li {
+    display: inline-block;
+    padding: 10px 18px;
+    color: #fff;
+    cursor: pointer;
+    color: #fff;
+    transition: 0.5s;
+  }
+  
+  .filter-menu li:hover,
+  .filter-menu li.current {
+    background: #20C863;
+  }
+  
+  .filter-item li {
+    width: 50%;
+    padding: 2px;
+    float: left;
+  }
+  
+  .filter-item li.active {
+    width: 50%;
+    padding: 2px;
+    transition: all 0.5s ease;
+  }
+  
+  .filter-item li.delete {
+    width: 0%;
+    padding: 0;
+    transition: all 0.5s ease;
+  }
+  
+  .filter-item img {
+    display: block;
+  }
+  

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}karl_pearson{% endblock %}
+{% block css %}
+{{ super() }}  <!-- Ensure that base CSS is included -->
+<link rel="stylesheet" href="{{ url_for('static', filename='foem2.css') }}">
+{% endblock %}
+{% block content %}
+<h1>Karl Pearson's Coefficient Calculator</h1>
+<div>
+<form id="calculationForm" action="/karl_pearson_out" method="post">
+    <label class="lable" for="n">Enter n :</label>
+    <input type="text" name="n" required>
+    <br>
+    <label class="lable"  for="x">Enter x :</label>
+    <input type="text" name="x" required>
+    <br>
+    <label class="lable"  for="y">Enter y :</label>
+    <input type="text" name="y" required>
+    <br>
+    <br>
+   
+    <button type="submit">Calculate</button>
+    {% if response %}
+        <h3>{{ response }}</h3>
+    {% endif %}
+    <u1></u1>
+    <button type="submit">Methodology</button>
+</form>
+</div>
+{% endblock %}

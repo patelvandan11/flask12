@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects{% endblock %}
+
+{% block navbar %}    
+<main>
+    <div id="page" class="s-pagewrap ss-home">
+        <header>
+            <div class="logo"></div>
+            <nav>
+                <div class="menu-icon" onclick="toggleMenu()">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/"><span>Home</span></a></li>
+                    <li><a href="/projects"><span>Projects</span></a></li>
+                    <li><a href="/about"><span>About</span></a></li>
+                    <li><a href="/contact"><span>Contact</span></a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuIcon = document.querySelector('.menu-icon');
+            const navLinks = document.querySelector('.nav-links');
+            function toggleMenu() {
+                menuIcon.classList.toggle('open');
+                navLinks.classList.toggle('open');
+            }
+            menuIcon.addEventListener('click', toggleMenu);
+        });
+    </script>
+    
+</main>     
+{% endblock %}
+
+
+
+{% block project %}
+<section id="content" class="s-content">
+    <div id="bricks" class="bricks">
+        <div class="masonry">
+            <div class="bricks-wrapper ss-animated" data-animate-block=" ">
+                <div class="grid-sizer"></div>
+
+                {% for project in projects %}
+                <article class="brick entry">
+                    <div class="entry__thumb">
+                        <a href="{{ project.url }}" class="thumb-link">
+                            <img src="{{ project.img_src }}" 
+                                 srcset="{{ project.img_srcset }}">
+                        </a>
+                    </div>
+                    <div class="entry__text">
+                        <div class="entry__header">
+                            <div class="entry__meta">
+                                <span class="cat-links">
+                                    <a href="{{ project.url }}">Project</a>
+                                </span>
+                            </div>
+                            <h1 class="entry__title"><a href="{{ project.url }}">{{ project.title }}</a></h1>
+                        </div>
+                        <div class="entry__excerpt">
+                            <p>{{ project.description }}</p>
+                        </div>
+                        <a class="entry__more-link" href="{{ project.url }}">Read More</a>
+                    </div>
+                </article>
+                {% endfor %}
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

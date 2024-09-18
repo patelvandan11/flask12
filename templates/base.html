@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" class="js ss-loaded">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Vandan{% endblock %}</title>
+
+    <!-- Block for custom CSS files -->
+    {% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='VAN.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
+    {% endblock %}
+</head>
+<body id="top">
+
+    <!-- Block for the navigation bar -->
+    {% block navbar %}{% endblock %}
+
+    <!-- Block for main content -->
+    {% block content %}{% endblock %}
+
+    <!-- Block for project section -->
+    {% block project %}{% endblock %}
+    
+    <!-- Block for footer -->
+    {% include 'footer.html' %}
+    
+    
+    <!-- Additional scripts -->
+    {% block scripts %}
+    <script>
+        function toggleMenu() {
+            const menuIcon = document.querySelector('.menu-icon');
+            const navLinks = document.querySelector('.nav-links');
+            menuIcon.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        }
+    </script>
+    {% endblock %}
+    
+</body>
+</html>

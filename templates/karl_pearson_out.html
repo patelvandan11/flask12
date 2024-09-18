@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}/karl_pearson_out{% endblock %}
+{% block css %}
+{{ super() }}  <!-- Ensure that base CSS is included -->
+<link rel="stylesheet" href="{{ url_for('static', filename='karl_pearson_out.css') }}">
+{% endblock %}
+{% block content %}
+<div class="center">
+    <div class="result-container">
+        <h1>Result</h1>
+        <p style="font-size:25px;">The Karl Pearson correlation coefficient is: {{ result }}</p>
+        <a href="/karl_pearson">Back to input form</a>
+    </div>
+</div>
+{% endblock %}
