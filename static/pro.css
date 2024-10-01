@@ -170,7 +170,7 @@ main, #content {
 
     .nav-links.open {
         display: flex;
-        background-color: aqua;
+        background-color: rgb(233, 255, 255);
         z-index: 2
     }
 

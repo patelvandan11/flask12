@@ -7,57 +7,10 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 {% endblock %}
-{% block navbar %}    
-<main>
-    <div id="page" class="s-pagewrap ss-home">
-        <header>
-            <div class="logo"></div>
-            <nav>
-                <div class="menu-icon" onclick="toggleMenu()">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                </div>
-                <ul class="nav-links">
-                    <li><a href="/"><span>Home</span></a></li>
-                    <li><a href="/projects"><span>Projects</span></a></li>
-                    <li><a href="/about"><span>About</span></a></li>
-                    <li><a href="/contact"><span>Contact</span></a></li>
-                </ul>
-            </nav>
-        </header>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuIcon = document.querySelector('.menu-icon');
-            const navLinks = document.querySelector('.nav-links');
-            function toggleMenu() {
-                menuIcon.classList.toggle('open');
-                navLinks.classList.toggle('open');
-            }
-            menuIcon.addEventListener('click', toggleMenu);
-        });
-    </script>
-    
-</main>     
-
-{% endblock %}
+{% block navbar %}{% endblock %}
 
 {% block content %}
-<div style="margin:10px;">
-    <div class="pin">
-        <img src="./static/images/vandan.jpg" alt="Vandan Patel">
-    </div>
+<div>
+    
 </div>
-    <div class="vandan_p" style="display: flex; justify-content: center; align-items: center; height: 50%;
-                                margin: 10px; padding: 10px; 
-                                ">
-        <p style="text-align: center; justify-content:center; width:50%;    ">
-            My name is Vandan Patel.<br> I am a third-year student of Artificial Intelligence and Data Science at ADIT. 
-            I am passionate about machine learning and also interested in web development where I have participated in hackathons and other competitions.<br> Most of my time 
-            is spent staring at a computer screen.
-            During the day, I am usually programming, working to derive insight from large datasets. My skills include data analysis, visualization, and machine learning. 
-            I have recently expanded my skill set to include topics such as time series analysis and neural networks, and I am excited to continue learning new methods in challenging and fast-paced environments.
-        </p>
-    </div>
 {% endblock %}
