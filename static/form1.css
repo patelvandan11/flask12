@@ -81,3 +81,66 @@ main {
 .centered-form input[type="submit"]:hover {
     background-color: #45a049;
 }
+
+
+
+@media (max-width: 768px) {
+    #contact-form {
+        width: 90%; /* Adjust form width for smaller screens */
+        padding: 10px; /* Reduce padding */
+    }
+
+    .centered-form h2 {
+        font-size: 1.5rem; /* Reduce the heading size */
+    }
+
+    .centered-form input[type="text"],
+    .centered-form input[type="email"],
+    .centered-form textarea {
+        font-size: 1rem; /* Adjust font size for inputs */
+        padding: 8px; /* Reduce padding in input fields */
+    }
+
+    .centered-form input[type="submit"] {
+        font-size: 1rem; /* Adjust button font size */
+        padding: 8px 15px; /* Reduce button padding */
+    }
+}
+
+@media (max-width: 480px) {
+    #contact-form {
+        width: 100%; /* Take up full width for very small screens */
+        padding: 5px;
+    }
+
+    .centered-form input[type="text"],
+    .centered-form input[type="email"],
+    .centered-form textarea {
+        font-size: 0.9rem; /* Further reduce font size */
+        padding: 6px; /* Further reduce padding */
+    }
+
+    .centered-form input[type="submit"] {
+        font-size: 0.9rem; /* Adjust button font size further */
+        padding: 6px 10px; /* Further reduce button padding */
+    }
+}
+
+/* Media Query for Submit Button */
+@media (max-width: 768px) {
+    .centered-form input[type="submit"] {
+        font-size: 1rem; /* Smaller font size for medium screens */
+        padding: 8px 12px; /* Reduce padding */
+        width: 80%; /* Adjust width for medium screens */
+        margin: 10px auto; /* Center the button */
+    }
+}
+
+@media (max-width: 480px) {
+    .centered-form input[type="submit"] {
+        font-size: 0.9rem; /* Even smaller font size for small screens */
+        padding: 6px 10px; /* Further reduce padding */
+        width: 100%; /* Full width for small screens */
+        margin: 8px auto; /* Ensure centering */
+    }
+}
