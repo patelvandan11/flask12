@@ -1,0 +1,82 @@
+
+/* Blog Card Container */
+.container {
+    max-width: 800px;
+    background: #ffffff; /* Clean white background */
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Modern shadow for depth */
+    border-radius: 8px; /* Smooth corners */
+    text-align: justify;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 0 auto;
+}
+
+.container:hover {
+    transform: translateY(-5px); /* Subtle hover effect for interaction */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+/* Blog Title Styling */
+.title {
+    color: #1a73e8; /* Brand blue color */
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Metadata (Date and Author Info) Styling */
+.meta {
+    color: #666; /* Neutral gray for meta info */
+    font-size: 14px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Blog Description Styling */
+.description {
+    font-size: 16px;
+    color: #333; /* Dark text for readability */
+    line-height: 1.6; /* Improved text spacing */
+    margin-bottom: 20px;
+}
+
+/* Read More Button Styling */
+.read-more {
+    display: inline-block;
+    background-color: #1a73e8; /* Consistent brand color */
+    color: white; /* High contrast text */
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+}
+
+.read-more:hover {
+    background-color: #135bb5; /* Darker blue for hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .description {
+        font-size: 14px;
+    }
+
+    .read-more {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}

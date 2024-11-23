@@ -5,12 +5,19 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 {% endblock %}
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div>
-    
+<div class="about-container">
+    <img src="{{ url_for('static', filename=user_info['profile_image']) }}" alt="Profile Picture" class="profile-img">
+    <div class="about-content">
+        <h1>{{ user_info['name'] }}</h1>
+        {% for item in user_info['description'] %}
+            <p><span class="emoji">{{ item.emoji }}</span> {{ item.text }}</p>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
