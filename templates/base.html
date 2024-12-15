@@ -11,29 +11,26 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
-    <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     {% endblock %}
 </head>
 <body id="top">
-    
+
     <!-- Block for the navigation bar -->
     {% include 'navbar.html' %}
     {% block Pro %} {% endblock %}
+
     <!-- Block for main content -->
     {% block content %}{% endblock %}
 
     <!-- Block for project section -->
     {% block project %}{% endblock %}
-    
+
     <!-- Block for footer -->
-     {% block footer %}
-     {% include 'footer.html' %}
+    {% block footer %}
+    {% include 'footer.html' %}
     {% endblock %}
-    
-    
+
     <!-- Additional scripts -->
-    
-    
 </body>
 </html>

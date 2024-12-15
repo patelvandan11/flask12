@@ -1,23 +1,76 @@
 {% extends 'base.html' %}
-
 {% block title %}About{% endblock %}
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}"> -->
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 {% endblock %}
-{% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="about-container">
-    <img src="{{ url_for('static', filename=user_info['profile_image']) }}" alt="Profile Picture" class="profile-img">
-    <div class="about-content">
-        <h1>{{ user_info['name'] }}</h1>
-        {% for item in user_info['description'] %}
-            <p><span class="emoji">{{ item.emoji }}</span> {{ item.text }}</p>
-        {% endfor %}
+<div class="resume-container">
+    <!-- Left Column -->
+    <div class="left-column">
+        <div class="profile">
+            <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Profile Picture">
+            <h2 style="font-size: 50px;">Vandan Patel</h2>
+            <p>AI Student, ADIT</p>
+        </div>
+        <div class="about">
+            <p> 
+                A passionate and innovative AI/ML enthusiast dedicated to exploring new frontiers in technology and problem-solving. Adept in building intelligent systems and collaborating on groundbreaking projects to achieve impactful goals and deadlines. Skilled in applying machine learning and deep learning techniques across diverse domains, with extensive knowledge of programming languages, frameworks, and tools. Above all, a curious and lifelong learner, constantly evolving in the dynamic and ever-expanding field of artificial intelligence and data science.
+            </p>
+        </div>
+        <div class="contact">
+            <h2>Contact Me</h2>
+            <p>Email: vandan11patel@gmail.com</p>
+            <p>Contact: +91 9664792015 </p>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-column">
+        <div class="skills">
+            <h2>Technical Skills</h2>
+            <div class="skills-icons">
+                <p>Programming Languages <b>:</b> Python</p>
+                <p>Frameworks and Libraries
+                     <b>:</b> PyTorch, TensorFlow, FastAPI</p>
+                <p>Tools and Technologies <b>:</b> CUDA, TensorFlow Lite</p>
+                 
+            </div>
+        </div>
+        <div class="software-skills">
+            <h2>Software Skills</h2>
+            <p>Problem-Solving</p>
+            
+        </div>
+        <div class="education">
+            <h2>Education</h2>
+            <ul>
+                <li>2022 - Present: A.D Patel Institute Of Technology, Anand (8.72 CGPA)</li>
+                 
+            </ul>
+        </div>
+        <!-- <div class="work-experience">
+            <h2>Work Experience</h2>
+            <ul>
+                <li><strong>Fashion Design Intern</strong> at Aditya Birla Group - Liva (June 2021 - Aug 2021)</li>
+                <li><strong>Illustrator</strong> at Pragmatic Art (Sept 2021 - Present)</li>
+            </ul>
+        </div> -->
+        <!-- <div class="additional-experience">
+            <h2>Additional Experiences</h2>
+            <ul>
+                <li>Intern at Dhaari by Deepika</li>
+                <li>Intern at Kanelle at Lakme Fashion Week</li>
+                <li>Intern at Gas Jeans</li>
+            </ul>
+        </div> -->
     </div>
 </div>
+{% endblock %}
+{% block footer %}
+{{ super() }}
 {% endblock %}

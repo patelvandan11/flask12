@@ -142,7 +142,9 @@ main, #content {
     display: flex;
     gap: 20px;
 }
-
+.nav-links a:hover {
+    text-decoration: underline;
+}
 .nav-links a {
     font-weight: bold;
 }
