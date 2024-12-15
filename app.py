@@ -96,18 +96,7 @@ def karl_pearson_out():
 # About route
 @app.route('/about')
 def about():
-    user_info = {
-        "name": "Hi There 👋",
-        "description": [
-            {"emoji": "💪", "text": "loves to solve complex problems in diverse domains"},
-            {"emoji": "🌍", "text": "is currently working in the field of Climate Change"},
-            {"emoji": "🔥", "text": "handled challenging tasks in Bioinformatics & Telecommunications"},
-            {"emoji": "⚡", "text": "plays with all kinds of data structures - text, image, graph, numerical etc"},
-            {"emoji": "☀️", "text": "at the end of the day, aims to make the data shine!"},
-        ],
-        "profile_image": "profile.jpg",
-    }
-    return render_template("about.html", user_info=user_info)
+    return render_template("about.html")
     
 
 # Contact route
@@ -118,15 +107,18 @@ def contact():
 # blog route
 @app.route('/blog')
 def blog():
-    post = {
+    posts = [{
+        "id": 1,
         "title": "Neural Network Back Propagation algorithms from scratch.",
         "date": "Aug 6, 2024",
         "author": "Vandan Patel",
         "description": (
             """Backpropagation is a fundamental supervised learning algorithm used to train artificial neural networks by minimizing prediction errors through iterative weight adjustments. It relies on the chain rule to calculate gradients, efficiently propagate errors backward through the network, and adjust weights to capture complex patterns in data. A practical Python implementation demonstrates forward propagation, parameter initialization, and weight updates ...."""
         ),
-    }
-    return render_template("blog.html", post=post)
+        "link": "https://medium.com/@vandan11patel/neural-network-back-propagation-algorithms-from-scratch-5ad32fd1b9e9"
+    } 
+    ]
+    return render_template("blog.html", posts=posts)
 
 # Run the application
 if __name__ == '__main__':

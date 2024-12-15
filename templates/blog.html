@@ -7,14 +7,16 @@
 
 {% block content %}
 <div class="v">
-
+    {% for post in posts %}
     <div class="container">
         <h1 class="title">{{ post.title }}</h1>
         <div class="meta">
             <span>📅 {{ post.date }}</span> | <span>👤 {{ post.author }}</span>
         </div>
         <p class="description">{{ post.description }}</p>
-        <a href="#" class="read-more">Read More</a>
+        <a href="{{ post.link }}" class="read-more">Read More</a>
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
+ 
