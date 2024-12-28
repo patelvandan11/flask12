@@ -4,13 +4,11 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}"> -->
 <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="resume-container">
-    <!-- Left Column -->
     <div class="left-column">
         <div class="profile">
             <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Profile Picture">
@@ -29,29 +27,43 @@
         </div>
     </div>
 
-    <!-- Right Column -->
     <div class="right-column">
         <div class="skills">
             <h2>Technical Skills</h2>
             <div class="skills-icons">
-                <p>Programming Languages <b>:</b> Python</p>
-                <p>Frameworks and Libraries
-                     <b>:</b> PyTorch, TensorFlow, FastAPI</p>
-                <p>Tools and Technologies <b>:</b>Git, CUDA, TensorFlow Lite</p>
-                 <p>Deployment <b>:</b>Docker</p>
+                <ul>
+                    <li><p><b>Programming Languages :</b> Python, Java, React JS</p></li>
+                    <li><p><b>Database :</b> SQL, MongoDB, MySQL</p></li>
+                    <li><p><b>Frameworks and Libraries:</b> Flask, FastAPI, PyTorch, TensorFlow, Keras </p></li>
+                    <li><p> <b>Tools and Technologies:</b>Git, Docker </p></li>
+                    <li><p> <b>Other Skills:</b> Machine Learning, Deep Learning, Web Development, Data Science, Statistical Analysis </p></li>
+                </ul>
             </div>
         </div>
         <div class="software-skills">
             <h2>Software Skills</h2>
-            <p>Problem-Solving</p>
+            <ul>
+                <li>Critical Thinking</li>
+                <li>Problem-solving</li>
+            </ul>
             
         </div>
         <div class="education">
             <h2>Education</h2>
             <ul>
                 <li>2022 - Present: A.D Patel Institute Of Technology, Anand (8.72 CGPA)</li>
-                 
+                
             </ul>
+        </div>
+        <div class="skills">
+            <h2>Hobbies</h2>
+            <div class="skills-icons">
+                <ul>
+                    <li>Exploring new technology</li>
+                    <li>Painting</li>
+                    <li>Storytelling</li>
+                </ul>
+            </div>
         </div>
         <!-- <div class="work-experience">
             <h2>Work Experience</h2>

@@ -8,7 +8,7 @@
     <div class="vandan">
         <div class="hero-text">
                 <h2>👋 Hi there, I'am <span>Vandan</span> </h2>
-                <p> Currently, I'm studying Artificial Intelligence and Data Science at CVM University.</p>
+                <p> Currently, I'm studyin  g Artificial Intelligence and Data Science at CVM University.</p>
                 <ul></ul>
                 <br>
         </div>
@@ -19,43 +19,7 @@
 </main>
 {% endblock %}
 
-{% block project %}
-<section id="content" class="s-content">
-    <div id="bricks" class="bricks">
-        <div class="masonry">
-            <div class="bricks-wrapper ss-animated" data-animate-block=" ">
-                <div class="grid-sizer"></div>
 
-                {% for project in projects %}
-                <article class="brick entry">
-                    <div class="entry__thumb">
-                        <a href="{{ project.url }}" class="thumb-link">
-                            <img src="{{ project.img_src }}" 
-                                 srcset="{{ project.img_srcset }}">
-                        </a>
-                    </div>
-                    <div class="entry__text">
-                        <div class="entry__header">
-                            <div class="entry__meta">
-                                <span class="cat-links">
-                                    <a href="{{ project.url }}">Project</a>
-                                </span>
-                            </div>
-                            <h1 class="entry__title"><a href="{{ project.url }}">{{ project.title }}</a></h1>
-                        </div>
-                        <div class="entry__excerpt">
-                            <p>{{ project.description }}</p>
-                        </div>
-                        <a class="entry__more-link" href="{{ project.url }}">Read More</a>
-                    </div>
-                </article>
-                {% endfor %}
-                
-            </div>
-        </div>
-    </div>
-</section>
-{% endblock %}
  
 {%block script%}
 <script>
