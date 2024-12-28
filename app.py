@@ -1,62 +1,27 @@
 from flask import Flask, render_template, url_for, request
+import json
 
 app = Flask(__name__)
 
-# Home route
+ 
 @app.route('/')
 def home():
-    projects = [
-        {
-            'img_src': url_for('static', filename='images/karl1.jpg'),
-            'img_srcset': url_for('static', filename='images/karl1.jpg') + ' 1x, ' + url_for('static', filename='images/karl2.jpg') + ' 2x',
-            'title': "Calculation of Karl Pearson's Coefficient of Correlation from Scratch",
-            'url': url_for('karl_pearson'),
-            'description': ("Calculating Karl Pearson's Coefficient of Correlation from scratch. "
-                            "Understanding the step-by-step process enhances comprehension of the statistical "
-                            "concepts involved in measuring the strength and direction of linear relationships "
-                            "between variables."),
-        },
-        {
-            'img_src': url_for('static', filename='images/Quora1.jpeg'),
-            'img_srcset': url_for('static', filename='images/Quora1.jpeg') + ' 1x, ' + url_for('static', filename='images/Quora2.png') + ' 2x',
-            'title': "Natural Language Processing and Correlation",
-            'url': url_for('projects'),
-            'description': "Exploring how NLP techniques can be used to implement Karl Pearson's Coefficient.",
-        }
-    ]
+     
+    with open('data.json') as f:
+        projects = json.load(f)
     return render_template('home.html', projects=projects)
-
-# Projects route
+ 
 @app.route('/projects', methods=['GET', 'POST'])
 def projects():
     
-    projects = [
-        {
-            'img_src': url_for('static', filename='images/karl1.jpg'),
-            'img_srcset': url_for('static', filename='images/karl1.jpg') + ' 1x, ' + url_for('static', filename='images/karl2.jpg') + ' 2x',
-            'title': "Calculation of Karl Pearson's Coefficient of Correlation from Scratch",
-            'url': url_for('karl_pearson'),
-            'description': ("Calculating Karl Pearson's Coefficient of Correlation from scratch. "
-                            "Understanding the step-by-step process enhances comprehension of the statistical "
-                            "concepts involved in measuring the strength and direction of linear relationships "
-                            "between variables."),
-        },
-        {
-            'img_src': url_for('static', filename='images/Quora1.jpeg'),
-            'img_srcset': url_for('static', filename='images/Quora1.jpeg') + ' 1x, ' + url_for('static', filename='images/Quora2.png') + ' 2x',
-            'title': "Natural Language Processing and Correlation",
-            'url': url_for('projects'),
-            'description': "Exploring how NLP techniques can be used to implement Karl Pearson's Coefficient.",
-        }
-    ]
+    with open('data.json') as f:
+        projects = json.load(f)
     return render_template('projects.html', projects=projects)
 
-# Route for Karl Pearson's Coefficient
 @app.route('/karl_pearson')
 def karl_pearson():
     return render_template('karl_pearson.html')
 
-# Route to handle Karl Pearson form submission and calculation
 @app.route('/karl_pearson_out', methods=['POST'])
 def karl_pearson_out():
     try:
@@ -107,17 +72,8 @@ def contact():
 # blog route
 @app.route('/blog')
 def blog():
-    posts = [{
-        "id": 1,
-        "title": "Neural Network Back Propagation algorithms from scratch.",
-        "date": "Aug 6, 2024",
-        "author": "Vandan Patel",
-        "description": (
-            """Backpropagation is a fundamental supervised learning algorithm used to train artificial neural networks by minimizing prediction errors through iterative weight adjustments. It relies on the chain rule to calculate gradients, efficiently propagate errors backward through the network, and adjust weights to capture complex patterns in data. A practical Python implementation demonstrates forward propagation, parameter initialization, and weight updates ...."""
-        ),
-        "link": "https://medium.com/@vandan11patel/neural-network-back-propagation-algorithms-from-scratch-5ad32fd1b9e9"
-    } 
-    ]
+    with open('Blog.json') as f:
+        posts = json.load(f)
     return render_template("blog.html", posts=posts)
 
 # Run the application

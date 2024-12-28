@@ -1,0 +1,23 @@
+[
+    {
+        "img_src": "static/images/karl1.jpg",
+        "img_srcset": "static/images/karl1.jpg 1x, static/images/karl2.jpg 2x",
+        "title": "Calculation of Karl Pearson's Coefficient of Correlation from Scratch",
+        "url": "/karl_pearson",
+        "description": "Calculating Karl Pearson's Coefficient of Correlation from scratch. Understanding the step-by-step process enhances comprehension of the statistical concepts involved in measuring the strength and direction of linear relationships between variables."
+    },
+    {
+        "img_src": "static/images/CNN.png",
+        "img_srcset": "static/images/CNN.png 1x, static/images/CNN.png 2x",
+        "title": "VGG-16 Convolutional Neural Network (CNN) Architecture Fine-Tuning Techniques",
+        "url": "https://medium.com",
+        "description": "An in-depth look at the VGG-16 architecture, a popular convolutional neural network model. This project covers the structure, layers, and fine-tuning techniques used to enhance the performance of VGG-16 for various image classification tasks."
+    },
+    {
+        "img_src": "static/images/Quora1.jpeg",
+        "img_srcset": "static/images/Quora1.jpeg 1x, static/images/Quora2.png 2x",
+        "title": "Natural Language Processing and Correlation",
+        "url": "/projects",
+        "description": "Exploring how NLP techniques can be used to implement Karl Pearson's Coefficient."
+    }
+]

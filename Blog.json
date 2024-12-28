@@ -1,0 +1,9 @@
+[{
+    "id": 1,
+    "title": "Neural Network Back Propagation algorithms from scratch.",
+    "date": "Aug 6, 2024",
+    "author": "Vandan Patel",
+    "description": "Backpropagation is a fundamental supervised learning algorithm used to train artificial neural networks by minimizing prediction errors through iterative weight adjustments. It relies on the chain rule to calculate gradients, efficiently propagate errors backward through the network, and adjust weights to capture complex patterns in data. A practical Python implementation demonstrates forward propagation, parameter initialization, and weight updates ....",
+    "link": "https://medium.com/@vandan11patel/neural-network-back-propagation-algorithms-from-scratch-5ad32fd1b9e9"
+} 
+]

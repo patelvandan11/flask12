@@ -52,13 +52,15 @@ nav ul li a:hover, .entry__more-link:hover, .link-list li a:hover, .s-footer__so
 
 /* Main section styles */
 main, #content {
-    padding: 15px;
+    padding: 0px;
 }
 
 .hero, .vandan, .s-footer__main {
     display: flex;
+    padding: 100px;
     justify-content: space-between;
     align-items: center;
+    /* background-color: #fff8ed; */
 }
 
 .hero-image img, .entry__thumb img {
