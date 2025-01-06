@@ -10,7 +10,7 @@
         "img_src": "static/images/CNN.png",
         "img_srcset": "static/images/CNN.png 1x, static/images/CNN.png 2x",
         "title": "VGG-16 Convolutional Neural Network (CNN) Architecture Fine-Tuning Techniques",
-        "url": "https://medium.com",
+        "url": "https://github.com/patelvandan11/VGG-16-Fine-Tuning",
         "description": "An in-depth look at the VGG-16 architecture, a popular convolutional neural network model. This project covers the structure, layers, and fine-tuning techniques used to enhance the performance of VGG-16 for various image classification tasks."
     }
 ]
