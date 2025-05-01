@@ -1,4 +1,12 @@
 [{
+    "id": 2,
+    "title": "Review : Building AI Applications with Foundation Models by Chip Huyen",
+    "date": "Mar 18, 2025",
+    "author": "Vandan Patel",
+    "description": "Building AI Applications with Foundation Models by Chip Huyen is a practical guide to developing AI applications. It covers everything from understanding AI models and training them to optimizing their performance, with a focus on using foundation models like GPT and LLaMA. The book provides clear explanations, hands-on examples, and valuable insights for both beginners and experienced engineers.",
+    "link": "https://medium.com/@vandan11patel/review-ai-engineering-building-applications-with-foundation-models-by-chip-huyen-c7bf60d90a07"
+} ,
+{
     "id": 1,
     "title": "Neural Network Back Propagation algorithms from scratch.",
     "date": "Aug 6, 2024",

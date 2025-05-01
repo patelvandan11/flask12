@@ -1,88 +1,85 @@
 {% extends 'base.html' %}
+
 {% block title %}About{% endblock %}
+
 {% block css %}
+{{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="resume-container">
+    <!-- Left Column -->
     <div class="left-column">
         <div class="profile">
             <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Profile Picture">
-            <h2 style="font-size: 50px;">Vandan Patel</h2>
+            <h2>Vandan Patel</h2>
             <p>AI Student, ADIT</p>
         </div>
+
         <div class="about">
-            <p> 
-                
+            <h2>About Me</h2>
+            <p>
+                I'm <b>Vandan Patel</b>, an AI and Data Science student at <b>A.D. Patel Institute of Technology</b>. I specialize in developing intelligent applications using <b>Deep Learning</b>, <b>Generative AI</b>, and <b>Data Analytics</b>. Whether it’s creating smart assistants, AI-driven travel planners, or visual recognition systems, I focus on delivering solutions that are both powerful and lightweight.
+            </p>
+            <br>
+            <p>
+                I believe in simplicity—both in code and life. My development philosophy is grounded in clarity, minimalism, and impact. I aim to create user-friendly, efficient, and fast applications that solve real-world problems in meaningful ways.
+            </p>
+            <br>
+            <p>
+                When I’m not coding, I love exploring new technologies, indulging in my passion for <b> painting </b>, and telling stories through <b>art</b>, <b> projects </b>, and <b> conversations </b>. I approach everything with a mindset of <b> curiosity </b>, <b> simplicity </b>, and <b> consistency </b>.
             </p>
         </div>
+        <br>
         <div class="contact">
-            <h2>Contact Me</h2>
-            <p>Email: vandan11patel@gmail.com</p>
-            <p>Contact: +91 9664792015 </p>
+            <h2>Contact</h2>
+            <p>Email: <a href="mailto:vandan11patel@gmail.com">vandan11patel@gmail.com</a></p>
+            <p>Phone: <a href="tel:+919664792015">+91 96647 92015</a></p>
         </div>
     </div>
 
+    <!-- Right Column -->
     <div class="right-column">
         <div class="skills">
             <h2>Technical Skills</h2>
-            <div class="skills-icons">
-                <ul>
-                    <li><p><b>Programming Languages :</b> Python, Java, React JS</p></li>
-                    <li><p><b>Database :</b> SQL, MongoDB, MySQL</p></li>
-                    <li><p><b>Frameworks and Libraries:</b> Flask, FastAPI, PyTorch, TensorFlow, Keras </p></li>
-                    <li><p> <b>Tools and Technologies:</b>Git, Docker </p></li>
-                    <li><p> <b>Other Skills:</b> Machine Learning, Deep Learning, Web Development, Data Science, Statistical Analysis </p></li>
-                </ul>
-            </div>
+            <ul>
+                <li><strong>Programming Languages:</strong> Python, Java, C++, JavaScript</li>
+                <li><strong>Frameworks:</strong> React.js, Flask, FastAPI, Streamlit</li>
+                <li><strong>Libraries:</strong> PyTorch, TensorFlow, Keras, OpenCV, NLTK, HuggingFace, LangChain</li>
+                <li><strong>Tools:</strong> Git, Docker, ChromaDB</li>
+                <li><strong>Expertise:</strong> Machine Learning, Deep Learning, Web Development, Statistical Analysis</li>
+            </ul>
         </div>
-        <div class="software-skills">
+
+        <div class="soft-skills">
             <h2>Soft Skills</h2>
             <ul>
                 <li>Critical Thinking</li>
-                <li>Problem-solving</li>
+                <li>Problem Solving</li>
+                <li>Creative Thinking</li>
             </ul>
-            
         </div>
+
         <div class="education">
             <h2>Education</h2>
             <ul>
-                <li>2022 - Present: A.D Patel Institute Of Technology, Anand (8.72 CGPA)</li>
-                
+                <li><strong>2022 - Present:</strong> A.D. Patel Institute of Technology (CGPA: 8.72)</li>
             </ul>
         </div>
-        <div class="skills">
+
+        <div class="hobbies">
             <h2>Hobbies</h2>
-            <div class="skills-icons">
-                <ul>
-                    <li>Exploring new technology</li>
-                    <li>Painting</li>
-                    <li>Storytelling</li>
-                </ul>
-            </div>
+            <ul>
+                <li>Exploring new technology</li>
+                <li>Painting & digital art</li>
+                <li>Storytelling & creative writing</li>
+            </ul>
         </div>
-        <!-- <div class="work-experience">
-            <h2>Work Experience</h2>
-            <ul>
-                <li><strong>Fashion Design Intern</strong> at Aditya Birla Group - Liva (June 2021 - Aug 2021)</li>
-                <li><strong>Illustrator</strong> at Pragmatic Art (Sept 2021 - Present)</li>
-            </ul>
-        </div> -->
-        <!-- <div class="additional-experience">
-            <h2>Additional Experiences</h2>
-            <ul>
-                <li>Intern at Dhaari by Deepika</li>
-                <li>Intern at Kanelle at Lakme Fashion Week</li>
-                <li>Intern at Gas Jeans</li>
-            </ul>
-        </div> -->
     </div>
 </div>
 {% endblock %}
+
 {% block footer %}
 {{ super() }}
 {% endblock %}

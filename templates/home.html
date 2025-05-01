@@ -2,36 +2,21 @@
 
 {% block title %}Home Page{% endblock %}
 
-{% block Pro %} 
+{% block navbar %}
+{% include 'navbar.html' %}
+{% endblock %}
 
+{% block content %}
 <main>
     <div class="vandan">
         <div class="hero-text">
-                <h2>👋 Welcome, I am <span>Vandan</span></h2>
-                <p> I am currently pursuing a degree in Artificial Intelligence and Data Science at CVM University.</p>
-                <ul></ul>
-                <br>
+            <h2>👋 Welcome, I am <span>Vandan</span></h2>
+            <p>I am currently pursuing a degree in Artificial Intelligence and Data Science at CVM University.</p>
         </div>
         <div class="hero-image">
-                <img src="./static/images/van.jpg" alt="Vandan's portrait">
-            </div>
+            <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Vandan's portrait">
+        </div>
     </div>
 </main>
 {% endblock %}
-
-
- 
-{%block script%}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const menuIcon = document.querySelector('.menu-icon');
-        const navLinks = document.querySelector('.nav-links');
-        function toggleMenu() {
-            menuIcon.classList.toggle('open');
-            navLinks.classList.toggle('open');
-        }
-        menuIcon.addEventListener('click', toggleMenu);
-    });
-</script>
-    {% endblock %}
  

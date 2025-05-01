@@ -1,16 +1,26 @@
 {% block css %}
-    {% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+{% endblock %}
 
 <main>
     <div id="page" class="s-pagewrap ss-home">
+        {% block navbar %}
         <header>
-            <div class="logo"></div>
+            <!-- Logo Section -->
+            <div class="logo">
+                <a href="/" class="logo-link">Vandan Patel</a>
+            </div>
+
+            <!-- Navigation Section -->
             <nav>
+                <!-- Menu Icon for Mobile View -->
                 <div class="menu-icon" onclick="toggleMenu()">
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
                 </div>
+
+                <!-- Navigation Links -->
                 <ul class="nav-links">
                     <li><a href="/"><span>Home</span></a></li>
                     <li><a href="/projects"><span>Projects</span></a></li>
@@ -20,17 +30,21 @@
                 </ul>
             </nav>
         </header>
+        {% endblock %}
     </div>
+
     <script>
+        // Toggle Menu for Mobile View
         document.addEventListener('DOMContentLoaded', function() {
             const menuIcon = document.querySelector('.menu-icon');
             const navLinks = document.querySelector('.nav-links');
+            
             function toggleMenu() {
                 menuIcon.classList.toggle('open');
                 navLinks.classList.toggle('open');
             }
+
             menuIcon.addEventListener('click', toggleMenu);
         });
     </script>
-    
-</main>     
+</main>

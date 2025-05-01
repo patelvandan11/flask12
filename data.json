@@ -1,5 +1,13 @@
 [
     {
+        "img_src": "static/images/ai_trip1.jpg",
+        "img_srcset": "static/images/ai_trip1.jpg 1x, static/images/ai_trip2.jpg 2x",
+        "title": "AI-Based India Trip Planner with Itinerary Suggestions",
+        "url": "https://github.com/patelvandan11/Ai-Trip-Planner-with-GPT-3.5",
+        "description": "An intelligent travel planning tool that suggests budget-friendly itineraries, tourist spots, cafes, and hotels based on your preferences. Get day-by-day plans, story ideas, and music prompts using AI and LLMs. by fine tune a GPT-3.5 model."
+    }
+    ,
+    {
         "img_src": "static/images/karl1.jpg",
         "img_srcset": "static/images/karl1.jpg 1x, static/images/karl2.jpg 2x",
         "title": "Calculation of Karl Pearson's Coefficient of Correlation from Scratch",
