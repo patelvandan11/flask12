@@ -6,11 +6,13 @@
     <div id="page" class="s-pagewrap ss-home">
         {% block navbar %}
         <header>
-            <!-- Logo Section -->
-            <div class="logo">
-                <a href="/" class="logo-link">Vandan Patel</a>
-            </div>
+            <div style="flex: 1; display: flex; align-items: center; height: 100%;">
 
+                <!-- Logo Section -->
+                <div class="logo">
+                <a href="/" class="logo-link">Vandan</a>
+            </div>
+            
             <!-- Navigation Section -->
             <nav>
                 <!-- Menu Icon for Mobile View -->
@@ -19,29 +21,52 @@
                     <div class="bar"></div>
                     <div class="bar"></div>
                 </div>
-
+                
                 <!-- Navigation Links -->
                 <ul class="nav-links">
-                    <li><a href="/"><span>Home</span></a></li>
+                    <li><a href="/" id="Home"><span>Home</span></a></li>
                     <li><a href="/projects"><span>Projects</span></a></li>
                     <li><a href="/about"><span>About</span></a></li>
                     <li><a href="/blog"><span>Blog</span></a></li>
                     <li><a href="/contact"><span>Contact</span></a></li>
                 </ul>
             </nav>
+        </div>
         </header>
         {% endblock %}
     </div>
-
+    <style>
+        /* Base styles (Mobile-first) */
+        #Home {
+            margin-left: 0; /* No margin on mobile by default */
+        }
+        
+        /* Apply left margin only on desktop viewports */
+        @media screen and (min-width: 768px) {
+            #Home {
+                margin-left: 300px;
+            }
+        }
+        </style>
+        
     <script>
         // Toggle Menu for Mobile View
         document.addEventListener('DOMContentLoaded', function() {
             const menuIcon = document.querySelector('.menu-icon');
             const navLinks = document.querySelector('.nav-links');
+            const currentPath = window.location.pathname;
+            const homeLink = document.querySelector('a[href="/"]');
             
             function toggleMenu() {
                 menuIcon.classList.toggle('open');
                 navLinks.classList.toggle('open');
+            }
+
+            // Add active state for home link
+            if (currentPath === '/') {
+                homeLink.classList.add('active');
+            } else {
+                homeLink.classList.remove('active');
             }
 
             menuIcon.addEventListener('click', toggleMenu);

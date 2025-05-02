@@ -19,8 +19,11 @@ body {
     text-align: center;
 }
 /* Header styles */
-header, footer {
-    background-color: #ffffff;
+header {
+    /* background: linear-gradient(to right, #FFFAF4, #FFFFFF); */
+
+     
+
     padding: 20px;
 }
 
@@ -178,7 +181,10 @@ main, #content {
 
     .nav-links.open {
         display: flex;  
-        background-color: rgb(255, 244, 230);
+        /* background-color: rgb(255, 244, 230); */
+        background: linear-gradient(135deg, #FFECDB, #AFDDFF);
+
+
         z-index: 2;
         width: 100%;
         height: 100%;
