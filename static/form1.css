@@ -23,66 +23,80 @@ main {
     justify-content: center;
     align-items: center;
 }
+/* --- Form Typography --- */
 
-#centered-form {
-    width: 60px;
-    margin-left: 50%;
-    display: flex;
-    padding: 20px;
-    
-}
-.centered-form h2 {
+h2 {
     text-align: center;
-}
-#contact-form {
-    /* display: flex;    */
-    justify-content: center;
-    align-items: center;
-    margin: auto;
-    padding: 20px;
-    width: 50%;
-    height: 50%;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-#centered-form form {
-    display: flex;
-    flex-direction: column;
+    font-size: 28px;
+    font-weight: 700;
+    color: #111;
+    margin-top: 0;
+    margin-bottom: 30px;
 }
 
-.centered-form label {
-    margin-bottom: 5px;
-}
-
-.centered-form input[type="text"],
-.centered-form input[type="email"],
-.centered-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.centered-form input[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 4px 20px;
-    cursor: pointer;
-    font-size: 22px;
+label {
     display: block;
-    margin: 0 auto;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
 }
 
-.centered-form input[type="submit"]:hover {
-    background-color: #45a049;
+/* --- Form Input Fields --- */
+
+/* Common styles for all text inputs and the textarea */
+#contact-form input[type="text"],
+#contact-form input[type="email"],
+#contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    box-sizing: border-box; /* Ensures padding doesn't affect the width */
+    font-size: 16px;
+    color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Style for when a user clicks into a field (improves user experience) */
+#contact-form input[type="text"]:focus,
+#contact-form input[type="email"]:focus,
+#contact-form textarea:focus {
+    outline: none;
+    border-color: #007bff; /* A subtle blue highlight on focus */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
 
+#contact-form textarea {
+    min-height: 140px;
+    resize: vertical; /* Allows user to resize height only, not width */
+}
+
+/* --- Submit Button --- */
+
+#contact-form input[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #111111; /* A strong, contrasting black */
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#contact-form input[type="submit"]:hover {
+    background-color: #333333; /* A slightly lighter black on hover */
+    transform: translateY(-2px); /* A subtle lift effect */
+}
+
+#contact-form input[type="submit"]:active {
+    transform: translateY(0); /* Button returns to original position on click */
+}
 
 @media (max-width: 768px) {
     #contact-form {
