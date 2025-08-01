@@ -3,22 +3,38 @@
 {% block title %}Home Page{% endblock %}
 
 {% block navbar %}
-{% include 'navbar.html' %}
+    {% include 'navbar.html' %}
 {% endblock %}
 
 {% block content %}
 <main>
+
+    <!-- ✅ Hero Section (Welcome) -->
     <div class="vandan">
         <div class="hero-text">
             <h2>👋 Welcome, I am <span>Vandan</span></h2>
             <p>I am currently pursuing a degree in Artificial Intelligence and Data Science at CVM University.</p>
-            <a class="resume-button" href="https://drive.google.com/file/d/1HR5pUR79dDpfddvarMNgLl1Ynjpgk-Es/view?usp=sharing" download>
+            <a class="resume-button"
+               href="https://drive.google.com/file/d/187mGGOHP0UlxFe_pq00ZoE32fMTlHdC_/view?usp=sharing"
+               download="Vandan_Resume.pdf">
                 📄 Download Resume
             </a>
         </div>
+
         <div class="hero-image">
             <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Vandan's portrait">
         </div>
     </div>
+
+
+     <!-- <div class="delhi-diary" >
+        <h2><strong>Diary</strong></h2>
+        <div class="image-gallery">
+            <img src="{{ url_for('static', filename='images/mirror.jpg') }}" alt="Delhi Image 1">
+            <img src="{{ url_for('static', filename='images/vandan1.jpg') }}" alt="">
+            <img src="{{ url_for('static', filename='images/mirror.jpg') }}" alt="Delhi Image 3">
+        </div>
+    </div> -->
+
 </main>
 {% endblock %}

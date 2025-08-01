@@ -1,43 +1,37 @@
 {% extends 'base.html' %}
 
-<!-- {% block title %}Projects{% endblock %} -->
- 
 {% block project %}
-<section id="content" class="s-content">
-    <div id="bricks" class="bricks">
-        <div class="masonry">
-            <div class="bricks-wrapper ss-animated" data-animate-block=" ">
-                <div class="grid-sizer"></div>
+<div class="page-container">
+    <section id="projects" class="section-projects">
+        <div class="projects-grid">
+            <div class="projects-grid-wrapper ss-animated" data-animate-block="">
 
                 {% for project in projects %}
-                <article class="brick entry">
-                    <div class="entry__thumb">
-                        <a href="{{ project.url }}" class="thumb-link">
-                            <img src="{{ project.img_src }}" 
-                                 srcset="{{ project.img_srcset }}">
+                <article class="project-card">
+                    <div class="project-card__thumbnail">
+                        <a href="{{ project.url }}" class="project-card__link">
+                            <img src="{{ project.img_src }}"
+                                 srcset="{{ project.img_srcset }}"
+                                 alt="{{ project.title }} thumbnail">
                         </a>
                     </div>
-                    <div class="entry__text">
-                        <div class="entry__header">
-                            <div class="entry__meta">
-                                <span class="cat-links">
+                    <div class="project-card__content">
+                        <div class="project-card__header">
+                            <div class="project-card__meta">
+                                <span class="category-links">
                                     <a href="{{ project.url }}">Project</a>
                                 </span>
                             </div>
-                            <h1 class="entry__title"><a href="{{ project.url }}">{{ project.title }}</a></h1>
+                            <h2 class="project-card__title">
+                                <a href="{{ project.url }}">{{ project.title }}</a>
+                            </h2>
                         </div>
-                        <div class="entry__excerpt">
+                        <div class="project-card__description">
                             <p>{{ project.description }}</p>
                         </div>
-                        <a class="entry__more-link" href="{{ project.url }}">Read More</a>
+                        <a class="project-card__read-more" href="{{ project.urlw }}">Read More</a>
                     </div>
                 </article>
                 {% endfor %}
-                
-            </div>
-        </div>
-    </div>
-</section>
 
-
-{% endblock %}
+            </div> </div> </section> </div> {% endblock %}
