@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}My Art Gallery{% endblock %}
+
+{% block css %}
+{{ super() }} <link rel="stylesheet" href="{{ url_for('static', filename='ar.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="art-container">
+    <header class="art-header">
+        <h1>My Creations</h1>
+        <p>A curated collection of my recent visual explorations. Each piece tells a story.</p>
+    </header>
+
+    <main class="art-gallery">
+        {% for art in artworks %}
+        <div class="art-card">
+            <img src="{{ url_for('static', filename='images/' + art.image_file) }}" alt="{{ art.title }}">
+            <div class="overlay">
+                <h3>{{ art.title }}</h3>
+                <p>{{ art.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+
+    </main>
+</div>
+{% endblock %}

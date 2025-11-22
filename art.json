@@ -1,0 +1,32 @@
+[
+    {
+        "title": "Sunset Silhouette",
+        "description": "A striking sunset behind leafless trees, painted in rich orange tones.",
+        "image_file": "art1.jpg"
+    },
+    {
+        "title": "Galactic Harmony",
+        "description": "A space-themed artwork featuring glowing planets and dreamy stars.",
+        "image_file": "art2.jpg"
+    },
+    {
+        "title": "Lunar Gaze",
+        "description": "A detailed grayscale painting of the moon floating in space.",
+        "image_file": "art3.jpg"
+    },
+    {
+        "title": "Autumn Whispers",
+        "description": "An autumn forest scene painted in bold orange and red shades.",
+        "image_file": "art4.jpg"
+    },
+    {
+        "title": "Celestial Spiral",
+        "description": "A galaxy spiral rendered in purples and pinks against a starry sky.",
+        "image_file": "art5.jpg"
+    },
+    {
+        "title": "Blossoms Beyond",
+        "description": "A fantasy pink planet with flower-like textures in outer space.",
+        "image_file": "art6.jpg"
+    }
+]

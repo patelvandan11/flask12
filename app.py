@@ -17,6 +17,13 @@ def projects():
     with open('data.json') as f:
         projects = json.load(f)
     return render_template('projects.html', projects=projects)
+ 
+@app.route('/art', methods=['GET', 'POST'])
+def art():
+    
+    with open('art.json') as f:
+        art = json.load(f)
+    return render_template('art.html', artworks=art)
 
 @app.route('/karl_pearson')
 def karl_pearson():

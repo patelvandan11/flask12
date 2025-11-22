@@ -1,0 +1,168 @@
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500&display=swap');
+
+/* --- CSS Variables --- */
+:root {
+    --heading-font: 'Playfair Display', serif;
+    --body-font: 'Montserrat', sans-serif;
+    --heading-color: #222;
+    --card-shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* --- Layout --- */
+.art-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    font-family: var(--body-font);
+}
+
+/* --- Header --- */
+.art-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.art-header h1 {
+    font-family: var(--heading-font);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    margin-bottom: 1rem;
+}
+
+.art-header p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: #666;
+}
+
+/* --- Gallery Grid --- */
+.art-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2.5rem;
+}
+
+/* --- Art Card --- */
+.art-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #000;
+    box-shadow: 0 4px 15px var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.art-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+/* --- Overlay Content --- */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1;
+}
+
+.overlay h3 {
+    font-family: var(--heading-font);
+    font-size: 1.6rem;
+    margin: 0;
+    transform: translateY(20px);
+    transition: transform 0.4s ease;
+}
+
+.overlay p {
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+    transform: translateY(20px);
+    transition: transform 0.4s ease 0.1s;
+}
+
+/* --- Hover Effects --- */
+@media (hover: hover) {
+    .art-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .art-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .art-card:hover .overlay {
+        opacity: 1;
+    }
+
+    .art-card:hover .overlay h3,
+    .art-card:hover .overlay p {
+        transform: translateY(0);
+    }
+}
+
+/* --- Tablets --- */
+@media (max-width: 992px) {
+    .art-header h1 {
+        font-size: 3rem;
+    }
+    .art-gallery {
+        gap: 2rem;
+    }
+}
+
+/* --- Mobiles --- */
+@media (max-width: 768px) {
+    .art-container {
+        padding: 3rem 1.5rem;
+    }
+
+    .art-header {
+        margin-bottom: 3rem;
+    }
+
+    .art-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .art-header p {
+        font-size: 1rem;
+    }
+
+    .art-gallery {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Always show overlay on mobile */
+    .art-card .overlay {
+        opacity: 1;
+    }
+
+    .art-card .overlay h3,
+    .art-card .overlay p {
+        transform: translateY(0);
+    }
+
+    .overlay h3 {
+        font-size: 1.4rem;
+    }
+
+    .overlay p {
+        font-size: 0.85rem;
+    }
+}

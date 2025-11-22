@@ -1,5 +1,13 @@
 [
     {
+        "img_src": "static/images/gridAIchemy.png",
+        "img_srcset": "static/images/gridAIchemy.png 1x, static/images/gridAIchemy.png 2x",
+        "title": "Market Intelligence Agent- AI Powered Market Research Tool",
+        "url": "https://github.com/patelvandan11/GridAlchemy",
+        "urlw": "https://github.com/patelvandan11/GridAlchemy",
+        "description": "GridAlchemy is a simple tool that transforms a wide banner into multiple Instagram-ready posts. It slices the banner into perfectly sized 1080×1350 tiles, making it easy to upload and create a seamless grid on Instagram."
+    },
+    {
         "img_src": "static/images/mia.png",
         "img_srcset": "static/images/mia.png 1x, static/images/mia.png 2x",
         "title": "Market Intelligence Agent- AI Powered Market Research Tool",
