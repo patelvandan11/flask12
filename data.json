@@ -1,5 +1,13 @@
 [
     {
+        "img_src": "static/images/aire.png",
+        "img_srcset": "static/images/aire.png 1x, static/images/aire.png 2x",
+        "title": "AI research Assistant- Research Paper Question Answering System",
+        "url": "https://github.com/patelvandan11/Agentic-rag-application",
+        "urlw": "https://github.com/patelvandan11/Agentic-rag-application",
+        "description": "An agentic AI application that searches and filters high-quality arXiv research papers, downloads and indexes PDFs into a vector database, and answers user questions using a ReAct-based RAG pipeline with FastAPI and Streamlit."
+    },
+    {
         "img_src": "static/images/gridAIchemy.png",
         "img_srcset": "static/images/gridAIchemy.png 1x, static/images/gridAIchemy.png 2x",
         "title": "Market Intelligence Agent- AI Powered Market Research Tool",
