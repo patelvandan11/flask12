@@ -1,27 +1,31 @@
 from flask import Flask, render_template, url_for, request
 import json
+import os
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static'))
 
  
 @app.route('/')
 def home():
      
-    with open('data.json') as f:
+    with open(os.path.join(BASE_DIR, 'data.json')) as f:
         projects = json.load(f)
     return render_template('home.html', projects=projects)
  
 @app.route('/projects', methods=['GET', 'POST'])
 def projects():
     
-    with open('data.json') as f:
+    with open(os.path.join(BASE_DIR, 'data.json')) as f:
         projects = json.load(f)
     return render_template('projects.html', projects=projects)
  
 @app.route('/art', methods=['GET', 'POST'])
 def art():
     
-    with open('art.json') as f:
+    with open(os.path.join(BASE_DIR, 'art.json')) as f:
         art = json.load(f)
     return render_template('art.html', artworks=art)
 
@@ -79,7 +83,7 @@ def contact():
 # blog route
 @app.route('/blog')
 def blog():
-    with open('Blog.json') as f:
+    with open(os.path.join(BASE_DIR, 'Blog.json')) as f:
         posts = json.load(f)
     return render_template("blog.html", posts=posts)
 
