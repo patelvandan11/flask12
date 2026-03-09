@@ -1,4 +1,12 @@
 [{
+    "id": 3,
+    "title": "Fine-Tune Large Language Models (LLMs): Advanced Strategies, Tools & Industry Use Cases. (part-1)",
+    "date": "mar 10, 2026",
+    "author": "Vandan Patel",
+    "description": "Fine-tuning large language models (LLMs) is a powerful technique to adapt pre-trained models to specific tasks or domains. This article explores advanced strategies for fine-tuning LLMs, including techniques like LoRA (Low-Rank Adaptation), PEFT (Parameter-Efficient Fine-Tuning), and QLoRA (Quantized Low-Rank Adaptation). We also discuss popular tools such as Hugging Face Transformers and DeepSpeed, and examine real-world industry use cases where fine-tuning has led to significant improvements in performance and efficiency.",
+    "link": "https://medium.com/@patelvandan11/how-to-fine-tune-large-language-models-llms-advanced-strategies-tools-industry-use-cases-21d812a4bd06"
+} ,
+{
     "id": 2,
     "title": "Review : Building AI Applications with Foundation Models by Chip Huyen",
     "date": "Mar 18, 2025",
