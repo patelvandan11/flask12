@@ -4,12 +4,7 @@ import json
 app = Flask(__name__)
 
  
-@app.route('/')
-def home():
-     
-    with open('data.json') as f:
-        projects = json.load(f)
-    return render_template('home.html', projects=projects)
+
  
 @app.route('/projects', methods=['GET', 'POST'])
 def projects():
