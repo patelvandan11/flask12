@@ -9,32 +9,72 @@
 {% block content %}
 <main>
 
-    <!-- ✅ Hero Section (Welcome) -->
-    <div class="vandan">
+  <section class="hero">
+    <div class="hero-content">
         <div class="hero-text">
-            <h2>👋 Welcome, I am <span>Vandan</span></h2>
-            <p>I am currently pursuing a degree in Artificial Intelligence and Data Science at CVM University.</p>
-            <a class="resume-button"
-               href="https://drive.google.com/file/d/1GzDOMeZzXpkl95ztqR5CXrPUbD3TYaHb/view?usp=sharing"
-               download="Vandan_Resume.pdf">
+            <h1>👋 Welcome, I am <span>Vandan Patel</span></h1>
+
+            <p>
+                AI & Data Science Graduate passionate about building intelligent
+                applications using Artificial Intelligence, Generative AI,
+                Machine Learning, Deep Learning, Large Language Models (LLMs),
+                Retrieval-Augmented Generation (RAG), AI Agents, and Computer Vision.
+            </p>
+
+            <p>
+                I specialize in Python, FastAPI, LangChain, OpenAI APIs, React,
+                and Full-Stack AI Development.
+            </p>
+
+            <a href="https://drive.google.com/file/d/1GzDOMeZzXpkl95ztqR5CXrPUbD3TYaHb/view" class="btn">
                 📄 Download Resume
             </a>
         </div>
 
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Vandan's portrait">
+            <img src="{{ url_for('static', filename='images/vaan.jpg') }}" alt="Vandan">
         </div>
     </div>
+</section>
 
+<section class="services">
+    <h2>What I Do</h2>
 
-     <!-- <div class="delhi-diary" >
-        <h2><strong>Diary</strong></h2>
-        <div class="image-gallery">
-            <img src="{{ url_for('static', filename='images/mirror.jpg') }}" alt="Delhi Image 1">
-            <img src="{{ url_for('static', filename='images/vandan1.jpg') }}" alt="">
-            <img src="{{ url_for('static', filename='images/mirror.jpg') }}" alt="Delhi Image 3">
+    <div class="cards">
+
+        <div class="card">
+            <h3>🤖 Generative AI</h3>
+            <p>
+                Building AI-powered assistants, RAG systems,
+                AI agents and automation workflows.
+            </p>
         </div>
-    </div> -->
 
-</main>     
+        <div class="card">
+            <h3>🧠 Machine Learning</h3>
+            <p>
+                Developing predictive models and intelligent
+                recommendation systems.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>👁️ Computer Vision</h3>
+            <p>
+                Image processing, object detection,
+                facial recognition and visual AI.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>💻 Full-Stack AI</h3>
+            <p>
+                Building scalable AI applications using
+                React, FastAPI and modern cloud tools.
+            </p>
+        </div>
+
+    </div>
+</section>
+</main>
 {% endblock %}
