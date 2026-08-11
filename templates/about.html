@@ -1,147 +1,156 @@
 {% extends 'base.html' %}
 
-{% block title %}About{% endblock %}
-
-{% block css %}
-{{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
-{% endblock %}
+{% block title %}About Me | Vandan Patel{% endblock %}
 
 {% block content %}
-<div class="resume-container">
-    <!-- Left Column -->
-    <div class="left-column">
-        <div class="profile">
-            <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Profile Picture">
-            <h2>Vandan Patel</h2>
-            <p>AI Student, ADIT</p>
+<div class="container">
+    
+    <header class="page-header">
+        <h1 class="page-title">About <span class="gradient-text">Vandan Patel</span></h1>
+        <p class="page-subtitle">AI &amp; Data Science Engineer passionate about building intelligent, scalable, and impact-driven technology.</p>
+    </header>
+
+    <div class="resume-grid">
+        <!-- Left Column: Profile Card & Quick Info -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <div class="glass-card profile-card">
+                <img src="{{ url_for('static', filename='images/van.jpg') }}" alt="Vandan Patel" class="profile-avatar">
+                <h2 style="font-size: 1.4rem; font-weight: 800;">Vandan Patel</h2>
+                <p style="color: var(--accent-cyan); font-size: 0.88rem; font-weight: 600; margin-bottom: 1rem;">AI &amp; Data Science Engineer</p>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                    Graduate in Artificial Intelligence &amp; Data Science from A.D. Patel Institute of Technology. Experienced in LLM applications, RAG pipelines, and deep learning.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; text-align: left; background: rgba(15, 23, 42, 0.5); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-envelope" style="color: var(--accent-cyan);"></i>
+                        <a href="mailto:vandan11patel@gmail.com" style="color: var(--text-secondary); text-decoration: underline;">vandan11patel@gmail.com</a>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-phone" style="color: var(--accent-violet);"></i>
+                        <a href="tel:+919664792015" style="color: var(--text-secondary);">+91 96647 92015</a>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-location-dot" style="color: var(--accent-emerald);"></i>
+                        <span style="color: var(--text-secondary);">Anand, Gujarat, India</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Soft Skills & Hobbies Card -->
+            <div class="glass-card" style="padding: 1.75rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">
+                    <i class="fa-solid fa-lightbulb" style="color: var(--accent-cyan);"></i> Soft Skills &amp; Interests
+                </h3>
+                <div class="tags-wrapper" style="margin-bottom: 1.5rem;">
+                    <span class="badge">Critical Thinking</span>
+                    <span class="badge">Problem Solving</span>
+                    <span class="badge">Creative Thinking</span>
+                </div>
+
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">
+                    <i class="fa-solid fa-palette" style="color: var(--accent-violet);"></i> Hobbies
+                </h3>
+                <div class="tags-wrapper">
+                    <span class="badge badge-purple">Tech Exploration</span>
+                    <span class="badge badge-purple">Painting &amp; Digital Art</span>
+                    <span class="badge badge-purple">Storytelling</span>
+                </div>
+            </div>
+
         </div>
 
-        <div class="about">
-            <h2>About Me</h2>
-            <p>
-                I'm <b>Vandan Patel</b>, a graduate in <b>Artificial Intelligence and Data Science</b> from <b>A.D.
-                    Patel Institute of Technology</b>. I am passionate about building intelligent solutions using
-                <b>Deep Learning</b>, <b>Generative AI</b>, <b>Machine Learning</b>, and <b>Data Analytics</b>. My
-                experience includes developing AI-powered chatbots, RAG systems, AI agents, computer vision
-                applications, and full-stack AI solutions using technologies such as <b>Python</b>, <b>FastAPI</b>,
-                <b>LangChain</b>, <b>React</b>, and <b>OpenAI APIs</b>.
-            </p>
+        <!-- Right Column: Work Experience, Skills & Education -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
 
-            <br>
+            <!-- Work Experience -->
+            <div class="glass-card" style="padding: 2rem;">
+                <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fa-solid fa-briefcase" style="color: var(--accent-cyan);"></i> Work Experience
+                </h2>
 
-            <p>
-                I enjoy transforming innovative ideas into practical applications that are efficient, scalable, and
-                user-friendly. Whether it's creating AI assistants, automation workflows, travel planning systems, or
-                data-driven applications, I focus on delivering solutions that solve real-world problems.
-            </p>
+                <div class="timeline">
+                    
+                    <!-- Experience 1 -->
+                    <div class="timeline-item">
+                        <h3 class="timeline-title">Prompt Engineering Intern &middot; <a href="https://www.esparkinfo.com/" target="_blank" rel="noopener" style="color: var(--accent-cyan);">eSparkBiz</a></h3>
+                        <p class="timeline-meta">Jan 2026 &ndash; April 2026</p>
+                        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                            Built an AI-powered SEO Agent using LangChain &amp; OpenAI API for Answer Engine Optimization (AEO) and Generative Engine Optimization (GEO). Designed optimized prompts for LLMs to generate search-optimized, structured content. Improved content visibility across Google, AI search engines, and generative platforms (ChatGPT / Bing AI).
+                        </p>
+                    </div>
 
-            <br>
+                    <!-- Experience 2 -->
+                    <div class="timeline-item">
+                        <h3 class="timeline-title">GenAI Intern &middot; <a href="https://corp8.ai" target="_blank" rel="noopener" style="color: var(--accent-cyan);">Corp8.ai</a></h3>
+                        <p class="timeline-meta">May 2025 &ndash; Oct 2025</p>
+                        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                            Built GenAI agents with LangChain and OpenAI API, implementing various RAG strategies and LangGraph workflows. Integrated ChromaDB for data management and developed tool-calling capabilities using MCP for enhanced agent functionality. Focused on practical, real-world AI solutions.
+                        </p>
+                    </div>
 
-            <p>
-                Beyond technology, I have a strong interest in <b>painting</b>, exploring emerging technologies, and
-                continuously learning new skills. I believe in <b>curiosity</b>, <b>creativity</b>, <b>consistency</b>,
-                and <b>lifelong learning</b>, which drive both my personal and professional growth.
-            </p>
-        </div>
-        <br>
-        <div class="contact">
-            <h2>Contact</h2>
-            <p>Email: <a href="mailto:vandan11patel@gmail.com">vandan11patel@gmail.com</a></p>
-            <p>Phone: <a href="tel:+919664792015">+91 96647 92015</a></p>
+                </div>
+            </div>
+
+            <!-- Technical Skills Matrix -->
+            <div class="glass-card" style="padding: 2rem;">
+                <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fa-solid fa-code" style="color: var(--accent-violet);"></i> Technical Expertise
+                </h2>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Languages</span>
+                        <div class="tags-wrapper" style="margin-top: 0.4rem;">
+                            <span class="badge">Python</span>
+                            <span class="badge">JavaScript</span>
+                            <span class="badge">C++</span>
+                            <span class="badge">Java</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Frameworks &amp; Web</span>
+                        <div class="tags-wrapper" style="margin-top: 0.4rem;">
+                            <span class="badge badge-purple">React.js</span>
+                            <span class="badge badge-purple">FastAPI</span>
+                            <span class="badge badge-purple">Flask</span>
+                            <span class="badge badge-purple">Streamlit</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI / ML / Data Libraries</span>
+                        <div class="tags-wrapper" style="margin-top: 0.4rem;">
+                            <span class="badge">LangChain</span>
+                            <span class="badge">LangGraph</span>
+                            <span class="badge">OpenAI API</span>
+                            <span class="badge">PyTorch</span>
+                            <span class="badge">TensorFlow</span>
+                            <span class="badge">HuggingFace</span>
+                            <span class="badge">OpenCV</span>
+                            <span class="badge">ChromaDB</span>
+                            <span class="badge">FastMCP</span>
+                            <span class="badge">Pydantic</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education Card -->
+            <div class="glass-card" style="padding: 2rem;">
+                <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fa-solid fa-graduation-cap" style="color: var(--accent-emerald);"></i> Education
+                </h2>
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700;">B.Tech in Artificial Intelligence &amp; Data Science</h3>
+                    <p style="color: var(--accent-cyan); font-size: 0.88rem; font-weight: 600;">A.D. Patel Institute of Technology, Anand, Gujarat</p>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.3rem;">Aug 2022 &ndash; May 2026 &middot; <strong>CGPA: 8.80</strong></p>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Right Column -->
-    <div class="right-column">
-        <div class="skills">
-            <h2>Technical Skills</h2>
-            <ul>
-                <li><strong>Programming Languages:</strong> Python, Java, C++, JavaScript</li>
-                <li><strong>Frameworks:</strong> React.js, Flask, FastAPI, Streamlit</li>
-                <li><strong>Libraries:</strong> PyTorch, TensorFlow, Keras, OpenCV, NLTK, HuggingFace, LangChain,
-                    LangGraph, OpenAI API, Selenium, FastMCP, Pydantic</li>
-                <li><strong>Tools:</strong> Git, Docker, ChromaDB</li>
-                <li><strong>Expertise:</strong> Generative AI, Deep Learning, Machine Learning, Web Development,
-                    Statistical Analysis, Prompt Engineering
-                </li>
-            </ul>
-        </div>
-
-        <div class="soft-skills">
-            <h2>Soft Skills</h2>
-            <ul>
-                <li>Critical Thinking</li>
-                <li>Problem Solving</li>
-                <li>Creative Thinking</li>
-            </ul>
-        </div>
-
-        <div class="education">
-            <h2>Education</h2>
-            <ul>
-                <li><strong>Aug 2022 - May 2026:</strong> A.D. Patel Institute of Technology, Anand, Gujarat <br> (CGPA:
-                    8.80)</li>
-            </ul>
-        </div>
-
-        <!-- <div class="education">
-            <h2>Interest</h2>
-            <ul>
-                <li>currently exploring the AI in bioin</li>
-            </ul>
-        </div> -->
-
-        <div class="hobbies">
-            <h2>Hobbies</h2>
-            <ul>
-                <li>Exploring new technology</li>
-                <li>Painting & digital art</li>
-                <li>Storytelling & creative writing</li>
-            </ul>
-        </div>
-        <div class="hobbies">
-            <h2>Experience</h2>
-            <ul>
-                <li>
-                    <strong>Prompt Engineering Intern – <a href="https://www.esparkinfo.com/"
-                            target="_blank">eSparkBiz</a></strong><br>
-                    <em>Jan 2026 – April 2026</em><br>
-                    Built an AI-powered SEO Agent by using LangChain & OpenAI API for AEO (Answer Engine Optimization)
-                    and GEO (Generative Engine Optimization). Designed and optimized prompts for LLMs to generate
-                    search-optimized, structured content. Improved content visibility across Google, AI search engines,
-                    and generative platforms (ChatGPT/Bing AI).
-                    <br>
-                    <br>
-                    <br>
-
-                </li>
-                </li>
-
-
-            </ul>
-            <ul>
-                <li>
-                    <strong>GenAI Intern – <a href="https://corp8.ai" target="_blank">Corp8.ai</a></strong><br>
-                    <em>May 2025 – Oct 2025</em><br>
-                    Built GenAI agents with LangChain and OpenAI API, implementing various RAG strategies and LangGraph
-                    workflows. Integrated ChromaDB for data management and developed tool-calling capabilities using MCP
-                    for enhanced agent functionality. Focused on creating practical, real-world AI solutions with
-                    seamless external tool integration.
-                    <br>
-                    <br>
-                    <br>
-                </li>
-                </li>
-
-
-            </ul>
-        </div>
-
-    </div>
 </div>
-{% endblock %}
-
-{% block footer %}
-{{ super() }}
 {% endblock %}

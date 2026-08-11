@@ -1,80 +1,184 @@
 {% extends 'base.html' %}
 
-{% block title %}Home Page{% endblock %}
-
-{% block navbar %}
-    {% include 'navbar.html' %}
-{% endblock %}
+{% block title %}Vandan Patel | AI & Data Science Engineer{% endblock %}
 
 {% block content %}
-<main>
+<div class="container">
 
-  <section class="hero">
-    <div class="hero-content">
-        <div class="hero-text">
-            <h1>👋 Welcome, I am <span>Vandan Patel</span></h1>
+  <!-- Bento Grid Hero Section -->
+  <section class="bento-hero" style="margin-bottom: 4rem;">
+    <div class="bento-grid">
 
-            <p>
-                AI & Data Science Graduate passionate about building intelligent
-                applications using Artificial Intelligence, Generative AI,
-                Machine Learning, Deep Learning, Large Language Models (LLMs),
-                Retrieval-Augmented Generation (RAG), AI Agents, and Computer Vision.
-            </p>
+      <!-- 1. Main Intro Card (Spans 8 Cols) -->
+      <div class="glass-card bento-card bento-intro">
+        <span class="hero-role">AI &amp; Data Science Engineer</span>
+        <h1 class="hero-name gradient-text">Vandan Patel</h1>
+        <p class="hero-bio">
+          Building intelligent applications with LLMs, RAG pipelines, AI agents, and computer vision. Experienced in full-stack AI engineering, vector databases, and scalable web solutions.
+        </p>
+        <div class="tags-wrapper">
+          <span class="badge"><i class="fa-solid fa-brain"></i> LangChain</span>
+          <span class="badge"><i class="fa-solid fa-bolt"></i> FastAPI</span>
+          <span class="badge"><i class="fa-solid fa-robot"></i> OpenAI API</span>
+          <span class="badge badge-purple"><i class="fa-brands fa-react"></i> React.js</span>
+          <span class="badge badge-purple"><i class="fa-solid fa-fire"></i> PyTorch</span>
+          <span class="badge"><i class="fa-solid fa-database"></i> ChromaDB</span>
+          <span class="badge"><i class="fa-solid fa-eye"></i> OpenCV</span>
+          <span class="badge badge-purple"><i class="fa-brands fa-docker"></i> Docker</span>
+        </div>
+        <div class="actions-wrapper">
+          <a href="https://drive.google.com/file/d/1GzDOMeZzXpkl95ztqR5CXrPUbD3TYaHb/view" target="_blank" rel="noopener" class="btn btn-primary">
+            <i class="fa-solid fa-file-pdf"></i> Resume
+          </a>
+          <a href="https://github.com/patelvandan11" target="_blank" rel="noopener" class="btn btn-secondary">
+            <i class="fa-brands fa-github"></i> GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/patelvandan11" target="_blank" rel="noopener" class="btn btn-secondary">
+            <i class="fa-brands fa-linkedin"></i> LinkedIn
+          </a>
+          <a href="/contact" class="btn btn-secondary">
+            <i class="fa-solid fa-paper-plane"></i> Contact
+          </a>
+        </div>
+      </div>
 
-            <p>
-                I specialize in Python, FastAPI, LangChain, OpenAI APIs, React, OpenAI Agent SDK
-                and Full-Stack AI Development.
-            </p>
+      <!-- 2. Photo Card (Spans 4 Cols) -->
+      <div class="glass-card bento-card bento-photo">
+        <img src="{{ url_for('static', filename='images/vaan.jpg') }}" alt="Vandan Patel" loading="lazy">
+      </div>
 
-            <a href="https://drive.google.com/file/d/1klDlApY_Uq7z7dcdgP1LvuJc0bvECsbA/view?usp=sharing" class="btn">
-                Download Resume
+      <!-- 3. Key Metrics / Stats Card (Spans 4 Cols) -->
+      <div class="glass-card bento-card bento-stats">
+        <div class="stat-item">
+          <div class="stat-number">8.80</div>
+          <div class="stat-label">CGPA &middot; AI &amp; Data Science</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number">10+</div>
+          <div class="stat-label">Production &amp; Research Projects</div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-purple"><i class="fa-solid fa-layer-group"></i> RAG &middot; Agents &middot; Vision</span>
+        </div>
+      </div>
+
+      <!-- 4. Top Skills Card (Spans 4 Cols) -->
+      <div class="glass-card bento-card bento-skills">
+        <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1.2rem;">
+          <i class="fa-solid fa-chart-simple" style="color: var(--accent-cyan);"></i> Core Expertise
+        </h3>
+        
+        <div class="skill-bar-item">
+          <div class="skill-info">
+            <span class="skill-title">Generative AI &amp; LLMs</span>
+            <span class="skill-percentage">90%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 90%;"></div>
+          </div>
+        </div>
+
+        <div class="skill-bar-item">
+          <div class="skill-info">
+            <span class="skill-title">Full-Stack AI Solutions</span>
+            <span class="skill-percentage">85%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 85%;"></div>
+          </div>
+        </div>
+
+        <div class="skill-bar-item">
+          <div class="skill-info">
+            <span class="skill-title">Machine Learning &amp; RAG</span>
+            <span class="skill-percentage">83%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 83%;"></div>
+          </div>
+        </div>
+
+        <div class="skill-bar-item">
+          <div class="skill-info">
+            <span class="skill-title">Deep Learning</span>
+            <span class="skill-percentage">80%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 80%;"></div>
+          </div>
+        </div>
+
+        <div class="skill-bar-item">
+          <div class="skill-info">
+            <span class="skill-title">Computer Vision</span>
+            <span class="skill-percentage">78%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 78%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Quick Links Card (Spans 4 Cols) -->
+      <div class="glass-card bento-card bento-links">
+        <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1.2rem;">
+          <i class="fa-solid fa-link" style="color: var(--accent-violet);"></i> Connect &amp; Profiles
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <a href="https://github.com/patelvandan11" target="_blank" rel="noopener" class="btn btn-secondary" style="justify-content: flex-start;">
+            <i class="fa-brands fa-github" style="color: var(--accent-cyan);"></i> patelvandan11
+          </a>
+          <a href="https://www.linkedin.com/in/patelvandan11" target="_blank" rel="noopener" class="btn btn-secondary" style="justify-content: flex-start;">
+            <i class="fa-brands fa-linkedin" style="color: var(--accent-cyan);"></i> LinkedIn Profile
+          </a>
+          <a href="https://medium.com/@patelvandan11" target="_blank" rel="noopener" class="btn btn-secondary" style="justify-content: flex-start;">
+            <i class="fa-brands fa-medium" style="color: var(--accent-cyan);"></i> Tech Articles on Medium
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Featured Projects Section on Home -->
+  {% if projects %}
+  <section class="featured-projects-section">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em;">Featured <span class="gradient-text">Projects</span></h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">Highlighted AI &amp; Software Innovations</p>
+      </div>
+      <a href="/projects" class="btn btn-secondary">
+        View All Projects <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="projects-grid">
+      {% for project in projects[:3] %}
+      <article class="glass-card project-card">
+        <div class="project-thumb">
+          <a href="{{ project.url }}" target="_blank" rel="noopener">
+            <img src="{{ project.img_src }}" alt="{{ project.title }}" loading="lazy">
+          </a>
+        </div>
+        <div class="project-body">
+          <h3 class="project-title">
+            <a href="{{ project.url }}" target="_blank" rel="noopener">{{ project.title }}</a>
+          </h3>
+          <p class="project-desc">{{ project.description }}</p>
+          <div class="project-footer">
+            <span class="badge"><i class="fa-solid fa-code-branch"></i> Project</span>
+            <a href="{{ project.urlw }}" target="_blank" rel="noopener" class="btn btn-secondary btn-icon" title="View Project">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </a>
+          </div>
         </div>
-
-        <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/vaan.jpg') }}" alt="Vandan">
-        </div>
+      </article>
+      {% endfor %}
     </div>
-</section>
+  </section>
+  {% endif %}
 
-<section class="services">
-    <h2>What I Do</h2>
-
-    <div class="cards">
-
-        <div class="card">
-            <h3>🤖 Generative AI</h3>
-            <p>
-                Building AI-powered assistants, RAG systems,
-                AI agents and automation workflows.
-            </p>
-        </div>
-
-        <div class="card">
-            <h3>🧠 Machine Learning</h3>
-            <p>
-                Developing predictive models and intelligent
-                recommendation systems.
-            </p>
-        </div>
-
-        <div class="card">
-            <h3>👁️ Computer Vision</h3>
-            <p>
-                Image processing, object detection,
-                facial recognition and visual AI.
-            </p>
-        </div>
-
-        <div class="card">
-            <h3>💻 Full-Stack AI</h3>
-            <p>
-                Building scalable AI applications using
-                React, FastAPI and modern cloud tools.
-            </p>
-        </div>
-
-    </div>
-</section>
-</main>
+</div>
 {% endblock %}
