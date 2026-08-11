@@ -1,31 +1,41 @@
 {% extends 'base.html' %}
 
-{% block title %}karl_pearson{% endblock %}
-{% block css %}
-{{ super() }}  <!-- Ensure that base CSS is included -->
-<link rel="stylesheet" href="{{ url_for('static', filename='foem2.css') }}">
-{% endblock %}
+{% block title %}Karl Pearson Calculator | Vandan Patel{% endblock %}
+
 {% block content %}
-<h1>Karl Pearson's Coefficient Calculator</h1>
-<div>
-<form id="calculationForm" action="/karl_pearson_out" method="post">
-    <label class="lable" for="n">Enter n :</label>
-    <input type="text" name="n" required>
-    <br>
-    <label class="lable"  for="x">Enter x :</label>
-    <input type="text" name="x" required>
-    <br>
-    <label class="lable"  for="y">Enter y :</label>
-    <input type="text" name="y" required>
-    <br>
-    <br>
-   
-    <button type="submit">Calculate</button>
-    {% if response %}
-        <h3>{{ response }}</h3>
-    {% endif %}
-    <u1></u1>
-    <button type="submit">Methodology</button>
-</form>
+<div class="container">
+    
+    <header class="page-header">
+        <h1 class="page-title">Karl Pearson's <span class="gradient-text">Calculator</span></h1>
+        <p class="page-subtitle">Calculate Karl Pearson's Coefficient of Correlation (\(r\)) between two set of numeric variables from scratch.</p>
+    </header>
+
+    <div class="glass-card form-card">
+        <form id="calculationForm" action="/karl_pearson_out" method="POST">
+            
+            <div class="form-group">
+                <label class="form-label" for="n">Number of Observations (\(n\)):</label>
+                <input type="number" id="n" name="n" class="form-control" placeholder="e.g. 5" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="x">Comma-separated Values for Variable \(X\):</label>
+                <input type="text" id="x" name="x" class="form-control" placeholder="e.g. 10, 20, 30, 40, 50" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="y">Comma-separated Values for Variable \(Y\):</label>
+                <input type="text" id="y" name="y" class="form-control" placeholder="e.g. 15, 25, 35, 45, 55" required>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                    <i class="fa-solid fa-calculator"></i> Calculate Correlation
+                </button>
+            </div>
+
+        </form>
+    </div>
+
 </div>
 {% endblock %}

@@ -1,37 +1,38 @@
 {% extends 'base.html' %}
 
-{% block project %}
-<div class="page-container">
-    <section id="projects" class="section-projects">
-        <div class="projects-grid">
-            <div class="projects-grid-wrapper ss-animated" data-animate-block="">
+{% block title %}Projects | Vandan Patel{% endblock %}
 
-                {% for project in projects %}
-                <article class="project-card">
-                    <div class="project-card__thumbnail">
-                        <a href="{{ project.url }}" class="project-card__link">
-                            <img src="{{ project.img_src }}"
-                                 srcset="{{ project.img_srcset }}"
-                                 alt="{{ project.title }} thumbnail">
-                        </a>
-                    </div>
-                    <div class="project-card__content">
-                        <div class="project-card__header">
-                            <div class="project-card__meta">
-                                <span class="category-links">
-                                    <a href="{{ project.url }}">Project</a>
-                                </span>
-                            </div>
-                            <h2 class="project-card__title">
-                                <a href="{{ project.url }}">{{ project.title }}</a>
-                            </h2>
-                        </div>
-                        <div class="project-card__description">
-                            <p>{{ project.description }}</p>
-                        </div>
-                        <a class="project-card__read-more" href="{{ project.urlw }}">Read More</a>
-                    </div>
-                </article>
-                {% endfor %}
+{% block content %}
+<div class="container">
+    
+    <header class="page-header">
+        <h1 class="page-title">Featured <span class="gradient-text">Projects</span></h1>
+        <p class="page-subtitle">A collection of AI/ML systems, Generative AI applications, RAG pipelines, computer vision tools, and full-stack software.</p>
+    </header>
 
-            </div> </div> </section> </div> {% endblock %}
+    <div class="projects-grid">
+        {% for project in projects %}
+        <article class="glass-card project-card">
+            <div class="project-thumb">
+                <a href="{{ project.url }}" target="_blank" rel="noopener">
+                    <img src="{{ project.img_src }}" alt="{{ project.title }}" loading="lazy">
+                </a>
+            </div>
+            <div class="project-body">
+                <h3 class="project-title">
+                    <a href="{{ project.url }}" target="_blank" rel="noopener">{{ project.title }}</a>
+                </h3>
+                <p class="project-desc">{{ project.description }}</p>
+                <div class="project-footer">
+                    <span class="badge"><i class="fa-solid fa-microchip"></i> AI / ML</span>
+                    <a href="{{ project.urlw }}" target="_blank" rel="noopener" class="btn btn-secondary" style="padding: 0.4rem 0.9rem; font-size: 0.82rem;">
+                        Learn More <i class="fa-solid fa-arrow-right" style="font-size: 0.75rem;"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

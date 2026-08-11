@@ -1,38 +1,59 @@
 <!DOCTYPE html>
-<html lang="en" class="js ss-loaded">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Vandan{% endblock %}</title>
+    <title>{% block title %}Vandan Patel | AI Engineer{% endblock %}</title>
 
-    <!-- Block for custom CSS files -->
-    {% block css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='VAN.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
+    <!-- Early Theme Script to prevent flash of wrong theme -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('portfolio-theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.add('light');
+            }
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    {% endblock %}
+
+    <!-- Core Glassmorphism Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    {% block css %}{% endblock %}
 </head>
 <body id="top">
 
-    <!-- Block for the navigation bar -->
+    <!-- Header / Navigation Bar -->
     {% include 'navbar.html' %}
     
-    <!-- profile pic -->
-    {% block Pro %} {% endblock %}
+    <main class="page-content">
+        <!-- Block for profile pic / hero -->
+        {% block Pro %}{% endblock %}
 
-    <!-- Block for main content about -->
-    {% block content %}{% endblock %}
+        <!-- Block for main content -->
+        {% block content %}{% endblock %}
 
-    <!-- Block for project section -->
-    {% block project %}{% endblock %}
+        <!-- Block for project section -->
+        {% block project %}{% endblock %}
+    </main>
 
-    <!-- Block for footer -->
+    <!-- Footer -->
     {% block footer %}
     {% include 'footer.html' %}
     {% endblock %}
 
-    <!-- Additional scripts -->
+    <!-- AI Chatbot Widget -->
+    {% include 'chatbot.html' %}
+
 </body>
 </html>
+

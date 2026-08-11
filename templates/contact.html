@@ -1,40 +1,95 @@
 {% extends 'base.html' %}
 
-{% block title %}Contact Us{% endblock %}
+{% block title %}Contact | Vandan Patel{% endblock %}
 
-{% block css %}
-{{ super() }}  <!-- Ensure that base CSS is included --> 
-<link rel="stylesheet" href="{{ url_for('static', filename='form1.css') }}">
-{% endblock %}
- 
 {% block content %}
-<main>
-    <div class="centered-form">
-        <h2>Contact Me</h2>
-        <form id="contact-form" action="https://api.web3forms.com/submit" method="POST">
-            <!-- Replace with your Access Key -->
-            <input type="hidden" name="access_key" value="5b038aeb-d553-42aa-b4ad-a244fd5aac2a">
+<div class="container">
+
+    <header class="page-header">
+        <h1 class="page-title">Get in <span class="gradient-text">Touch</span></h1>
+        <p class="page-subtitle">Have a project idea, opportunity, or collaboration inquiry? Feel free to reach out directly.</p>
+    </header>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; max-width: 960px; margin: 0 auto;">
         
-            <!-- Honeypot Spam Protection -->
-            <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
-        
-            <!-- User Inputs -->
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-        
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-        
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" required></textarea>
-        
-            <!-- Optional: Custom Confirmation / Success Page -->
-            <!-- <input type="hidden" name="redirect" value="https://yourwebsite.com/thank-you.html"> -->
-        
-            <input type="submit" value="Submit">
-        </form>
-        
+        <!-- Contact Info Side Card -->
+        <div class="glass-card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 1.25rem;">Contact Information</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                    I'm open to full-time roles, freelance projects, AI consulting, and research collaborations.
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="btn btn-secondary btn-icon" style="background: var(--accent-cyan-glow); border-color: var(--accent-cyan); color: var(--accent-cyan);">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Email</span>
+                            <a href="mailto:vandan11patel@gmail.com" style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">vandan11patel@gmail.com</a>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="btn btn-secondary btn-icon" style="background: var(--accent-violet-glow); border-color: var(--accent-violet); color: var(--accent-violet);">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Phone</span>
+                            <a href="tel:+919664792015" style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">+91 96647 92015</a>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="btn btn-secondary btn-icon" style="background: rgba(16, 185, 129, 0.15); border-color: var(--accent-emerald); color: var(--accent-emerald);">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Location</span>
+                            <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">Anand, Gujarat, India</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-glass);">
+                <div class="social-links" style="justify-content: flex-start;">
+                    <a href="https://github.com/patelvandan11" target="_blank" rel="noopener" class="social-link" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/patelvandan11" target="_blank" rel="noopener" class="social-link" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://medium.com/@patelvandan11" target="_blank" rel="noopener" class="social-link" title="Medium"><i class="fa-brands fa-medium"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form Card -->
+        <div class="glass-card" style="padding: 2.5rem;">
+            <form action="https://api.web3forms.com/submit" method="POST">
+                <input type="hidden" name="access_key" value="5b038aeb-d553-42aa-b4ad-a244fd5aac2a">
+                <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+
+                <div class="form-group">
+                    <label for="name" class="form-label">Your Name</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g. John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="e.g. john@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message" class="form-label">Message</label>
+                    <textarea id="message" name="message" class="form-control" placeholder="Write your message here..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
+                    Send Message <i class="fa-solid fa-paper-plane" style="margin-left: 0.4rem;"></i>
+                </button>
+            </form>
+        </div>
+
     </div>
-</main>
+
+</div>
 {% endblock %}
- 

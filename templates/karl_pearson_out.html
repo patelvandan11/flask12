@@ -1,16 +1,46 @@
 {% extends 'base.html' %}
 
-{% block title %}/karl_pearson_out{% endblock %}
-{% block css %}
-{{ super() }}  <!-- Ensure that base CSS is included -->
-<link rel="stylesheet" href="{{ url_for('static', filename='karl_pearson_out.css') }}">
-{% endblock %}
+{% block title %}Correlation Result | Vandan Patel{% endblock %}
+
 {% block content %}
-<div class="center">
-    <div class="result-container">
-        <h1>Result</h1>
-        <p style="font-size:25px;">The Karl Pearson correlation coefficient is: {{ result }}</p>
-        <a href="/karl_pearson">Back to input form</a>
+<div class="container">
+    
+    <header class="page-header">
+        <h1 class="page-title">Calculation <span class="gradient-text">Result</span></h1>
+        <p class="page-subtitle">Karl Pearson's Coefficient of Correlation</p>
+    </header>
+
+    <div class="glass-card form-card" style="text-align: center; padding: 3rem 2rem;">
+        <div style="width: 70px; height: 70px; border-radius: 50%; background: var(--accent-cyan-glow); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1.5rem;">
+            <i class="fa-solid fa-square-root-variable"></i>
+        </div>
+
+        <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">
+            Correlation Coefficient (\(r\))
+        </span>
+
+        <div style="font-size: 3rem; font-weight: 800; font-family: var(--font-code); color: var(--accent-cyan); margin-bottom: 1.5rem;">
+            {{ "%.4f"|format(result) }}
+        </div>
+
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto;">
+            {% if result > 0.7 %}
+                Strong positive linear relationship between Variable X and Variable Y.
+            {% elif result > 0.3 %}
+                Moderate positive linear relationship between Variable X and Variable Y.
+            {% elif result > -0.3 %}
+                Weak or no linear relationship between Variable X and Variable Y.
+            {% elif result > -0.7 %}
+                Moderate negative linear relationship between Variable X and Variable Y.
+            {% else %}
+                Strong negative linear relationship between Variable X and Variable Y.
+            {% endif %}
+        </p>
+
+        <a href="/karl_pearson" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Calculate Another Dataset
+        </a>
     </div>
+
 </div>
 {% endblock %}

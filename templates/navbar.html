@@ -1,76 +1,110 @@
-{% block css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
-{% endblock %}
+<header class="site-header">
+    <div class="nav-container">
+        <!-- Logo -->
+        <a href="/" class="logo-link">
+            <span>Vandan</span><span class="logo-dot"></span>
+        </a>
+        
+        <!-- Navigation Links -->
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/" class="nav-link" data-path="/">Home</a></li>
+            <li><a href="/projects" class="nav-link" data-path="/projects">Projects</a></li>
+            <li><a href="/about" class="nav-link" data-path="/about">About</a></li>
+            <li><a href="/blog" class="nav-link" data-path="/blog">Blog</a></li>
+            <li><a href="/art" class="nav-link" data-path="/art">Creations</a></li>
+            <li><a href="/contact" class="nav-link" data-path="/contact">Contact</a></li>
+        </ul>
 
-<main>
-    <div id="page" class="s-pagewrap ss-home">
-        {% block navbar %}
-        <header>
-            <div style="flex: 1; display: flex; align-items: center; height: 100%;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <!-- Theme Toggle Button (Day / Night Mode) -->
+            <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Day / Night mode" title="Toggle Light / Dark Mode">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
 
-                <!-- Logo Section -->
-                <div class="logo">
-                <a href="/" class="logo-link">Vandan</a>
-            </div>
-            
-            <!-- Navigation Section -->
-            <nav>
-                <!-- Menu Icon for Mobile View -->
-                <div class="menu-icon" onclick="toggleMenu()">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                </div>
-                
-                <!-- Navigation Links -->
-                <ul class="nav-links">
-                    <li><a href="/" id="Home"><span>Home</span></a></li>
-                    <li><a href="/projects"><span>Projects</span></a></li>
-                    <li><a href="/about"><span>About</span></a></li>
-                    <li><a href="/blog"><span>Blog</span></a></li>
-                    <li><a href="/contact"><span>Contact</span></a></li>
-                    <!-- <li><a href="/art"><span>Creations</span></a></li> -->
-                </ul>
-            </nav>
+            <!-- Mobile Menu Toggle Button -->
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation menu">
+                <i class="fa-solid fa-bars" id="menuIcon"></i>
+            </button>
         </div>
-        </header>
-        {% endblock %}
     </div>
-    <style>
-        /* Base styles (Mobile-first) */
-        #Home {
-            margin-left: 0; /* No margin on mobile by default */
-        }
-        
-        /* Apply left margin only on desktop viewports */
-        @media screen and (min-width: 768px) {
-            #Home {
-                margin-left: 300px;
-            }
-        }
-        </style>
-        
-    <script>
-        // Toggle Menu for Mobile View
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuIcon = document.querySelector('.menu-icon');
-            const navLinks = document.querySelector('.nav-links');
-            const currentPath = window.location.pathname;
-            const homeLink = document.querySelector('a[href="/"]');
-            
-            function toggleMenu() {
-                menuIcon.classList.toggle('open');
-                navLinks.classList.toggle('open');
-            }
+</header>
 
-            // Add active state for home link
-            if (currentPath === '/') {
-                homeLink.classList.add('active');
+<script>
+    (function() {
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
             } else {
-                homeLink.classList.remove('active');
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
             }
+        }
 
-            menuIcon.addEventListener('click', toggleMenu);
+        // Initialize Theme from localStorage or system default
+        const savedTheme = localStorage.getItem('portfolio-theme') || 'light';
+        applyTheme(savedTheme);
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function() {
+                const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('portfolio-theme', newTheme);
+                applyTheme(newTheme);
+            });
+        }
+    })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const menuIcon = document.getElementById('menuIcon');
+        const currentPath = window.location.pathname;
+
+        // Active Link Highlighting
+        const links = document.querySelectorAll('.nav-link');
+        links.forEach(link => {
+            const path = link.getAttribute('data-path');
+            if (path === '/' && currentPath === '/') {
+                link.classList.add('active');
+            } else if (path !== '/' && currentPath.startsWith(path)) {
+                link.classList.add('active');
+            }
         });
-    </script>
-</main>
+
+        // Mobile Menu Toggle
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('open');
+                if (navLinks.classList.contains('open')) {
+                    menuIcon.classList.remove('fa-bars');
+                    menuIcon.classList.add('fa-xmark');
+                } else {
+                    menuIcon.classList.remove('fa-xmark');
+                    menuIcon.classList.add('fa-bars');
+                }
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!menuToggle.contains(event.target) && !navLinks.contains(event.target)) {
+                    navLinks.classList.remove('open');
+                    menuIcon.classList.remove('fa-xmark');
+                    menuIcon.classList.add('fa-bars');
+                }
+            });
+        }
+    });
+</script>
