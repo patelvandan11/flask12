@@ -1,5 +1,7 @@
-click
 Flask
+requests
+python-dotenv
+click
 itsdangerous
 Jinja2
 MarkupSafe
