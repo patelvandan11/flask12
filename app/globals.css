@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Base Styling & Theme Overrides */
+@layer base {
+  body {
+    @apply font-sans bg-background-light dark:bg-background-dark text-text-primaryLight dark:text-text-primaryDark min-h-screen flex flex-col overflow-x-hidden relative transition-colors duration-300;
+  }
+
+  /* Ambient Lighting Background Effect (Obsidian & Neon Cyber aesthetic) */
+  body::before {
+    content: "";
+    @apply fixed top-[-15%] left-[10%] w-[750px] h-[750px] pointer-events-none filter blur-[100px] z-[-2];
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(0,0,0,0) 70%);
+  }
+
+  body::after {
+    content: "";
+    @apply fixed bottom-[5%] right-[5%] w-[700px] h-[700px] pointer-events-none filter blur-[100px] z-[-2];
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(0,0,0,0) 70%);
+  }
+
+  /* Dark mode background adjustments */
+  html.dark body::before {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(0,0,0,0) 75%);
+  }
+  html.dark body::after {
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(0,0,0,0) 75%);
+  }
+}
+
+/* Custom Components & Utilities */
+@layer components {
+  /* Cyber-Glassmorphism Cards */
+  .cyber-glass-card {
+    @apply bg-card-light dark:bg-card-dark backdrop-blur-glass border border-black/10 dark:border-white/10 rounded-2xl shadow-glass-light dark:shadow-glass-dark transition-all duration-300;
+  }
+  
+  .cyber-glass-card:hover {
+    @apply border-cyber-cyan/40 dark:border-cyber-cyan/40 shadow-glow-cyan -translate-y-1;
+    background: rgba(255, 255, 255, 0.85);
+  }
+  
+  html.dark .cyber-glass-card:hover {
+    background: rgba(24, 33, 53, 0.75);
+  }
+
+  /* Ambient Orb Decorators */
+  .neon-orb-violet {
+    @apply absolute w-72 h-72 rounded-full pointer-events-none filter blur-[80px] opacity-20 dark:opacity-40 animate-pulse-glow z-[-1];
+    background: radial-gradient(circle, var(--accent-violet, #8b5cf6) 0%, rgba(0,0,0,0) 70%);
+  }
+
+  .neon-orb-cyan {
+    @apply absolute w-72 h-72 rounded-full pointer-events-none filter blur-[80px] opacity-20 dark:opacity-40 animate-pulse-glow z-[-1];
+    background: radial-gradient(circle, var(--accent-cyan, #06b6d4) 0%, rgba(0,0,0,0) 70%);
+  }
+
+  /* Custom Buttons */
+  .cyber-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 font-semibold text-white px-5 py-3 rounded-xl transition-all duration-200 border border-transparent shadow-[0_4px_14px_rgba(6,182,212,0.3)] bg-gradient-to-r from-cyber-cyan to-cyber-blue hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(6,182,212,0.4)];
+  }
+
+  .cyber-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-xl transition-all duration-200 border border-black/15 dark:border-white/15 bg-white/40 dark:bg-white/5 text-text-primaryLight dark:text-text-primaryDark hover:bg-black/10 dark:hover:bg-white/10 hover:border-cyber-cyan/40 hover:-translate-y-0.5;
+  }
+
+  /* Technical Skill Badges */
+  .cyber-badge {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30;
+  }
+
+  .cyber-badge-violet {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-cyber-violet/10 text-cyber-violet border border-cyber-violet/30;
+  }
+
+  .cyber-badge-pink {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-cyber-pink/10 text-cyber-pink border border-cyber-pink/30;
+  }
+
+  /* Form Fields */
+  .cyber-input {
+    @apply w-full px-4 py-3 bg-white/50 dark:bg-black/40 border border-black/10 dark:border-white/10 rounded-xl text-text-primaryLight dark:text-text-primaryDark placeholder-text-muted outline-none transition-all duration-200 focus:border-cyber-cyan focus:ring-2 focus:ring-cyber-cyan/20;
+  }
+}
+
+/* Custom Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background-light dark:bg-background-dark;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-cyber-cyan rounded-full;
+}

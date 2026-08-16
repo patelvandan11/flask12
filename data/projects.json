@@ -1,0 +1,74 @@
+[
+  {
+    "img_src": "/images/full1.png",
+    "img_srcset": "/images/full1.png 1x, /images/full1.png 2x",
+    "title": "meivan Scalable API-as-a-Service Platform (Saas Product)",
+    "url": "https://meivan.vercel.app/",
+    "urlw": "https://meivan.vercel.app/",
+    "description": "Meivan is a scalable API-as-a-Service platform that enables developers to create, manage, and deploy APIs effortlessly. With features like automated documentation, analytics, and seamless integration, Meivan empowers businesses to build robust APIs and accelerate their development process."
+  },
+  {
+    "img_src": "/images/AI_civic.png",
+    "img_srcset": "/images/AI_civic.png 1x, /images/AI_civic.png 2x",
+    "title": "AI Civilization Simulator — Multi-Agent AI Simulation",
+    "url": "https://github.com/patelvandan11/AI_Civilization_Simulator",
+    "urlw": "https://github.com/patelvandan11/AI_Civilization_Simulator",
+    "description": "AI Civilization Simulator is a multi-agent simulation project where autonomous AI agents gather resources, craft items, build settlements, manage infrastructure, and make decisions in a dynamic procedurally generated world. The project explores reinforcement learning, multi-agent systems, resource management, spatial planning, and emergent civilization behavior."
+  },
+  {
+    "img_src": "/images/aire.png",
+    "img_srcset": "/images/aire.png 1x, /images/aire.png 2x",
+    "title": "AI Research Assistant- Research Paper Question Answering System",
+    "url": "https://github.com/patelvandan11/Agentic-rag-application",
+    "urlw": "https://github.com/patelvandan11/Agentic-rag-application",
+    "description": "An agentic AI application that searches and filters high-quality arXiv research papers, downloads and indexes PDFs into a vector database, and answers user questions using a ReAct-based RAG pipeline with FastAPI and Streamlit."
+  },
+  {
+    "img_src": "/images/gridAIchemy.png",
+    "img_srcset": "/images/gridAIchemy.png 1x, /images/gridAIchemy.png 2x",
+    "title": "GridAlchemy - Instagram Post photo grid with image enhancer",
+    "url": "https://github.com/patelvandan11/GridAlchemy",
+    "urlw": "https://github.com/patelvandan11/GridAlchemy",
+    "description": "GridAlchemy is a simple tool that transforms a wide banner into multiple Instagram-ready posts. It slices the banner into perfectly sized 1080×1350 tiles, making it easy to upload and create a seamless grid on Instagram."
+  },
+  {
+    "img_src": "/images/mia.png",
+    "img_srcset": "/images/mia.png 1x, /images/mia.png 2x",
+    "title": "Market Intelligence Agent- AI Powered Market Research Tool",
+    "url": "https://github.com/patelvandan11/Market-Agent",
+    "urlw": "https://github.com/patelvandan11/Market-Agent",
+    "description": "Market Intelligence Agent Tool is an AI-driven solution that collects and analyzes real-time market data from multiple sources. It provides key insights on trends, competitors, and customer sentiment using NLP and LLMs. Users can query insights via a chat interface and visualize them on an interactive dashboard."
+  },
+  {
+    "img_src": "/images/unmasked.png",
+    "img_srcset": "/images/unmasked.png 1x, /images/unmasked.png 2x",
+    "title": "Deep-Fake Face Detection on Video by using MTCNN and GRU Hybrid approach",
+    "url": "https://github.com/patelvandan11/DeepFake_Face_Detection",
+    "urlw": "https://deep-fake-face-detection-alpha.vercel.app/",
+    "description": "Developed a hybrid deep learning model combining MTCNN for accurate face detection and GRU for sequence-based deepfake classification on video frames. Leveraged PyTorch and OpenCV to process datasets like DFDC and Celeb-DF. Achieved reliable results in detecting fake faces by analyzing temporal and spatial patterns."
+  },
+  {
+    "img_src": "/images/ai_trip1.jpg",
+    "img_srcset": "/images/ai_trip1.jpg 1x, /images/ai_trip2.jpg 2x",
+    "title": "AI-Based India Trip Planner with Itinerary Suggestions",
+    "url": "https://github.com/patelvandan11/Ai-Trip-Planner-with-GPT-3.5",
+    "urlw": "https://github.com/patelvandan11/Ai-Trip-Planner-with-GPT-3.5",
+    "description": "An intelligent travel planning tool that suggests budget-friendly itineraries, tourist spots, cafes, and hotels based on your preferences. Get day-by-day plans, story ideas, and music prompts using AI and LLMs by fine-tuning a GPT-3.5 model."
+  },
+  {
+    "img_src": "/images/CNN.png",
+    "img_srcset": "/images/CNN.png 1x, /images/CNN.png 2x",
+    "title": "VGG-16 Convolutional Neural Network (CNN) Architecture Fine-Tuning Techniques",
+    "url": "https://github.com/patelvandan11/VGG-16-Fine-Tuning",
+    "urlw": "https://github.com/patelvandan11/VGG-16-Fine-Tuning",
+    "description": "An in-depth look at the VGG-16 architecture, a popular convolutional neural network model. This project covers the structure, layers, and fine-tuning techniques used to enhance the performance of VGG-16 for various image classification tasks."
+  },
+  {
+    "img_src": "/images/karl1.jpg",
+    "img_srcset": "/images/karl1.jpg 1x, /images/karl2.jpg 2x",
+    "title": "Calculation of Karl Pearson's Coefficient of Correlation from Scratch",
+    "url": "/karl-pearson",
+    "urlw": "/karl-pearson",
+    "description": "Calculating Karl Pearson's Coefficient of Correlation from scratch. Understanding the step-by-step process enhances comprehension of the statistical concepts involved in measuring the strength and direction of linear relationships between variables."
+  }
+]

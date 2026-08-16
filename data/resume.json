@@ -1,0 +1,59 @@
+{
+  "name": "Vandan Patel",
+  "title": "AI & Data Science Engineer",
+  "email": "vandan11patel@gmail.com",
+  "phone": "+91 96647 92015",
+  "location": "Anand, Gujarat, India",
+  "cgpa": "8.80",
+  "degree": "B.Tech in Artificial Intelligence & Data Science",
+  "institution": "A.D. Patel Institute of Technology",
+  "graduation_year": "Aug 2022 - May 2026",
+  "summary": "AI & Data Science graduate passionate about building intelligent solutions using Deep Learning, Generative AI, Machine Learning, and Data Analytics. Experienced in developing AI-powered chatbots, RAG systems, AI agents, computer vision applications, and full-stack AI solutions.",
+  "links": {
+    "github": "https://github.com/patelvandan11",
+    "linkedin": "https://www.linkedin.com/in/patelvandan11",
+    "medium": "https://medium.com/@patelvandan11",
+    "kaggle": "https://www.kaggle.com/patelvandan115",
+    "leetcode": "https://leetcode.com/u/vandan_patel115/",
+    "instagram": "https://www.instagram.com/vandan_1_1/"
+  },
+  "work_experience": [
+    {
+      "company": "eSparkBiz",
+      "company_url": "https://www.esparkinfo.com/",
+      "role": "Prompt Engineering Intern",
+      "duration": "Jan 2026 – April 2026",
+      "details": "Built an AI-powered SEO Agent using LangChain & OpenAI API for AEO (Answer Engine Optimization) and GEO (Generative Engine Optimization). Designed and optimized prompts for LLMs to generate search-optimized, structured content. Improved content visibility across Google, AI search engines, and generative platforms (ChatGPT/Bing AI)."
+    },
+    {
+      "company": "Corp8.ai",
+      "company_url": "https://corp8.ai",
+      "role": "GenAI Intern",
+      "duration": "May 2025 – Oct 2025",
+      "details": "Built GenAI agents with LangChain and OpenAI API, implementing various RAG strategies and LangGraph workflows. Integrated ChromaDB for data management and developed tool-calling capabilities using MCP for enhanced agent functionality."
+    }
+  ],
+  "technical_skills": {
+    "programming_languages": ["Python", "JavaScript", "C++", "Java"],
+    "frameworks": ["React.js", "FastAPI", "Flask", "Streamlit"],
+    "ai_ml_libraries": ["LangChain", "LangGraph", "OpenAI API", "PyTorch", "TensorFlow", "Keras", "OpenCV", "HuggingFace", "ChromaDB", "FastMCP", "Pydantic", "Selenium", "NLTK"]
+  },
+  "featured_projects": [
+    {
+      "title": "Meivan - Scalable API-as-a-Service Platform (SaaS Product)",
+      "description": "Meivan is a scalable API-as-a-Service platform that enables developers to create, manage, and deploy APIs effortlessly with automated documentation and analytics."
+    },
+    {
+      "title": "AI Research Assistant - Research Paper QA System",
+      "description": "Agentic AI application that searches and filters arXiv research papers, downloads and indexes PDFs into a vector database, and answers questions using a ReAct-based RAG pipeline with FastAPI & Streamlit."
+    },
+    {
+      "title": "GridAlchemy - Instagram Post Photo Grid with Image Enhancer",
+      "description": "Transforms wide banner images into multiple Instagram-ready tiles (1080x1350) for a seamless grid layout."
+    },
+    {
+      "title": "Market Intelligence Agent - AI Powered Market Research Tool",
+      "description": "AI solution collecting real-time market data, providing NLP and LLM insights on trends, competitors, and sentiment via an interactive dashboard."
+    }
+  ]
+}
