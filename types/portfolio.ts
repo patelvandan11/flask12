@@ -2,6 +2,8 @@ export interface Project {
   title: string;
   url: string;
   urlw: string;
+  github_url?: string | null;
+  live_demo?: string | null;
   description: string;
   img_src: string;
   img_srcset: string;
@@ -39,6 +41,7 @@ export interface Links {
   github: string;
   linkedin: string;
   medium: string;
+  hashnode?: string;
   kaggle: string;
   leetcode: string;
   instagram: string;

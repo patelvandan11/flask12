@@ -1,14 +1,15 @@
 import React from 'react';
-import { Github, Linkedin, BookOpen, Code, Instagram } from 'lucide-react';
+import { Github, Linkedin, BookOpen, Code, Instagram, Globe } from 'lucide-react';
 
 export default function Footer() {
-  const linkClasses = "w-10 h-10 rounded-full bg-white/40 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-text-secondaryLight dark:text-text-secondaryDark text-lg transition-all duration-200 hover:text-cyber-cyan hover:border-cyber-cyan/55 hover:-translate-y-0.5 hover:shadow-glow-cyan shadow-sm";
+  const linkClasses =
+    'w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-center text-zinc-600 dark:text-zinc-400 text-sm transition-all duration-200 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500 hover:-translate-y-0.5 shadow-sm';
 
   return (
-    <footer className="mt-auto border-t border-black/10 dark:border-white/10 py-10 bg-white/40 dark:bg-[#030712]/40 backdrop-blur-md transition-colors duration-300">
+    <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800/80 py-8 bg-zinc-50/50 dark:bg-[#09090b]/80 backdrop-blur-md transition-colors duration-300">
       <div className="w-full max-w-5xl mx-auto px-6">
-        <div className="flex flex-col items-center gap-5">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center gap-3">
             <a
               href="https://github.com/patelvandan11"
               target="_blank"
@@ -16,7 +17,16 @@ export default function Footer() {
               className={linkClasses}
               title="GitHub"
             >
-              <Github size={18} />
+              <Github size={16} />
+            </a>
+            <a
+              href="https://hashnode.com/@vandan11"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClasses}
+              title="Hashnode Profile"
+            >
+              <BookOpen size={16} />
             </a>
             <a
               href="https://www.linkedin.com/in/patelvandan11"
@@ -25,7 +35,7 @@ export default function Footer() {
               className={linkClasses}
               title="LinkedIn"
             >
-              <Linkedin size={18} />
+              <Linkedin size={16} />
             </a>
             <a
               href="https://medium.com/@patelvandan11"
@@ -34,7 +44,7 @@ export default function Footer() {
               className={linkClasses}
               title="Medium"
             >
-              <BookOpen size={18} />
+              <Globe size={16} />
             </a>
             <a
               href="https://www.kaggle.com/patelvandan115"
@@ -43,7 +53,7 @@ export default function Footer() {
               className={linkClasses}
               title="Kaggle"
             >
-              <span className="font-extrabold text-sm">K</span>
+              <span className="font-extrabold text-xs font-code">K</span>
             </a>
             <a
               href="https://leetcode.com/u/vandan_patel115/"
@@ -52,7 +62,7 @@ export default function Footer() {
               className={linkClasses}
               title="LeetCode"
             >
-              <Code size={18} />
+              <Code size={16} />
             </a>
             <a
               href="https://www.instagram.com/vandan_1_1/"
@@ -61,10 +71,10 @@ export default function Footer() {
               className={linkClasses}
               title="Instagram"
             >
-              <Instagram size={18} />
+              <Instagram size={16} />
             </a>
           </div>
-          <p className="text-xs text-text-muted tracking-wide text-center">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 tracking-wide text-center font-code">
             &copy; {new Date().getFullYear()} Vandan Patel. Crafted with Next.js, Tailwind CSS &amp; TypeScript.
           </p>
         </div>

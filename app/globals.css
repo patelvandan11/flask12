@@ -2,86 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Base Styling & Theme Overrides */
+/* Custom Base Styling & Colorful Aesthetic Overrides */
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   body {
-    @apply font-sans bg-background-light dark:bg-background-dark text-text-primaryLight dark:text-text-primaryDark min-h-screen flex flex-col overflow-x-hidden relative transition-colors duration-300;
+    @apply font-sans bg-[#f8fafc] dark:bg-[#0b0f19] text-[#0f172a] dark:text-[#f8fafc] min-h-screen flex flex-col overflow-x-hidden relative transition-colors duration-300;
   }
 
-  /* Ambient Lighting Background Effect (Obsidian & Neon Cyber aesthetic) */
+  /* Soft Colorful Background Lighting Orbs */
   body::before {
     content: "";
-    @apply fixed top-[-15%] left-[10%] w-[750px] h-[750px] pointer-events-none filter blur-[100px] z-[-2];
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(0,0,0,0) 70%);
+    @apply fixed top-[-10%] left-[10%] w-[650px] h-[650px] pointer-events-none filter blur-[130px] z-[-2];
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(0,0,0,0) 70%);
   }
 
   body::after {
     content: "";
-    @apply fixed bottom-[5%] right-[5%] w-[700px] h-[700px] pointer-events-none filter blur-[100px] z-[-2];
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(0,0,0,0) 70%);
+    @apply fixed bottom-[5%] right-[5%] w-[650px] h-[650px] pointer-events-none filter blur-[130px] z-[-2];
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.12) 0%, rgba(0,0,0,0) 70%);
   }
 
-  /* Dark mode background adjustments */
   html.dark body::before {
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(0,0,0,0) 75%);
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.09) 0%, rgba(0,0,0,0) 75%);
   }
   html.dark body::after {
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(0,0,0,0) 75%);
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.09) 0%, rgba(0,0,0,0) 75%);
   }
 }
 
 /* Custom Components & Utilities */
 @layer components {
-  /* Cyber-Glassmorphism Cards */
+  /* Colorful Aesthetic Glassmorphism Cards */
   .cyber-glass-card {
-    @apply bg-card-light dark:bg-card-dark backdrop-blur-glass border border-black/10 dark:border-white/10 rounded-2xl shadow-glass-light dark:shadow-glass-dark transition-all duration-300;
+    @apply bg-white/90 dark:bg-[#111827]/85 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/80 rounded-2xl shadow-sm transition-all duration-300;
   }
   
   .cyber-glass-card:hover {
-    @apply border-cyber-cyan/40 dark:border-cyber-cyan/40 shadow-glow-cyan -translate-y-1;
-    background: rgba(255, 255, 255, 0.85);
-  }
-  
-  html.dark .cyber-glass-card:hover {
-    background: rgba(24, 33, 53, 0.75);
+    @apply border-indigo-300 dark:border-indigo-700/60 -translate-y-1 shadow-md;
   }
 
-  /* Ambient Orb Decorators */
-  .neon-orb-violet {
-    @apply absolute w-72 h-72 rounded-full pointer-events-none filter blur-[80px] opacity-20 dark:opacity-40 animate-pulse-glow z-[-1];
-    background: radial-gradient(circle, var(--accent-violet, #8b5cf6) 0%, rgba(0,0,0,0) 70%);
-  }
-
-  .neon-orb-cyan {
-    @apply absolute w-72 h-72 rounded-full pointer-events-none filter blur-[80px] opacity-20 dark:opacity-40 animate-pulse-glow z-[-1];
-    background: radial-gradient(circle, var(--accent-cyan, #06b6d4) 0%, rgba(0,0,0,0) 70%);
-  }
-
-  /* Custom Buttons */
+  /* Aesthetic Buttons */
   .cyber-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 font-semibold text-white px-5 py-3 rounded-xl transition-all duration-200 border border-transparent shadow-[0_4px_14px_rgba(6,182,212,0.3)] bg-gradient-to-r from-cyber-cyan to-cyber-blue hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(6,182,212,0.4)];
+    @apply inline-flex items-center justify-center gap-2 font-medium text-white bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 px-5 py-2.5 rounded-xl transition-all duration-200 border border-transparent shadow-md shadow-indigo-500/20 hover:-translate-y-0.5 cursor-pointer;
   }
 
   .cyber-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-xl transition-all duration-200 border border-black/15 dark:border-white/15 bg-white/40 dark:bg-white/5 text-text-primaryLight dark:text-text-primaryDark hover:bg-black/10 dark:hover:bg-white/10 hover:border-cyber-cyan/40 hover:-translate-y-0.5;
+    @apply inline-flex items-center justify-center gap-2 font-medium px-5 py-2.5 rounded-xl transition-all duration-200 border border-slate-200/90 dark:border-slate-800 bg-white/80 dark:bg-slate-800/70 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 hover:-translate-y-0.5 cursor-pointer shadow-sm;
   }
 
-  /* Technical Skill Badges */
+  /* Colorful Aesthetic Badges */
   .cyber-badge {
-    @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30;
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-indigo-50/90 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/50;
+  }
+
+  .cyber-badge-emerald {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50/90 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/50;
+  }
+
+  .cyber-badge-amber {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-amber-50/90 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/50;
   }
 
   .cyber-badge-violet {
-    @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-cyber-violet/10 text-cyber-violet border border-cyber-violet/30;
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-purple-50/90 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200/70 dark:border-purple-800/50;
   }
 
-  .cyber-badge-pink {
-    @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-cyber-pink/10 text-cyber-pink border border-cyber-pink/30;
+  .cyber-badge-teal {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-teal-50/90 dark:bg-teal-950/70 text-teal-700 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/50;
   }
 
   /* Form Fields */
   .cyber-input {
-    @apply w-full px-4 py-3 bg-white/50 dark:bg-black/40 border border-black/10 dark:border-white/10 rounded-xl text-text-primaryLight dark:text-text-primaryDark placeholder-text-muted outline-none transition-all duration-200 focus:border-cyber-cyan focus:ring-2 focus:ring-cyber-cyan/20;
+    @apply w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
   }
 }
 
@@ -91,9 +86,9 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-background-light dark:bg-background-dark;
+  @apply bg-[#f8fafc] dark:bg-[#0b0f19];
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-cyber-cyan rounded-full;
+  @apply bg-indigo-400 dark:bg-indigo-600 rounded-full;
 }

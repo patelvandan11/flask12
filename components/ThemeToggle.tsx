@@ -9,9 +9,12 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = (localStorage.getItem('portfolio-theme') as 'light' | 'dark') || 'light';
-    setTheme(savedTheme);
-    if (savedTheme === 'dark') {
+    const isDarkClass = document.documentElement.classList.contains('dark');
+    const savedTheme = localStorage.getItem('portfolio-theme') as 'light' | 'dark' | null;
+    const initialTheme = savedTheme || (isDarkClass ? 'dark' : 'light');
+    setTheme(initialTheme);
+
+    if (initialTheme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
     } else {
@@ -33,12 +36,13 @@ export default function ThemeToggle() {
     }
   };
 
-  const btnClasses = "w-10 h-10 rounded-full flex items-center justify-center border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 text-text-primaryLight dark:text-text-primaryDark hover:scale-108 hover:rotate-12 hover:border-cyber-cyan/50 hover:text-cyber-cyan transition-all duration-200 cursor-pointer shadow-sm";
+  const btnClasses =
+    'w-9 h-9 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 bg-zinc-100/70 dark:bg-zinc-800/70 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200 cursor-pointer shadow-sm';
 
   if (!mounted) {
     return (
       <button className={btnClasses} aria-label="Toggle theme">
-        <Moon className="w-5 h-5" />
+        <Moon className="w-4 h-4 text-zinc-600" />
       </button>
     );
   }
@@ -51,9 +55,9 @@ export default function ThemeToggle() {
       title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
     >
       {theme === 'dark' ? (
-        <Sun className="w-5 h-5 text-amber-400" />
+        <Sun className="w-4 h-4 text-amber-400" />
       ) : (
-        <Moon className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+        <Moon className="w-4 h-4 text-zinc-700" />
       )}
     </button>
   );
