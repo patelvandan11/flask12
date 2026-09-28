@@ -1,0 +1,314 @@
+{
+  "ai-civilization-simulator": {
+    "mode": "complex-canvas",
+    "title": "AI Civilization Multi-Agent Architecture",
+    "subtitle": "Interactive Node-Graph Canvas: Perception, LLM Planning, Memory Tree & Governance",
+    "nodes": [
+      {
+        "id": "n1",
+        "x": 50,
+        "y": 60,
+        "label": "World Biome Engine",
+        "subtext": "Procedural Terrain & Resources",
+        "type": "input",
+        "color": "blue"
+      },
+      {
+        "id": "n2",
+        "x": 300,
+        "y": 60,
+        "label": "Perception Vector",
+        "subtext": "Spatial State Input",
+        "type": "process",
+        "color": "sky"
+      },
+      {
+        "id": "n3",
+        "x": 657,
+        "y": 10,
+        "label": "Agent Brain (RL + LLM)",
+        "subtext": "Decision & Goal Trees",
+        "type": "reasoning",
+        "color": "mint"
+      },
+      {
+        "id": "n4",
+        "x": 550,
+        "y": 240,
+        "label": "Agent Memory Tree",
+        "subtext": "Short & Long-Term Vector DB",
+        "type": "database",
+        "color": "yellow"
+      },
+      {
+        "id": "n5",
+        "x": 1150,
+        "y": 10,
+        "label": "Governance & Voting",
+        "subtext": "Consensus & Laws Protocol",
+        "type": "decision",
+        "color": "purple"
+      },
+      {
+        "id": "n6",
+        "x": 759,
+        "y": 338,
+        "label": "Resource Economy Market",
+        "subtext": "Gathering, Trade & Crafting",
+        "type": "tool",
+        "color": "amber"
+      },
+      {
+        "id": "n7",
+        "x": 1050,
+        "y": 150,
+        "label": "Evolving Digital Society",
+        "subtext": "Real-Time World State Sync",
+        "type": "output",
+        "color": "emerald"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "from": "n1",
+        "to": "n2",
+        "label": "Raw Map Matrix"
+      },
+      {
+        "id": "e2",
+        "from": "n2",
+        "to": "n3",
+        "label": "State Vectors"
+      },
+      {
+        "id": "e3",
+        "from": "n3",
+        "to": "n4",
+        "label": "Read/Write Memories"
+      },
+      {
+        "id": "e4",
+        "from": "n3",
+        "to": "n5",
+        "label": "Propose Policies"
+      },
+      {
+        "id": "e5",
+        "from": "n5",
+        "to": "n6",
+        "label": "Execute Rules"
+      },
+      {
+        "id": "e6",
+        "from": "n6",
+        "to": "n7",
+        "label": "Update World"
+      }
+    ]
+  },
+  "meivan": {
+    "mode": "simple-pipeline",
+    "title": "Meivan Guard Interceptor Pipeline",
+    "subtitle": "Request Parsing, Policy Validation & Sanitized Output",
+    "nodes": [
+      {
+        "id": "m1",
+        "x": 50,
+        "y": 100,
+        "label": "Client Request",
+        "subtext": "Raw LLM Prompt",
+        "type": "input",
+        "color": "sky"
+      },
+      {
+        "id": "m2",
+        "x": 280,
+        "y": 100,
+        "label": "Meivan Interceptor",
+        "subtext": "<5ms FastAPI Parser",
+        "type": "process",
+        "color": "blue"
+      },
+      {
+        "id": "m3",
+        "x": 510,
+        "y": 100,
+        "label": "PII & Injection Shield",
+        "subtext": "Rule Evaluation",
+        "type": "reasoning",
+        "color": "mint"
+      },
+      {
+        "id": "m4",
+        "x": 740,
+        "y": 100,
+        "label": "Upstream LLM Provider",
+        "subtext": "Sanitized Payload",
+        "type": "output",
+        "color": "emerald"
+      }
+    ],
+    "edges": [
+      {
+        "id": "me1",
+        "from": "m1",
+        "to": "m2",
+        "label": "HTTPS Payload"
+      },
+      {
+        "id": "me2",
+        "from": "m2",
+        "to": "m3",
+        "label": "Check Guardrails"
+      },
+      {
+        "id": "me3",
+        "from": "m3",
+        "to": "m4",
+        "label": "Safe Dispatch"
+      }
+    ]
+  },
+  "meivan-art": {
+    "mode": "complex-canvas",
+    "title": "Generative Canvas Shader Architecture",
+    "subtitle": "Interactive Nodes: Touch Gestures, Brush Physics, Color Harmony & WebGL Viewport",
+    "nodes": [
+      {
+        "id": "a1",
+        "x": 60,
+        "y": 100,
+        "label": "Stylus / Touch Input",
+        "subtext": "Coord & Pressure Vectors",
+        "type": "input",
+        "color": "rose"
+      },
+      {
+        "id": "a2",
+        "x": 320,
+        "y": 100,
+        "label": "Procedural Brush Physics",
+        "subtext": "Fluid Drag & Splatter Math",
+        "type": "process",
+        "color": "mint"
+      },
+      {
+        "id": "a3",
+        "x": 320,
+        "y": 260,
+        "label": "Color Harmony Engine",
+        "subtext": "Algorithmic Gradient Mesh",
+        "type": "database",
+        "color": "yellow"
+      },
+      {
+        "id": "a4",
+        "x": 600,
+        "y": 180,
+        "label": "WebGL Fragment Shader",
+        "subtext": "Real-time Fragment Processing",
+        "type": "reasoning",
+        "color": "purple"
+      },
+      {
+        "id": "a5",
+        "x": 880,
+        "y": 180,
+        "label": "Canvas Render Viewport",
+        "subtext": "60 FPS Output Frame",
+        "type": "output",
+        "color": "emerald"
+      }
+    ],
+    "edges": [
+      {
+        "id": "ae1",
+        "from": "a1",
+        "to": "a2",
+        "label": "Motion Input"
+      },
+      {
+        "id": "ae2",
+        "from": "a2",
+        "to": "a4",
+        "label": "Texture Matrix"
+      },
+      {
+        "id": "ae3",
+        "from": "a3",
+        "to": "a4",
+        "label": "Swatches Array"
+      },
+      {
+        "id": "ae4",
+        "from": "a4",
+        "to": "a5",
+        "label": "Display Frame"
+      }
+    ]
+  },
+  "deepfake-detection": {
+    "mode": "simple-pipeline",
+    "title": "MTCNN + GRU Sequential Detection Pipeline",
+    "subtitle": "Frame Parsing, Face Bounding Box, 5 Landmarks & Temporal Classification",
+    "nodes": [
+      {
+        "id": "d1",
+        "x": 50,
+        "y": 100,
+        "label": "RGB Video Stream",
+        "subtext": "DFDC Dataset",
+        "type": "input",
+        "color": "amber"
+      },
+      {
+        "id": "d2",
+        "x": 280,
+        "y": 100,
+        "label": "MTCNN Face Detector",
+        "subtext": "5 Facial Keypoints",
+        "type": "process",
+        "color": "mint"
+      },
+      {
+        "id": "d3",
+        "x": 510,
+        "y": 100,
+        "label": "GRU Recurrent Classifier",
+        "subtext": "30-Frame Sequence Vector",
+        "type": "reasoning",
+        "color": "purple"
+      },
+      {
+        "id": "d4",
+        "x": 740,
+        "y": 100,
+        "label": "Authenticity Rating Score",
+        "subtext": "98.6% Accuracy Output",
+        "type": "output",
+        "color": "emerald"
+      }
+    ],
+    "edges": [
+      {
+        "id": "de1",
+        "from": "d1",
+        "to": "d2",
+        "label": "Extract Frames"
+      },
+      {
+        "id": "de2",
+        "from": "d2",
+        "to": "d3",
+        "label": "Facial Landmarks"
+      },
+      {
+        "id": "de3",
+        "from": "d3",
+        "to": "d4",
+        "label": "Classify Anomaly"
+      }
+    ]
+  }
+}

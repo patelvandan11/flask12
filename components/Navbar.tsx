@@ -7,12 +7,13 @@ import { Menu, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 const navItems = [
-  { label: 'Home', path: '#home', id: 'home' },
-  { label: 'Stack', path: '#stack', id: 'stack' },
-  { label: 'Projects', path: '#projects', id: 'projects' },
-  { label: 'About', path: '#about', id: 'about' },
-  { label: 'Blog', path: '#blog', id: 'blog' },
-  { label: 'Contact', path: '#contact', id: 'contact' },
+  { label: 'Home', path: '#home', id: 'home', isRoute: false },
+  { label: 'Stack', path: '#stack', id: 'stack', isRoute: false },
+  { label: 'Projects', path: '#projects', id: 'projects', isRoute: false },
+  { label: 'Explore', path: '/explore', id: 'explore', isRoute: true },
+  { label: 'About', path: '#about', id: 'about', isRoute: false },
+  { label: 'Blog', path: '#blog', id: 'blog', isRoute: false },
+  { label: 'Contact', path: '#contact', id: 'contact', isRoute: false },
 ];
 
 export default function Navbar() {
@@ -25,13 +26,16 @@ export default function Navbar() {
     if (pathname !== '/') return;
 
     const handleScroll = () => {
-      const sections = navItems.map((item) => document.getElementById(item.id));
+      const sections = navItems.filter((i) => !i.isRoute).map((item) => document.getElementById(item.id));
       const scrollPosition = window.scrollY + 200;
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = sections[i];
         if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(navItems[i].id);
+          const sectionItem = navItems.filter((i) => !i.isRoute)[i];
+          if (sectionItem) {
+            setActiveSection(sectionItem.id);
+          }
           break;
         }
       }
@@ -41,18 +45,24 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: (typeof navItems)[0]) => {
+    setMobileOpen(false);
+    if (item.isRoute) {
+      if (pathname === item.path) {
+        e.preventDefault();
+      }
+      return;
+    }
     if (pathname === '/') {
       e.preventDefault();
-      setMobileOpen(false);
-      const element = document.getElementById(targetId);
+      const element = document.getElementById(item.id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
-        setActiveSection(targetId);
+        setActiveSection(item.id);
       }
     } else {
-      setMobileOpen(false);
-      router.push(`/#${targetId}`);
+      e.preventDefault();
+      router.push(`/#${item.id}`);
     }
   };
 
@@ -61,8 +71,8 @@ export default function Navbar() {
       <div className="flex items-center justify-between bg-white/85 dark:bg-[#111827]/85 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/80 rounded-full px-6 py-2.5 max-w-5xl mx-auto shadow-sm transition-all duration-300">
         {/* Logo */}
         <a
-          href="#home"
-          onClick={(e) => handleNavClick(e, 'home')}
+          href="/#home"
+          onClick={(e) => handleNavClick(e, { label: 'Home', path: '#home', id: 'home', isRoute: false })}
           className="text-lg font-bold tracking-tight flex items-center gap-2 text-slate-900 dark:text-slate-100 cursor-pointer"
         >
           <span>Vandan Patel</span>
@@ -74,21 +84,35 @@ export default function Navbar() {
           mobileOpen ? 'max-md:translate-y-0 max-md:opacity-100 max-md:visible' : 'max-md:-translate-y-4 max-md:opacity-0 max-md:invisible'
         }`}>
           {navItems.map((item) => {
-            const isActive = pathname === '/' ? activeSection === item.id : false;
+            const isActive = item.isRoute ? pathname === item.path : (pathname === '/' && activeSection === item.id);
 
             return (
               <li key={item.id} className="max-md:w-full">
-                <a
-                  href={`/#${item.id}`}
-                  onClick={(e) => handleNavClick(e, item.id)}
-                  className={`text-xs font-medium px-3.5 py-1.5 rounded-full transition-all duration-200 block max-md:text-center cursor-pointer ${
-                    isActive
-                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-md shadow-indigo-500/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80'
-                  }`}
-                >
-                  {item.label}
-                </a>
+                {item.isRoute ? (
+                  <Link
+                    href={item.path}
+                    onClick={(e) => handleNavClick(e, item)}
+                    className={`text-xs font-medium px-3.5 py-1.5 rounded-full transition-all duration-200 block max-md:text-center cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-md shadow-indigo-500/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={`/#${item.id}`}
+                    onClick={(e) => handleNavClick(e, item)}
+                    className={`text-xs font-medium px-3.5 py-1.5 rounded-full transition-all duration-200 block max-md:text-center cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-md shadow-indigo-500/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                )}
               </li>
             );
           })}
