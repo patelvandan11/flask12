@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import AdminLoginModal from '@/components/AdminLoginModal';
 
+import { useAdmin } from '@/components/AdminContext';
+
 export default function ExploreContent() {
   const featuredProject = explorations.find((item) => item.featured) || explorations[0];
   const secondaryProjects = explorations.filter((item) => item.id !== featuredProject.id);
@@ -33,20 +35,8 @@ export default function ExploreContent() {
   // In-depth details modal state
   const [selectedProject, setSelectedProject] = useState<ExplorationItem | null>(null);
 
-  // Admin auth state
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/admin/session')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.isAdmin) {
-          setIsAdmin(true);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // Unified Admin Context
+  const { isAdmin, openAdminModal, logoutAdmin } = useAdmin();
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -70,31 +60,15 @@ export default function ExploreContent() {
             <span>EXPLORE</span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (isAdmin) {
-                fetch('/api/admin/session', { method: 'POST' }).then(() => setIsAdmin(false));
-              } else {
-                setIsAdminModalOpen(true);
-              }
-            }}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.7rem] font-bold font-code uppercase tracking-wider border transition-all cursor-pointer ${
-              isAdmin
-                ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-200'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-indigo-600 hover:text-white'
-            }`}
-          >
-            {isAdmin ? (
-              <>
-                <Unlock size={12} /> Admin Mode (Click to Logout)
-              </>
-            ) : (
-              <>
-                <Lock size={12} /> Admin Login
-              </>
-            )}
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={logoutAdmin}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.7rem] font-bold font-code uppercase tracking-wider border transition-all cursor-pointer bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-200"
+            >
+              <Unlock size={12} /> Admin Mode (Click to Exit)
+            </button>
+          )}
         </div>
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
           Explore What I Build
@@ -162,18 +136,11 @@ export default function ExploreContent() {
         <InDepthDetailsModal
           project={selectedProject}
           isAdmin={isAdmin}
-          onRequireAdminLogin={() => setIsAdminModalOpen(true)}
-          onLogout={() => setIsAdmin(false)}
+          onRequireAdminLogin={openAdminModal}
+          onLogout={logoutAdmin}
           onClose={() => setSelectedProject(null)}
         />
       )}
-
-      {/* 6. ADMIN LOGIN MODAL */}
-      <AdminLoginModal
-        isOpen={isAdminModalOpen}
-        onClose={() => setIsAdminModalOpen(false)}
-        onLoginSuccess={() => setIsAdmin(true)}
-      />
     </div>
   );
 }

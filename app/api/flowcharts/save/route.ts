@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { getFlowchartsData, saveFlowchartsData } from '@/lib/flowchartStore';
 
-const getFilePath = () => path.join(process.cwd(), 'data', 'flowcharts.json');
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify admin session
     const adminCookie = req.cookies.get('admin_session');
     if (adminCookie?.value !== 'authenticated_token_2026') {
       return NextResponse.json(
@@ -15,19 +13,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Parse payload
     const body = await req.json();
     const { projectId, flowchartData, fullData } = body;
 
-    const filePath = getFilePath();
-    let currentData: Record<string, any> = {};
-
-    try {
-      const fileContent = await fs.readFile(filePath, 'utf-8');
-      currentData = JSON.parse(fileContent);
-    } catch {
-      currentData = {};
-    }
+    let currentData = await getFlowchartsData();
 
     if (fullData) {
       currentData = fullData;
@@ -40,12 +29,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Write back to data/flowcharts.json
-    await fs.writeFile(filePath, JSON.stringify(currentData, null, 2), 'utf-8');
+    const saveResult = await saveFlowchartsData(currentData);
 
     return NextResponse.json({
       success: true,
-      message: 'Flowchart data saved successfully',
+      message: `Flowchart saved via ${saveResult.provider}`,
+      provider: saveResult.provider,
       data: currentData,
     });
   } catch (error) {

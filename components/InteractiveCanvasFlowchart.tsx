@@ -744,12 +744,16 @@ export default function InteractiveCanvasFlowchart({
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-500 dark:text-slate-400 font-bold block">Type</label>
-              <select
+              <label className="text-slate-500 dark:text-slate-400 font-bold block">Type (Manual Text or Preset)</label>
+              <input
+                type="text"
+                list={`type-presets-${selectedNode.id}`}
                 value={selectedNode.type}
                 onChange={(e) => updateSelectedNode('type', e.target.value)}
-                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100"
-              >
+                placeholder="Type custom node type..."
+                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-code"
+              />
+              <datalist id={`type-presets-${selectedNode.id}`}>
                 <option value="input">Input / Seed</option>
                 <option value="process">Process / Interceptor</option>
                 <option value="reasoning">Reasoning / LLM</option>
@@ -757,7 +761,10 @@ export default function InteractiveCanvasFlowchart({
                 <option value="decision">Decision / Voting</option>
                 <option value="tool">Tool / Action</option>
                 <option value="output">Output / Sync</option>
-              </select>
+                <option value="AI Agent">AI Agent</option>
+                <option value="API Guard">API Guard</option>
+                <option value="Custom Module">Custom Module</option>
+              </datalist>
             </div>
 
             <div className="space-y-1">

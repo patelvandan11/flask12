@@ -10,6 +10,7 @@ export interface Project {
 }
 
 export interface BlogPost {
+  id?: number;
   title: string;
   link: string;
   date: string;

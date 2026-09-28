@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Chatbot from '@/components/Chatbot';
+import { AdminProvider } from '@/components/AdminContext';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -31,10 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${firaCode.variable}`}>
       <body id="top">
-        <Navbar />
-        <main className="page-content">{children}</main>
-        <Footer />
-        <Chatbot />
+        <AdminProvider>
+          <Navbar />
+          <main className="page-content">{children}</main>
+          <Footer />
+          <Chatbot />
+        </AdminProvider>
       </body>
     </html>
   );

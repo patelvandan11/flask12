@@ -1,7 +1,12 @@
+'use client';
+
 import React from 'react';
-import { Github, Linkedin, BookOpen, Code, Instagram, Globe } from 'lucide-react';
+import { Github, Linkedin, BookOpen, Code, Instagram, Globe, Lock } from 'lucide-react';
+import { useAdmin } from './AdminContext';
 
 export default function Footer() {
+  const { isAdmin, openAdminModal } = useAdmin();
+
   const linkClasses =
     'w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-center text-zinc-600 dark:text-zinc-400 text-sm transition-all duration-200 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500 hover:-translate-y-0.5 shadow-sm';
 
@@ -74,9 +79,18 @@ export default function Footer() {
               <Instagram size={16} />
             </a>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 tracking-wide text-center font-code">
-            &copy; {new Date().getFullYear()} Vandan Patel. Crafted with Next.js, Tailwind CSS &amp; TypeScript.
-          </p>
+          <div className="flex items-center justify-center gap-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 tracking-wide text-center font-code">
+              &copy; {new Date().getFullYear()} Vandan Patel. Crafted with Next.js, Tailwind CSS &amp; TypeScript.
+            </p>
+            <button
+              onClick={openAdminModal}
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors p-1 rounded cursor-pointer"
+              title="System Admin Portal (Ctrl+Shift+A)"
+            >
+              <Lock size={11} className={isAdmin ? "text-emerald-400" : "opacity-40 hover:opacity-100"} />
+            </button>
+          </div>
         </div>
       </div>
     </footer>

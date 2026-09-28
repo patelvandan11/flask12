@@ -15,8 +15,8 @@
       },
       {
         "id": "n2",
-        "x": 300,
-        "y": 60,
+        "x": 250,
+        "y": 257,
         "label": "Perception Vector",
         "subtext": "Spatial State Input",
         "type": "process",
@@ -60,8 +60,8 @@
       },
       {
         "id": "n7",
-        "x": 1050,
-        "y": 150,
+        "x": 1242,
+        "y": 348,
         "label": "Evolving Digital Society",
         "subtext": "Real-Time World State Sync",
         "type": "output",
@@ -108,14 +108,14 @@
     ]
   },
   "meivan": {
-    "mode": "simple-pipeline",
+    "mode": "complex-canvas",
     "title": "Meivan Guard Interceptor Pipeline",
     "subtitle": "Request Parsing, Policy Validation & Sanitized Output",
     "nodes": [
       {
         "id": "m1",
-        "x": 50,
-        "y": 100,
+        "x": 10,
+        "y": 10,
         "label": "Client Request",
         "subtext": "Raw LLM Prompt",
         "type": "input",
@@ -123,8 +123,8 @@
       },
       {
         "id": "m2",
-        "x": 280,
-        "y": 100,
+        "x": 248,
+        "y": 171,
         "label": "Meivan Interceptor",
         "subtext": "<5ms FastAPI Parser",
         "type": "process",
@@ -132,8 +132,8 @@
       },
       {
         "id": "m3",
-        "x": 510,
-        "y": 100,
+        "x": 517,
+        "y": 10,
         "label": "PII & Injection Shield",
         "subtext": "Rule Evaluation",
         "type": "reasoning",
@@ -141,8 +141,8 @@
       },
       {
         "id": "m4",
-        "x": 740,
-        "y": 100,
+        "x": 912,
+        "y": 96,
         "label": "Upstream LLM Provider",
         "subtext": "Sanitized Payload",
         "type": "output",
