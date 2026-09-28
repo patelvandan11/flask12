@@ -29,8 +29,21 @@ import AdminLoginModal from '@/components/AdminLoginModal';
 import { useAdmin } from '@/components/AdminContext';
 
 export default function ExploreContent() {
-  const featuredProject = explorations.find((item) => item.featured) || explorations[0];
-  const secondaryProjects = explorations.filter((item) => item.id !== featuredProject.id);
+  const [items, setItems] = useState<ExplorationItem[]>(explorations);
+
+  useEffect(() => {
+    fetch('/api/explorations')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setItems(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const featuredProject = items.find((item) => item.featured) || items[0];
+  const secondaryProjects = items.filter((item) => item.id !== featuredProject.id);
 
   // In-depth details modal state
   const [selectedProject, setSelectedProject] = useState<ExplorationItem | null>(null);

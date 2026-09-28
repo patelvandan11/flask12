@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import clientPromise from './mongodb';
+import { explorations as defaultExplorations } from '@/data/explorations';
 
 const getDataFilePath = (fileName: string) => path.join(process.cwd(), 'data', fileName);
 
@@ -8,7 +9,8 @@ const getDataFilePath = (fileName: string) => path.join(process.cwd(), 'data', f
 async function loadCollectionData<T>(
   collectionName: string,
   configId: string,
-  jsonFileName: string
+  jsonFileName: string,
+  defaultFallback?: T
 ): Promise<T> {
   // 1. Live MongoDB Database
   if (process.env.MONGODB_URI && clientPromise) {
@@ -26,12 +28,13 @@ async function loadCollectionData<T>(
     }
   }
 
-  // 2. Fallback to local data/*.json
+  // 2. Fallback to local data/*.json or provided default
   try {
     const filePath = getDataFilePath(jsonFileName);
     const content = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(content) as T;
   } catch (err) {
+    if (defaultFallback) return defaultFallback;
     console.error(`Error reading local ${jsonFileName}:`, err);
     throw err;
   }
@@ -105,4 +108,12 @@ export async function getResumeData() {
 }
 export async function saveResumeData(data: Record<string, any>) {
   return saveCollectionData<Record<string, any>>('resume', 'resume_config', 'resume.json', data);
+}
+
+// --- EXPLORATIONS / EXPLORE PAGE ---
+export async function getExplorationsData() {
+  return loadCollectionData<any[]>('explorations', 'explorations_config', 'explorations.json', defaultExplorations);
+}
+export async function saveExplorationsData(data: any[]) {
+  return saveCollectionData<any[]>('explorations', 'explorations_config', 'explorations.json', data);
 }
