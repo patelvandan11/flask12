@@ -151,7 +151,7 @@ export default function HomePage() {
               <div className="border-t border-amber-200/60 dark:border-amber-900/40 my-0.5"></div>
               <div>
                 <div className="text-4xl font-extrabold font-code text-indigo-600 dark:text-indigo-400 leading-none">
-                  10+
+                  2+
                 </div>
                 <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 font-code">
                   Production &amp; Research Projects
