@@ -30,6 +30,7 @@ interface AdminContextType {
   openDeleteBlogsModal: () => void;
   openAddArtModal: () => void;
   openAddExploreModal: () => void;
+  openDeleteExploreModal: () => void;
   logoutAdmin: () => Promise<void>;
   checkSession: () => Promise<void>;
 }
@@ -43,6 +44,7 @@ const AdminContext = createContext<AdminContextType>({
   openDeleteBlogsModal: () => {},
   openAddArtModal: () => {},
   openAddExploreModal: () => {},
+  openDeleteExploreModal: () => {},
   logoutAdmin: async () => {},
   checkSession: async () => {},
 });
@@ -221,7 +223,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // Global Modals State
   const [activeModal, setActiveModal] = useState<
-    'add-project' | 'delete-projects' | 'add-blog' | 'delete-blogs' | 'add-art' | 'add-explore' | null
+    'add-project' | 'delete-projects' | 'add-blog' | 'delete-blogs' | 'add-art' | 'add-explore' | 'delete-explore' | null
   >(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
@@ -229,6 +231,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // List Data for Delete Modals
   const [projectsList, setProjectsList] = useState<any[]>([]);
   const [blogsList, setBlogsList] = useState<any[]>([]);
+  const [exploreList, setExploreList] = useState<any[]>([]);
 
   // Form States
   const [projectForm, setProjectForm] = useState({
@@ -373,6 +376,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setActiveModal('add-explore');
   };
 
+  const openDeleteExploreModal = async () => {
+    setIsDropdownOpen(false);
+    try {
+      const res = await fetch('/api/explorations');
+      if (res.ok) setExploreList(await res.json());
+    } catch (e) {}
+    setActiveModal('delete-explore');
+  };
+
   // Delete Action Handlers
   const handleDeleteProjectItem = async (index: number) => {
     const itemToDelete = projectsList[index];
@@ -409,6 +421,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       router.refresh();
     } catch (e) {
       alert('Failed to delete blog article');
+    }
+  };
+
+  const handleDeleteExploreItem = async (index: number) => {
+    const itemToDelete = exploreList[index];
+    if (!confirm(`Are you sure you want to delete experiment "${itemToDelete.title}" from MongoDB?`)) return;
+
+    const updated = exploreList.filter((_, i) => i !== index);
+    setExploreList(updated);
+
+    try {
+      await fetch('/api/explorations/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: updated }),
+      });
+      router.refresh();
+    } catch (e) {
+      alert('Failed to delete experiment');
     }
   };
 
@@ -631,6 +662,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         openDeleteBlogsModal,
         openAddArtModal,
         openAddExploreModal,
+        openDeleteExploreModal,
         logoutAdmin,
         checkSession,
       }}
@@ -708,6 +740,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
               >
                 <Sparkles size={14} className="text-amber-400 shrink-0" />
                 <span>Add Explore Experiment</span>
+              </button>
+
+              <button
+                onClick={openDeleteExploreModal}
+                className="w-full px-3 py-2 rounded-xl text-left text-red-300 hover:text-white hover:bg-red-600/50 font-semibold flex items-center gap-2.5 transition-all cursor-pointer"
+              >
+                <Trash2 size={14} className="text-red-400 shrink-0" />
+                <span>Delete / Manage Explore</span>
               </button>
 
               {/* 5. FLOWCHARTS */}
@@ -1255,6 +1295,57 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 7. GLOBAL DELETE EXPLORE EXPERIMENTS MODAL */}
+      {activeModal === 'delete-explore' && (
+        <div className="fixed inset-0 z-[3500] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center">
+                  <Trash2 size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Delete / Manage Explore Experiments</h3>
+                  <p className="text-[0.68rem] text-slate-500 font-code">Deletes directly from MongoDB Atlas</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs font-code">
+              {exploreList.length === 0 ? (
+                <p className="text-center py-6 text-slate-500">No experiments found in database.</p>
+              ) : (
+                exploreList.map((exp, idx) => (
+                  <div
+                    key={exp.id || idx}
+                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 block truncate">{exp.title}</span>
+                      <span className="text-[0.68rem] text-slate-500 truncate block">{exp.category} &bull; {exp.tagline || exp.description}</span>
+                    </div>
+
+                    <button
+                      onClick={() => handleDeleteExploreItem(idx)}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shrink-0 flex items-center gap-1 transition-all cursor-pointer"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
