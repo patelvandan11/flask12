@@ -23,27 +23,56 @@ import {
   GitFork,
   Lock,
   Unlock,
+  Pencil,
+  Trash2,
+  Plus,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import AdminLoginModal from '@/components/AdminLoginModal';
-
-import { useAdmin } from '@/components/AdminContext';
+import { useAdmin, ImageDropzone } from '@/components/AdminContext';
 
 export default function ExploreContent() {
   const [items, setItems] = useState<ExplorationItem[]>(explorations);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Edit / Add Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const [formState, setFormState] = useState({
+    title: '',
+    category: 'AI Experiment',
+    tagline: '',
+    description: '',
+    longDescription: '',
+    url: '',
+    githubUrl: '',
+    image: '',
+    features: '',
+    techStack: '',
+  });
 
   useEffect(() => {
-    fetch('/api/explorations')
-      .then((res) => res.json())
-      .then((data) => {
+    fetchExplorations();
+  }, []);
+
+  const fetchExplorations = async () => {
+    try {
+      const res = await fetch('/api/explorations');
+      if (res.ok) {
+        const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           setItems(data);
         }
-      })
-      .catch(() => {});
-  }, []);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch explorations:', err);
+    }
+  };
 
   const featuredProject = items.find((item) => item.featured) || items[0];
-  const secondaryProjects = items.filter((item) => item.id !== featuredProject.id);
+  const secondaryProjects = items.filter((item) => item.id !== (featuredProject?.id || ''));
 
   // In-depth details modal state
   const [selectedProject, setSelectedProject] = useState<ExplorationItem | null>(null);
@@ -51,9 +80,154 @@ export default function ExploreContent() {
   // Unified Admin Context
   const { isAdmin, openAdminModal, logoutAdmin } = useAdmin();
 
+  const handleOpenAdd = () => {
+    setEditingIndex(null);
+    setFormState({
+      title: '',
+      category: 'AI Experiment',
+      tagline: '',
+      description: '',
+      longDescription: '',
+      url: '',
+      githubUrl: '',
+      image: '/images/AI_civic.png',
+      features: 'Interactive System Architecture, Cloud Telemetry Buffer',
+      techStack: 'Python, FastAPI, Next.js, TypeScript',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleOpenEdit = (index: number) => {
+    const target = items[index];
+    setEditingIndex(index);
+    setFormState({
+      title: target.title || '',
+      category: target.category || 'AI Experiment',
+      tagline: target.tagline || '',
+      description: target.description || '',
+      longDescription: target.longDescription || target.description || '',
+      url: target.url || '',
+      githubUrl: target.githubUrl || '',
+      image: target.images && target.images[0] ? target.images[0] : '/images/AI_civic.png',
+      features: Array.isArray(target.features) ? target.features.join(', ') : '',
+      techStack: Array.isArray(target.techStack) ? target.techStack.join(', ') : '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = async (index: number) => {
+    const itemToDelete = items[index];
+    if (!confirm(`Are you sure you want to delete "${itemToDelete.title}"?`)) return;
+
+    const updated = items.filter((_, i) => i !== index);
+    setItems(updated);
+    await saveExplorations(updated);
+  };
+
+  const handleSaveExploration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    const featureArr = formState.features
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const techArr = formState.techStack
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    let updatedList: ExplorationItem[];
+    if (editingIndex !== null) {
+      updatedList = [...items];
+      const existing = updatedList[editingIndex];
+      updatedList[editingIndex] = {
+        ...existing,
+        title: formState.title,
+        category: formState.category,
+        tagline: formState.tagline || formState.title,
+        description: formState.description,
+        longDescription: formState.longDescription || formState.description,
+        url: formState.url || '#',
+        githubUrl: formState.githubUrl || '#',
+        images: [formState.image || '/images/AI_civic.png'],
+        features: featureArr.length > 0 ? featureArr : ['Interactive Architecture'],
+        techStack: techArr.length > 0 ? techArr : ['Next.js', 'TypeScript'],
+      };
+    } else {
+      const newId = `exp_${Date.now().toString().slice(-5)}`;
+      const newItem: ExplorationItem = {
+        id: newId,
+        title: formState.title,
+        category: formState.category,
+        tagline: formState.tagline || formState.title,
+        description: formState.description,
+        longDescription: formState.longDescription || formState.description,
+        url: formState.url || '#',
+        githubUrl: formState.githubUrl || '#',
+        buttonText: 'Explore',
+        featured: false,
+        previewType: 'default',
+        badgeStyle: 'cyber-badge',
+        accentGradient: 'from-indigo-600 via-purple-500 to-emerald-600',
+        cardGlow: 'indigo',
+        images: [formState.image || '/images/AI_civic.png'],
+        features: featureArr.length > 0 ? featureArr : ['Interactive System Architecture'],
+        techStack: techArr.length > 0 ? techArr : ['Python', 'FastAPI', 'Next.js'],
+        diagram: {
+          diagramType: 'components',
+          runtimeLabel: `${formState.title} Runtime`,
+          title: `Components of ${formState.title}`,
+          subtitle: formState.description,
+          connectionLabel: 'connects to',
+          subsystems: [
+            {
+              id: 'core_module',
+              title: 'System Engine',
+              icon: 'brain',
+              badgeColor: 'mint',
+              sections: [
+                {
+                  sectionTitle: 'Core Logic',
+                  blocks: [
+                    { id: 'b1', label: 'Processing Unit', subtext: 'System Engine', color: 'mint' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+      updatedList = [newItem, ...items];
+    }
+
+    setItems(updatedList);
+    const success = await saveExplorations(updatedList);
+    setIsSaving(false);
+
+    if (success) {
+      setIsEditModalOpen(false);
+    }
+  };
+
+  const saveExplorations = async (dataToSave: ExplorationItem[]) => {
+    try {
+      const res = await fetch('/api/explorations/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: dataToSave }),
+      });
+      const data = await res.json();
+      return res.ok && data.success;
+    } catch (err) {
+      alert('Failed to save changes to MongoDB.');
+      return false;
+    }
+  };
+
   // Lock body scroll when modal is open
   useEffect(() => {
-    if (selectedProject) {
+    if (selectedProject || isEditModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -61,7 +235,7 @@ export default function ExploreContent() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [selectedProject]);
+  }, [selectedProject, isEditModalOpen]);
 
   return (
     <div className="w-full max-w-5xl mx-auto px-6 py-12 space-y-16 pt-28 md:pt-32">
@@ -89,6 +263,17 @@ export default function ExploreContent() {
         <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
           A collection of experiments, products, websites, creative projects, and ideas I'm bringing to life.
         </p>
+
+        {isAdmin && (
+          <div className="pt-2 flex justify-center">
+            <button
+              onClick={handleOpenAdd}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <Plus size={16} /> Add New Experiment (Admin)
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 2. FEATURED PROJECT (AI CIVILIZATION SIMULATOR) */}
@@ -100,11 +285,16 @@ export default function ExploreContent() {
           <span className="hidden sm:inline">STANDALONE AI SIMULATION</span>
         </div>
 
-        <ProjectCard
-          project={featuredProject}
-          isFeatured={true}
-          onOpenDetails={(p) => setSelectedProject(p)}
-        />
+        {featuredProject && (
+          <ProjectCard
+            project={featuredProject}
+            isFeatured={true}
+            isAdmin={isAdmin}
+            onOpenDetails={(p) => setSelectedProject(p)}
+            onEdit={() => handleOpenEdit(items.findIndex((i) => i.id === featuredProject.id))}
+            onDelete={() => handleDelete(items.findIndex((i) => i.id === featuredProject.id))}
+          />
+        )}
       </section>
 
       {/* 3. PRODUCTS & CREATIONS GRID (TOTAL 4 WEBSITES) */}
@@ -113,19 +303,25 @@ export default function ExploreContent() {
           <span className="flex items-center gap-1.5 text-slate-900 dark:text-slate-100">
             <Layers size={14} className="text-indigo-600 dark:text-indigo-400" /> PRODUCTS &amp; CREATIONS
           </span>
-          <span>{explorations.length} WEBSITES &amp; SHOWCASE PROJECTS</span>
+          <span>{items.length} WEBSITES &amp; SHOWCASE PROJECTS</span>
         </div>
 
         {/* 3-Column Grid for Secondary Items */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {secondaryProjects.map((item) => (
-            <ProjectCard
-              key={item.id}
-              project={item}
-              isFeatured={false}
-              onOpenDetails={(p) => setSelectedProject(p)}
-            />
-          ))}
+          {secondaryProjects.map((item) => {
+            const itemIdx = items.findIndex((i) => i.id === item.id);
+            return (
+              <ProjectCard
+                key={item.id}
+                project={item}
+                isFeatured={false}
+                isAdmin={isAdmin}
+                onOpenDetails={(p) => setSelectedProject(p)}
+                onEdit={() => handleOpenEdit(itemIdx)}
+                onDelete={() => handleDelete(itemIdx)}
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -154,6 +350,157 @@ export default function ExploreContent() {
           onClose={() => setSelectedProject(null)}
         />
       )}
+
+      {/* 6. EDIT / ADD EXPLORATION MODAL */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 space-y-5 my-auto max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Sparkles className="text-indigo-500" size={18} />
+                {editingIndex !== null ? 'Edit Exploration Experiment' : 'Add New Exploration Experiment'}
+              </h3>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveExploration} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Title</label>
+                <input
+                  type="text"
+                  required
+                  value={formState.title}
+                  onChange={(e) => setFormState({ ...formState, title: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                  placeholder="e.g. AI Civilization Simulator"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Category</label>
+                  <input
+                    type="text"
+                    required
+                    value={formState.category}
+                    onChange={(e) => setFormState({ ...formState, category: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                    placeholder="e.g. AI Simulation / SaaS Web"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Tagline</label>
+                  <input
+                    type="text"
+                    value={formState.tagline}
+                    onChange={(e) => setFormState({ ...formState, tagline: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                    placeholder="e.g. Autonomous Agent Ecosystem"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Short Description</label>
+                <textarea
+                  required
+                  rows={2}
+                  value={formState.description}
+                  onChange={(e) => setFormState({ ...formState, description: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                  placeholder="Brief summary of the experiment..."
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Detailed Description (Modal View)</label>
+                <textarea
+                  rows={3}
+                  value={formState.longDescription}
+                  onChange={(e) => setFormState({ ...formState, longDescription: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                  placeholder="In-depth explanation of system architecture..."
+                />
+              </div>
+
+              <ImageDropzone
+                value={formState.image}
+                onChange={(url) => setFormState({ ...formState, image: url })}
+                label="Project Screenshot / Preview Image"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Target / Demo URL</label>
+                  <input
+                    type="text"
+                    value={formState.url}
+                    onChange={(e) => setFormState({ ...formState, url: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                    placeholder="e.g. https://... or /sites/..."
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">GitHub URL</label>
+                  <input
+                    type="text"
+                    value={formState.githubUrl}
+                    onChange={(e) => setFormState({ ...formState, githubUrl: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                    placeholder="e.g. https://github.com/..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Features (Comma Separated)</label>
+                  <input
+                    type="text"
+                    value={formState.features}
+                    onChange={(e) => setFormState({ ...formState, features: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                    placeholder="Feature 1, Feature 2, Feature 3"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Tech Stack (Comma Separated)</label>
+                  <input
+                    type="text"
+                    value={formState.techStack}
+                    onChange={(e) => setFormState({ ...formState, techStack: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium"
+                    placeholder="Python, FastAPI, Next.js, Docker"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  <span>Save Experiment</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -162,11 +509,17 @@ export default function ExploreContent() {
 function ProjectCard({
   project,
   isFeatured,
+  isAdmin = false,
   onOpenDetails,
+  onEdit,
+  onDelete,
 }: {
   project: ExplorationItem;
   isFeatured: boolean;
+  isAdmin?: boolean;
   onOpenDetails: (project: ExplorationItem) => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, scale: 1 });
@@ -240,6 +593,37 @@ function ProjectCard({
       }}
       className={cardBaseClasses}
     >
+      {/* Admin Quick Action Overlay Buttons */}
+      {isAdmin && (
+        <div className="absolute top-3 right-3 z-[40] flex items-center gap-1.5 bg-slate-950/85 p-1 rounded-xl backdrop-blur-md border border-white/10 shadow-xl">
+          {onEdit && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="p-1.5 text-slate-300 hover:text-white bg-indigo-600/80 hover:bg-indigo-600 rounded-lg transition-colors cursor-pointer"
+              title="Edit Experiment"
+            >
+              <Pencil size={13} />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="p-1.5 text-slate-300 hover:text-white bg-red-600/80 hover:bg-red-600 rounded-lg transition-colors cursor-pointer"
+              title="Delete Experiment"
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
+        </div>
+      )}
       {isFeatured ? (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
           {/* Left Column: Details */}

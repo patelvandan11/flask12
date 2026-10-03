@@ -73,8 +73,13 @@ export default function Navbar() {
         <a
           href="/#home"
           onClick={(e) => handleNavClick(e, { label: 'Home', path: '#home', id: 'home', isRoute: false })}
-          className="text-lg font-bold tracking-tight flex items-center gap-2 text-slate-900 dark:text-slate-100 cursor-pointer"
+          className="text-lg font-bold tracking-tight flex items-center gap-2.5 text-slate-900 dark:text-slate-100 cursor-pointer"
         >
+          <img
+            src="/logo.png"
+            alt="Website Logo"
+            className="w-7 h-7 rounded-full object-cover border border-indigo-500/40 shadow-sm"
+          />
           <span>Vandan Patel</span>
           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
         </a>

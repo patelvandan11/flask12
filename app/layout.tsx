@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   title: 'Vandan Patel | AI & Data Science Engineer',
   description:
     'Portfolio of Vandan Patel - AI & Data Science Engineer specializing in LLMs, RAG pipelines, AI agents, deep learning, and full-stack web solutions.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({

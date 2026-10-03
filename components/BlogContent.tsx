@@ -7,9 +7,11 @@ import { Calendar, User, ExternalLink, Plus, Pencil, Trash2, X, Save, Loader2 } 
 
 interface BlogContentProps {
   initialPosts: BlogPost[];
+  sectionPrefix?: string;
+  hidePadding?: boolean;
 }
 
-export default function BlogContent({ initialPosts }: BlogContentProps) {
+export default function BlogContent({ initialPosts, sectionPrefix, hidePadding = false }: BlogContentProps) {
   const { isAdmin } = useAdmin();
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,18 +110,23 @@ export default function BlogContent({ initialPosts }: BlogContentProps) {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 py-20">
-      <header className="text-center mb-12 relative">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-text-primaryLight dark:text-text-primaryDark">
-          Technical <span className="bg-gradient-to-r from-cyber-cyan via-cyber-blue to-cyber-violet bg-clip-text text-transparent">Articles</span>
-        </h1>
-        <p className="text-text-secondaryLight dark:text-text-secondaryDark text-base max-w-2xl mx-auto leading-relaxed">
+    <div className={`w-full ${hidePadding ? '' : 'max-w-5xl mx-auto px-6 py-20'}`}>
+      <header className="text-center mb-10 relative">
+        {sectionPrefix && (
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-code block mb-1">
+            {sectionPrefix}
+          </span>
+        )}
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">
+          Technical <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 bg-clip-text text-transparent">Articles &amp; Writing</span>
+        </h2>
+        <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed">
           In-depth guides and articles on LLM fine-tuning, RAG architecture, backpropagation, and foundation models.
         </p>
 
         {/* Admin Add Button */}
         {isAdmin && (
-          <div className="mt-6 flex justify-center">
+          <div className="mt-4 flex justify-center">
             <button
               onClick={handleOpenAdd}
               className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer"

@@ -32,6 +32,9 @@ import {
   BookOpen,
 } from 'lucide-react';
 
+import ProjectsContent from '@/components/ProjectsContent';
+import BlogContent from '@/components/BlogContent';
+
 export default function HomePage() {
   const projects: Project[] = projectsData;
   const posts: BlogPost[] = blogData;
@@ -359,126 +362,7 @@ export default function HomePage() {
 
       {/* 3. PROJECTS SECTION (#projects) */}
       <section id="projects" className="scroll-mt-28">
-        <div className="text-center mb-10">
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-code block mb-1">
-            03 / PORTFOLIO &amp; LAB
-          </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">
-            Featured Projects &amp; Demos
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed">
-            Explore AI systems, multi-agent simulations, SaaS applications, and interactive tools built by Vandan Patel. Live links available for supported projects!
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {projects.map((project, idx) => {
-            const targetUrl = project.live_demo || project.github_url || project.url;
-            const isInternal = targetUrl.startsWith('/');
-
-            return (
-              <article key={idx} className="cyber-glass-card flex flex-col overflow-hidden h-full">
-                <div className="h-44 relative bg-gradient-to-br from-indigo-50/50 via-slate-50 to-purple-50/40 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
-                  {isInternal ? (
-                    <Link href={targetUrl} className="relative w-full h-full block">
-                      <Image
-                        src={project.img_src}
-                        alt={project.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 30vw"
-                        className="object-contain transition-transform duration-500 hover:scale-103"
-                      />
-                    </Link>
-                  ) : (
-                    <a href={targetUrl} target="_blank" rel="noopener noreferrer" className="relative w-full h-full block">
-                      <Image
-                        src={project.img_src}
-                        alt={project.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 30vw"
-                        className="object-contain transition-transform duration-500 hover:scale-103"
-                      />
-                    </a>
-                  )}
-                </div>
-
-                <div className="p-5 flex flex-col justify-between flex-1">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2 leading-snug">
-                      {isInternal ? (
-                        <Link href={targetUrl} className="hover:underline transition-colors">
-                          {project.title}
-                        </Link>
-                      ) : (
-                        <a href={targetUrl} target="_blank" rel="noopener noreferrer" className="hover:underline transition-colors">
-                          {project.title}
-                        </a>
-                      )}
-                    </h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-                      {project.description}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-200/80 dark:border-slate-800 mt-auto">
-                    {/* Code Link */}
-                    {(project.github_url || project.url) && (
-                      (project.github_url || project.url).startsWith('/') ? (
-                        <Link
-                          href={project.github_url || project.url}
-                          className="cyber-btn-secondary text-xs !px-3 !py-1.5 flex items-center gap-1.5"
-                          title="View Code"
-                        >
-                          <Github size={13} /> Code →
-                        </Link>
-                      ) : (
-                        <a
-                          href={project.github_url || project.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="cyber-btn-secondary text-xs !px-3 !py-1.5 flex items-center gap-1.5"
-                          title="View Source Code"
-                        >
-                          <Github size={13} /> Code ↗
-                        </a>
-                      )
-                    )}
-
-                    {/* Live Demo Option */}
-                    {project.live_demo ? (
-                      project.live_demo.startsWith('/') ? (
-                        <Link
-                          href={project.live_demo}
-                          className="cyber-btn-primary text-xs !px-3.5 !py-1.5 flex items-center gap-1.5 font-medium"
-                          title="Open Live Demo"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
-                          Live Demo →
-                        </Link>
-                      ) : (
-                        <a
-                          href={project.live_demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="cyber-btn-primary text-xs !px-3.5 !py-1.5 flex items-center gap-1.5 font-medium"
-                          title="Open Live Demo"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
-                          Live Demo ↗
-                        </a>
-                      )
-                    ) : (
-                      <span className="text-[0.72rem] font-medium text-slate-500 dark:text-slate-400 px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-full flex items-center gap-1.5 font-code">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        Demo N/A
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        <ProjectsContent initialProjects={projects} sectionPrefix="03 / PORTFOLIO & LAB" hidePadding={true} />
       </section>
 
       {/* 4. ABOUT SECTION (#about) */}
@@ -649,56 +533,7 @@ export default function HomePage() {
 
       {/* 5. BLOG SECTION (#blog) */}
       <section id="blog" className="scroll-mt-28">
-        <div className="text-center mb-10">
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-code block mb-1">
-            05 / WRITING &amp; ARTICLES
-          </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">
-            Technical Articles &amp; Writing
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed">
-            In-depth technical publications on LLM fine-tuning, RAG architecture, neural networks, and AI engineering.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {posts.map((post, idx) => (
-            <article key={idx} className="cyber-glass-card p-5 flex flex-col justify-between bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/30 dark:from-indigo-950/20 dark:via-slate-900/90 dark:to-purple-950/20 border-indigo-100 dark:border-indigo-900/40">
-              <div>
-                <div className="flex items-center gap-4 text-[0.72rem] font-semibold text-slate-500 dark:text-slate-400 mb-3">
-                  <span className="inline-flex items-center gap-1.5 font-code">
-                    <Calendar size={13} className="text-indigo-600 dark:text-indigo-400" /> {post.date}
-                  </span>
-                  <span>&bull;</span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <User size={13} className="text-indigo-600 dark:text-indigo-400" /> {post.author}
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold leading-snug mb-2.5 text-slate-900 dark:text-slate-100 hover:underline transition-colors duration-150">
-                  <a href={post.link} target="_blank" rel="noopener noreferrer">
-                    {post.title}
-                  </a>
-                </h3>
-
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-                  {post.description}
-                </p>
-              </div>
-
-              <div className="pt-3 border-t border-indigo-100 dark:border-indigo-900/40 mt-auto">
-                <a
-                  href={post.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cyber-btn-secondary w-full text-xs py-2.5 hover:border-indigo-300 dark:hover:border-indigo-600"
-                >
-                  Read Full Article on Medium ↗
-                </a>
-              </div>
-            </article>
-          ))}
-        </div>
+        <BlogContent initialPosts={posts} sectionPrefix="05 / WRITING & ARTICLES" hidePadding={true} />
       </section>
 
       {/* 6. CONTACT SECTION (#contact) */}

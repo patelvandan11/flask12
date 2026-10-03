@@ -80,6 +80,7 @@ export default function Footer() {
             </a>
           </div>
           <div className="flex items-center justify-center gap-2">
+            <img src="/logo.png" alt="Logo" className="w-5 h-5 rounded-full object-cover border border-zinc-300 dark:border-zinc-700" />
             <p className="text-xs text-zinc-500 dark:text-zinc-400 tracking-wide text-center font-code">
               &copy; {new Date().getFullYear()} Vandan Patel. Crafted with Next.js, Tailwind CSS &amp; TypeScript.
             </p>

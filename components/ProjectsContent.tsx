@@ -9,9 +9,11 @@ import { ExternalLink, Github, Plus, Pencil, Trash2, X, Save, Loader2 } from 'lu
 
 interface ProjectsContentProps {
   initialProjects: Project[];
+  sectionPrefix?: string;
+  hidePadding?: boolean;
 }
 
-export default function ProjectsContent({ initialProjects }: ProjectsContentProps) {
+export default function ProjectsContent({ initialProjects, sectionPrefix, hidePadding = false }: ProjectsContentProps) {
   const { isAdmin } = useAdmin();
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -114,18 +116,23 @@ export default function ProjectsContent({ initialProjects }: ProjectsContentProp
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 py-20">
-      <header className="text-center mb-12 relative">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-text-primaryLight dark:text-text-primaryDark">
+    <div className={`w-full ${hidePadding ? '' : 'max-w-5xl mx-auto px-6 py-20'}`}>
+      <header className="text-center mb-10 relative">
+        {sectionPrefix && (
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-code block mb-1">
+            {sectionPrefix}
+          </span>
+        )}
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">
           Featured Projects &amp; Demos
-        </h1>
-        <p className="text-text-secondaryLight dark:text-text-secondaryDark text-base max-w-2xl mx-auto leading-relaxed">
+        </h2>
+        <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed">
           A showcase of AI systems, LLM agents, SaaS applications, computer vision models, and web tools built by Vandan Patel.
         </p>
 
         {/* Admin Add Button (Only when Admin) */}
         {isAdmin && (
-          <div className="mt-6 flex justify-center">
+          <div className="mt-4 flex justify-center">
             <button
               onClick={handleOpenAdd}
               className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer"
