@@ -11,6 +11,7 @@ const navItems = [
   { label: 'Stack', path: '#stack', id: 'stack', isRoute: false },
   { label: 'Projects', path: '#projects', id: 'projects', isRoute: false },
   { label: 'Explore', path: '/explore', id: 'explore', isRoute: true },
+  { label: 'Beyond Code', path: '/beyond-coding', id: 'beyond-coding', isRoute: true },
   { label: 'About', path: '#about', id: 'about', isRoute: false },
   { label: 'Blog', path: '#blog', id: 'blog', isRoute: false },
   { label: 'Contact', path: '#contact', id: 'contact', isRoute: false },

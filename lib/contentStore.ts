@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import clientPromise from './mongodb';
 import { explorations as defaultExplorations } from '@/data/explorations';
+import { BeyondCodingData } from '@/types/portfolio';
 
 const getDataFilePath = (fileName: string) => path.join(process.cwd(), 'data', fileName);
 
@@ -117,3 +118,12 @@ export async function getExplorationsData() {
 export async function saveExplorationsData(data: any[]) {
   return saveCollectionData<any[]>('explorations', 'explorations_config', 'explorations.json', data);
 }
+
+// --- BEYOND CODING ---
+export async function getBeyondCodingData(): Promise<BeyondCodingData> {
+  return loadCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', 'beyondCoding.json');
+}
+export async function saveBeyondCodingData(data: BeyondCodingData) {
+  return saveCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', 'beyondCoding.json', data);
+}
+

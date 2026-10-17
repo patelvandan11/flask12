@@ -71,3 +71,44 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
+
+export interface QuoteItem {
+  id: string;
+  quote: string;
+  author: string;
+  source?: string;
+  category: 'AI Engineering' | 'Deep Learning' | 'Machine Learning' | 'Philosophy' | 'Mindset' | 'Creativity' | 'Tech & Life' | 'Growth' | 'Art';
+  colorTheme?: 'indigo' | 'purple' | 'amber' | 'emerald' | 'rose' | 'sky';
+  bgImage?: string;
+  noteImage?: string;
+  pinned?: boolean;
+  tags: string[];
+}
+
+export interface BookItem {
+  id: string;
+  title: string;
+  author: string;
+  coverImage?: string;
+  notesImage?: string;
+  status: 'Currently Reading' | 'Completed' | 'Favorite' | 'Want to Read';
+  rating: number;
+  keyTakeaway: string;
+  favoriteQuote?: string;
+  genre: string;
+  yearRead?: string;
+}
+
+export interface PersonalStats {
+  booksReadThisYear: number;
+  yearlyGoal: number;
+  favoriteCategory: string;
+  mindsetQuote: string;
+}
+
+export interface BeyondCodingData {
+  quotes: QuoteItem[];
+  books: BookItem[];
+  personalStats?: PersonalStats;
+}
+

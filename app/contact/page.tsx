@@ -1,6 +1,6 @@
 import React from 'react';
 import resumeData from '@/data/resume.json';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, BookOpen } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Github, Linkedin, BookOpen, Code2 } from 'lucide-react';
 
 export const metadata = {
   title: 'Contact | Vandan Patel',
@@ -82,6 +82,9 @@ export default function ContactPage() {
               </a>
               <a href={resumeData.links.linkedin} target="_blank" rel="noopener noreferrer" className={socialLinkClasses} title="LinkedIn">
                 <Linkedin size={16} />
+              </a>
+              <a href={resumeData.links.leetcode} target="_blank" rel="noopener noreferrer" className={socialLinkClasses} title="LeetCode">
+                <Code2 size={16} />
               </a>
               <a href={resumeData.links.medium} target="_blank" rel="noopener noreferrer" className={socialLinkClasses} title="Medium">
                 <BookOpen size={16} />

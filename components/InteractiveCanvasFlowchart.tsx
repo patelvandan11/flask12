@@ -439,18 +439,10 @@ export default function InteractiveCanvasFlowchart({
               {data.mode === 'complex-canvas' ? 'Interactive Node Canvas' : 'Sequential Pipeline'}
             </span>
 
-            {isAdmin ? (
+            {isAdmin && (
               <span className="text-[0.65rem] font-bold font-code uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
                 <Lock size={11} /> Admin Mode (Editable)
               </span>
-            ) : (
-              <button
-                type="button"
-                onClick={onRequireAdminLogin}
-                className="text-[0.65rem] font-bold font-code uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <Lock size={11} /> Visitor View (Click for Admin)
-              </button>
             )}
           </div>
 

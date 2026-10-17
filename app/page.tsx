@@ -30,6 +30,7 @@ import {
   Calendar,
   User,
   BookOpen,
+  Sparkles,
 } from 'lucide-react';
 
 import ProjectsContent from '@/components/ProjectsContent';
@@ -122,6 +123,17 @@ export default function HomePage() {
               >
                 <BookOpen size={14} /> Hashnode ↗
               </a>
+              <a
+                href={resumeData.links.leetcode}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cyber-btn-secondary text-xs px-4 py-2"
+              >
+                <Code2 size={14} /> LeetCode ↗
+              </a>
+              <Link href="/beyond-coding" className="cyber-btn-secondary text-xs px-4 py-2">
+                <Sparkles size={14} /> Beyond Code ✨
+              </Link>
               <a href="#contact" className="cyber-btn-secondary text-xs px-4 py-2">
                 <Send size={14} /> Contact →
               </a>
@@ -242,6 +254,14 @@ export default function HomePage() {
                   className="cyber-btn-secondary w-full text-xs !py-2 !justify-start hover:border-sky-300 dark:hover:border-sky-600"
                 >
                   <Linkedin size={13} className="text-sky-600 dark:text-sky-400" /> LinkedIn Profile ↗
+                </a>
+                <a
+                  href={resumeData.links.leetcode}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cyber-btn-secondary w-full text-xs !py-2 !justify-start hover:border-amber-300 dark:hover:border-amber-600"
+                >
+                  <Code2 size={13} className="text-amber-600 dark:text-amber-400" /> LeetCode Profile ↗
                 </a>
                 <a
                   href={resumeData.links.medium}
@@ -640,6 +660,15 @@ export default function HomePage() {
                   title="LinkedIn"
                 >
                   <Linkedin size={15} />
+                </a>
+                <a
+                  href={resumeData.links.leetcode}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={socialLinkClasses}
+                  title="LeetCode"
+                >
+                  <Code2 size={15} />
                 </a>
               </div>
             </div>

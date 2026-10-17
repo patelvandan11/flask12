@@ -75,6 +75,19 @@ async function seedMongo() {
     );
     console.log('🎉 Initialized resume in MongoDB Atlas!');
 
+    // 6. Beyond Coding
+    if (fs.existsSync(path.join(process.cwd(), 'data', 'beyondCoding.json'))) {
+      const beyondData = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), 'data', 'beyondCoding.json'), 'utf-8')
+      );
+      await db.collection('beyond_coding').updateOne(
+        { _id: 'beyond_config' },
+        { $set: { data: beyondData, updatedAt: new Date() } },
+        { upsert: true }
+      );
+      console.log('🎉 Initialized beyond_coding in MongoDB Atlas!');
+    }
+
     console.log('✅ ALL JSON datasets successfully seeded to MongoDB Atlas!');
   } catch (err) {
     console.error('❌ MongoDB Atlas Seeding Error:', err);
