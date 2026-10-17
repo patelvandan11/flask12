@@ -130,9 +130,57 @@ export interface PersonalStats {
   mindsetQuote: string;
 }
 
+export type PlannerSticker =
+  | 'sun'
+  | 'smiley'
+  | 'sparkle'
+  | 'coffee'
+  | 'cat'
+  | 'flower'
+  | 'pizza'
+  | 'camera'
+  | 'art'
+  | 'heart'
+  | 'plant'
+  | 'pin'
+  | 'tape'
+  | 'star'
+  | 'custom';
+
+export interface PlannerMemory {
+  id: string;
+  year: number;
+  month: number; // 1 - 12
+  day: number; // 1 - 31
+  title: string;
+  note?: string;
+  imageUrl?: string;
+  sticker?: PlannerSticker | string;
+  stickerText?: string;
+  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender';
+  location?: string;
+  mood?: string;
+  pinned?: boolean;
+}
+
+export interface MonthScrapbook {
+  month: number;
+  name: string;
+  fullSpanishName: string;
+  fullEnglishName: string;
+  coverImages: string[];
+  vibeText?: string;
+  stickers: string[];
+}
+
 export interface BeyondCodingData {
-  quotes: QuoteItem[];
-  books: BookItem[];
+  year: number;
+  title: string;
+  subtitle: string;
+  memories: PlannerMemory[];
+  months: MonthScrapbook[];
+  quotes?: QuoteItem[];
+  books?: BookItem[];
   personalStats?: PersonalStats;
 }
 
