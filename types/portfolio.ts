@@ -91,6 +91,37 @@ export interface ResumeData {
   links: Links;
 }
 
+export const EMPTY_RESUME: ResumeData = {
+  name: 'Vandan Patel',
+  title: 'AI Engineer & Full-Stack Developer',
+  email: 'vandan11patel@gmail.com',
+  phone: '+91 8849767223',
+  location: 'Ahmedabad, India',
+  degree: 'B.Tech in Information Technology',
+  institution: 'CHARUSAT',
+  graduation_year: '2026',
+  cgpa: '8.76',
+  summary: '',
+  hero_bio: '',
+  about_bio: '',
+  hero_badges: [],
+  soft_skills: [],
+  hobbies: [],
+  core_stack_overview: { ai_ml: '', data: '', backend: '' },
+  stack_section: { ai_ml: [], data: [], backend: [], infra: [] },
+  technical_skills: { programming_languages: [], frameworks: [], ai_ml_libraries: [] },
+  work_experience: [],
+  featured_projects: [],
+  links: {
+    github: 'https://github.com/patelvandan11',
+    linkedin: 'https://linkedin.com/in/vandan-patel11',
+    medium: 'https://medium.com/@vandanpatel',
+    kaggle: 'https://kaggle.com/vandanpatel',
+    leetcode: 'https://leetcode.com/u/vandanpatel11/',
+    instagram: 'https://instagram.com/vandan_patel',
+  },
+};
+
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;

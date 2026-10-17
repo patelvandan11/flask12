@@ -12,7 +12,7 @@ try {
 
 const uri = 'mongodb+srv://meivaninfo_db_user:uZh6Ml7pWgfBUPxL@portfolio.lonyqkm.mongodb.net/portfolio_db?retryWrites=true&w=majority&appName=portfolio';
 
-async function seedMongo() {
+async function checkOrSeedMongo() {
   const client = new MongoClient(uri);
   try {
     console.log('Connecting to Live MongoDB Atlas...');
@@ -20,80 +20,42 @@ async function seedMongo() {
     console.log('✅ Connected to Live MongoDB Atlas successfully!');
     const db = client.db('portfolio_db');
 
-    // 1. Flowcharts
-    const flowchartsData = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), 'data', 'flowcharts.json'), 'utf-8')
-    );
-    await db.collection('flowcharts').updateOne(
-      { _id: 'flowcharts_config' },
-      { $set: { data: flowchartsData, updatedAt: new Date() } },
-      { upsert: true }
-    );
-    console.log('🎉 Initialized flowcharts in MongoDB Atlas!');
+    const collections = [
+      { name: 'flowcharts', id: 'flowcharts_config', file: 'flowcharts.json' },
+      { name: 'art', id: 'art_config', file: 'art.json' },
+      { name: 'blogs', id: 'blog_config', file: 'blog.json' },
+      { name: 'projects', id: 'projects_config', file: 'projects.json' },
+      { name: 'resume', id: 'resume_config', file: 'resume.json' },
+      { name: 'beyond_coding', id: 'beyond_config', file: 'beyondCoding.json' },
+      { name: 'explorations', id: 'explorations_config', file: 'explorations.json' },
+    ];
 
-    // 2. Art
-    const artData = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), 'data', 'art.json'), 'utf-8')
-    );
-    await db.collection('art').updateOne(
-      { _id: 'art_config' },
-      { $set: { data: artData, updatedAt: new Date() } },
-      { upsert: true }
-    );
-    console.log('🎉 Initialized art in MongoDB Atlas!');
-
-    // 3. Blog
-    const blogData = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), 'data', 'blog.json'), 'utf-8')
-    );
-    await db.collection('blogs').updateOne(
-      { _id: 'blog_config' },
-      { $set: { data: blogData, updatedAt: new Date() } },
-      { upsert: true }
-    );
-    console.log('🎉 Initialized blogs in MongoDB Atlas!');
-
-    // 4. Projects
-    const projectsData = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), 'data', 'projects.json'), 'utf-8')
-    );
-    await db.collection('projects').updateOne(
-      { _id: 'projects_config' },
-      { $set: { data: projectsData, updatedAt: new Date() } },
-      { upsert: true }
-    );
-    console.log('🎉 Initialized projects in MongoDB Atlas!');
-
-    // 5. Resume
-    const resumeData = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), 'data', 'resume.json'), 'utf-8')
-    );
-    await db.collection('resume').updateOne(
-      { _id: 'resume_config' },
-      { $set: { data: resumeData, updatedAt: new Date() } },
-      { upsert: true }
-    );
-    console.log('🎉 Initialized resume in MongoDB Atlas!');
-
-    // 6. Beyond Coding
-    if (fs.existsSync(path.join(process.cwd(), 'data', 'beyondCoding.json'))) {
-      const beyondData = JSON.parse(
-        fs.readFileSync(path.join(process.cwd(), 'data', 'beyondCoding.json'), 'utf-8')
-      );
-      await db.collection('beyond_coding').updateOne(
-        { _id: 'beyond_config' },
-        { $set: { data: beyondData, updatedAt: new Date() } },
-        { upsert: true }
-      );
-      console.log('🎉 Initialized beyond_coding in MongoDB Atlas!');
+    for (const col of collections) {
+      const filePath = path.join(process.cwd(), 'data', col.file);
+      if (fs.existsSync(filePath)) {
+        const fileContent = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+        await db.collection(col.name).updateOne(
+          { _id: col.id },
+          { $set: { data: fileContent, updatedAt: new Date() } },
+          { upsert: true }
+        );
+        console.log(`🎉 Seeded ${col.name} from local ${col.file} to MongoDB Atlas!`);
+      } else {
+        const existing = await db.collection(col.name).findOne({ _id: col.id });
+        if (existing && existing.data) {
+          console.log(`✅ Live MongoDB Atlas has active collection [${col.name}] (pure MongoDB mode)`);
+        } else {
+          console.log(`ℹ️ [${col.name}] in MongoDB Atlas ready for writes.`);
+        }
+      }
     }
 
-    console.log('✅ ALL JSON datasets successfully seeded to MongoDB Atlas!');
+    console.log('✅ MongoDB Atlas verification complete! Running purely on MongoDB.');
   } catch (err) {
-    console.error('❌ MongoDB Atlas Seeding Error:', err);
+    console.error('❌ MongoDB Atlas Error:', err);
   } finally {
     await client.close();
   }
 }
 
-seedMongo();
+checkOrSeedMongo();

@@ -1,20 +1,14 @@
-import fs from 'fs/promises';
-import path from 'path';
 import clientPromise from './mongodb';
 import { explorations as defaultExplorations } from '@/data/explorations';
 import { BeyondCodingData } from '@/types/portfolio';
 
-const getDataFilePath = (fileName: string) => path.join(process.cwd(), 'data', fileName);
-
-// Generic loader for any collection
-async function loadCollectionData<T>(
+// Generic loader for any collection from MongoDB
+export async function loadCollectionData<T>(
   collectionName: string,
   configId: string,
-  jsonFileName: string,
   defaultFallback?: T
 ): Promise<T> {
-  // 1. Live MongoDB Database
-  if (process.env.MONGODB_URI && clientPromise) {
+  if (clientPromise) {
     try {
       const client = await clientPromise;
       const dbName = process.env.MONGODB_DB || 'portfolio_db';
@@ -29,29 +23,16 @@ async function loadCollectionData<T>(
     }
   }
 
-  // 2. Fallback to local data/*.json or provided default
-  try {
-    const filePath = getDataFilePath(jsonFileName);
-    const content = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(content) as T;
-  } catch (err) {
-    if (defaultFallback) return defaultFallback;
-    console.error(`Error reading local ${jsonFileName}:`, err);
-    throw err;
-  }
+  return (defaultFallback ?? ([] as unknown as T)) as T;
 }
 
-// Generic saver for any collection
-async function saveCollectionData<T>(
+// Generic saver for any collection to MongoDB
+export async function saveCollectionData<T>(
   collectionName: string,
   configId: string,
-  jsonFileName: string,
   newData: T
 ): Promise<{ success: boolean; provider: string }> {
-  let activeProvider = 'memory';
-
-  // 1. Live MongoDB Database
-  if (process.env.MONGODB_URI && clientPromise) {
+  if (clientPromise) {
     try {
       const client = await clientPromise;
       const dbName = process.env.MONGODB_DB || 'portfolio_db';
@@ -63,67 +44,64 @@ async function saveCollectionData<T>(
       );
       return { success: true, provider: 'Live MongoDB Database' };
     } catch (err) {
-      console.warn(`MongoDB save error for ${collectionName}:`, err);
+      console.error(`MongoDB save error for ${collectionName}:`, err);
+      throw err;
     }
   }
 
-  // 2. Local File Save fallback
-  try {
-    const filePath = getDataFilePath(jsonFileName);
-    await fs.writeFile(filePath, JSON.stringify(newData, null, 2), 'utf-8');
-    activeProvider = 'Local File';
-  } catch (err) {
-    console.warn(`Local fs write skipped for ${jsonFileName} (serverless environment)`);
-  }
-
-  return { success: true, provider: activeProvider };
+  return { success: false, provider: 'MongoDB not connected' };
 }
 
 // --- ART ---
 export async function getArtData() {
-  return loadCollectionData<any[]>('art', 'art_config', 'art.json');
+  return loadCollectionData<any[]>('art', 'art_config', []);
 }
 export async function saveArtData(data: any[]) {
-  return saveCollectionData<any[]>('art', 'art_config', 'art.json', data);
+  return saveCollectionData<any[]>('art', 'art_config', data);
 }
 
 // --- BLOG ---
 export async function getBlogData() {
-  return loadCollectionData<any[]>('blogs', 'blog_config', 'blog.json');
+  return loadCollectionData<any[]>('blogs', 'blog_config', []);
 }
 export async function saveBlogData(data: any[]) {
-  return saveCollectionData<any[]>('blogs', 'blog_config', 'blog.json', data);
+  return saveCollectionData<any[]>('blogs', 'blog_config', data);
 }
 
 // --- PROJECTS ---
 export async function getProjectsData() {
-  return loadCollectionData<any[]>('projects', 'projects_config', 'projects.json');
+  return loadCollectionData<any[]>('projects', 'projects_config', []);
 }
 export async function saveProjectsData(data: any[]) {
-  return saveCollectionData<any[]>('projects', 'projects_config', 'projects.json', data);
+  return saveCollectionData<any[]>('projects', 'projects_config', data);
 }
 
 // --- RESUME ---
 export async function getResumeData() {
-  return loadCollectionData<Record<string, any>>('resume', 'resume_config', 'resume.json');
+  return loadCollectionData<Record<string, any>>('resume', 'resume_config', {});
 }
 export async function saveResumeData(data: Record<string, any>) {
-  return saveCollectionData<Record<string, any>>('resume', 'resume_config', 'resume.json', data);
+  return saveCollectionData<Record<string, any>>('resume', 'resume_config', data);
 }
 
 // --- EXPLORATIONS / EXPLORE PAGE ---
 export async function getExplorationsData() {
-  return loadCollectionData<any[]>('explorations', 'explorations_config', 'explorations.json', defaultExplorations);
+  return loadCollectionData<any[]>('explorations', 'explorations_config', defaultExplorations);
 }
 export async function saveExplorationsData(data: any[]) {
-  return saveCollectionData<any[]>('explorations', 'explorations_config', 'explorations.json', data);
+  return saveCollectionData<any[]>('explorations', 'explorations_config', data);
 }
 
 // --- BEYOND CODING ---
 export async function getBeyondCodingData(): Promise<BeyondCodingData> {
-  return loadCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', 'beyondCoding.json');
+  return loadCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', {
+    year: 2026,
+    title: 'Beyond Coding — Digital Scrapbook & Planner',
+    subtitle: 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys beyond software engineering.',
+    months: [],
+    memories: [],
+  });
 }
 export async function saveBeyondCodingData(data: BeyondCodingData) {
-  return saveCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', 'beyondCoding.json', data);
+  return saveCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', data);
 }
-

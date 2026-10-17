@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ResumeData, WorkExperience, StackSection, TechnicalSkills } from '@/types/portfolio';
-import defaultResumeData from '@/data/resume.json';
+import { ResumeData, WorkExperience, StackSection, TechnicalSkills, EMPTY_RESUME } from '@/types/portfolio';
 
 export function useResumeData(initialData?: ResumeData) {
-  const [resume, setResume] = useState<ResumeData>(initialData || (defaultResumeData as unknown as ResumeData));
+  const [resume, setResume] = useState<ResumeData>(initialData || EMPTY_RESUME);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

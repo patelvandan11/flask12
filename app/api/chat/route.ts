@@ -1,23 +1,25 @@
 import { NextResponse } from 'next/server';
-import resumeData from '@/data/resume.json';
+import { getResumeData } from '@/lib/contentStore';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const userMessages = body.messages || [];
 
+    const resumeData = await getResumeData();
+
     const apiKey = (process.env.OPENAI_API_KEY || '').trim();
 
     const systemPrompt = `You are Vandan Patel's personal AI Assistant embedded on his portfolio website.
 Your goal is to represent Vandan Patel and answer questions from recruiters, engineers, and site visitors about Vandan's experience, skills, projects, education, articles, and contact info.
 
-Here is Vandan Patel's official structured profile data from resume.json:
+Here is Vandan Patel's official structured profile data from MongoDB:
 ${JSON.stringify(resumeData, null, 2)}
 
 Guidelines:
 - Be friendly, professional, articulate, and concise.
 - Answer accurately based strictly on Vandan's profile data.
-- If asked how to contact Vandan, provide email (${resumeData.email}) and phone (${resumeData.phone}).
+- If asked how to contact Vandan, provide email (${resumeData.email || 'vandan11patel@gmail.com'}) and phone (${resumeData.phone || '+91 8849767223'}).
 - If asked about projects, highlight key innovations like Meivan SaaS, AI Research Assistant, Market Intelligence Agent, and DeepFake Detection.
 - Format responses nicely with markdown list items or bold text where appropriate.`;
 
@@ -51,13 +53,13 @@ Guidelines:
       } else {
         const errorText = await resp.text();
         const lastUserMsg = userMessages.length > 0 ? userMessages[userMessages.length - 1].content : '';
-        const reply = generateLocalResponse(lastUserMsg, errorText);
+        const reply = generateLocalResponse(lastUserMsg, resumeData, errorText);
         return NextResponse.json({ reply, source: 'fallback', api_error: errorText });
       }
     }
 
     const lastUserMsg = userMessages.length > 0 ? userMessages[userMessages.length - 1].content : '';
-    const reply = generateLocalResponse(lastUserMsg);
+    const reply = generateLocalResponse(lastUserMsg, resumeData);
     return NextResponse.json({ reply, source: 'local_assistant' });
   } catch (error: unknown) {
     const errMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -65,7 +67,7 @@ Guidelines:
   }
 }
 
-function generateLocalResponse(query: string, apiErr?: string): string {
+function generateLocalResponse(query: string, resumeData: Record<string, any>, apiErr?: string): string {
   const q = (query || '').toLowerCase();
   let prefix = '';
   if (apiErr) {
@@ -99,12 +101,12 @@ function generateLocalResponse(query: string, apiErr?: string): string {
   } else if (/contact|email|phone|reach|hire|linkedin/.test(q)) {
     return (
       prefix +
-      `**Contact Vandan Patel:**\n- **Email:** [${resumeData.email}](mailto:${resumeData.email})\n- **Phone:** ${resumeData.phone}\n- **Location:** ${resumeData.location}\n- **LinkedIn:** [LinkedIn Profile](${resumeData.links?.linkedin})`
+      `**Contact Vandan Patel:**\n- **Email:** [${resumeData.email || 'vandan11patel@gmail.com'}](mailto:${resumeData.email || 'vandan11patel@gmail.com'})\n- **Phone:** ${resumeData.phone || '+91 8849767223'}\n- **Location:** ${resumeData.location || 'Ahmedabad, India'}\n- **LinkedIn:** [LinkedIn Profile](${resumeData.links?.linkedin || 'https://linkedin.com/in/vandan-patel11'})`
     );
   } else if (/education|degree|cgpa|college|university|gpa/.test(q)) {
     return (
       prefix +
-      `**Education:**\n- **${resumeData.degree}**\n- **Institution:** ${resumeData.institution}\n- **Graduation:** ${resumeData.graduation_year}\n- **CGPA:** ${resumeData.cgpa}`
+      `**Education:**\n- **${resumeData.degree || 'B.Tech in Information Technology'}**\n- **Institution:** ${resumeData.institution || 'CHARUSAT'}\n- **Graduation:** ${resumeData.graduation_year || '2026'}\n- **CGPA:** ${resumeData.cgpa || '8.76'}`
     );
   } else {
     return (

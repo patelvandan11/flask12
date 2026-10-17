@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAdmin } from './AdminContext';
-import { ResumeData, WorkExperience, TechnicalSkills } from '@/types/portfolio';
-import defaultResumeData from '@/data/resume.json';
+import { ResumeData, WorkExperience, TechnicalSkills, EMPTY_RESUME } from '@/types/portfolio';
 import {
   Mail,
   Phone,
@@ -35,7 +34,7 @@ export default function AboutContent({
   isStandalonePage = true,
 }: AboutContentProps) {
   const { isAdmin } = useAdmin();
-  const [resume, setResume] = useState<ResumeData>(initialResume || (defaultResumeData as unknown as ResumeData));
+  const [resume, setResume] = useState<ResumeData>(initialResume || EMPTY_RESUME);
   const [isSaving, setIsSaving] = useState(false);
 
   // Modals
