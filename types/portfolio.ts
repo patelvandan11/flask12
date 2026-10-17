@@ -189,7 +189,7 @@ export interface PlannerMemory {
   images?: string[]; // Multiple photos support for 2s slideshow
   sticker?: PlannerSticker | string;
   stickerText?: string;
-  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender';
+  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach';
   location?: string;
   mood?: string;
   pinned?: boolean;

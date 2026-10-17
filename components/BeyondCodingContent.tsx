@@ -50,24 +50,60 @@ const DAYS_HEADER_ES = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
 const DAYS_HEADER_EN = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 const STICKER_ICONS: Record<string, string> = {
-  sun: '☀️',
-  smiley: '😊',
-  sparkle: '✨',
+  flower: '🌸',
   coffee: '☕',
-  cat: '🐱',
-  flower: '🌺',
-  pizza: '🍕',
-  camera: '📷',
-  art: '🎨',
+  sparkle: '✨',
   heart: '💛',
+  cat: '🐱',
+  sun: '☀️',
   plant: '🌿',
+  croissant: '🥐',
+  art: '🎨',
+  camera: '📷',
+  pizza: '🍕',
+  star: '⭐',
+  letter: '💌',
+  music: '🎧',
+  book: '📖',
+  candle: '🕯️',
+  cake: '🧁',
+  travel: '✈️',
   pin: '📌',
   tape: '🏷️',
-  star: '⭐',
+  smiley: '😊',
+  hibiscus: '🌺',
+  tea: '🍵',
+  rainbow: '🌈',
+};
+
+const resolveStickerIcon = (stickerKey?: string): string => {
+  if (!stickerKey) return '✨';
+  if (STICKER_ICONS[stickerKey]) return STICKER_ICONS[stickerKey];
+  return stickerKey;
+};
+
+const getWashiTapeClass = (color?: string) => {
+  switch (color) {
+    case 'pink':
+      return 'washi-pattern-pink';
+    case 'mint':
+      return 'washi-pattern-mint';
+    case 'lavender':
+      return 'washi-pattern-lavender';
+    case 'kraft':
+      return 'washi-pattern-kraft';
+    case 'sky':
+      return 'washi-pattern-sky';
+    case 'peach':
+      return 'washi-pattern-peach';
+    case 'gold':
+    default:
+      return 'washi-pattern-gold';
+  }
 };
 
 export default function BeyondCodingContent({ initialData }: BeyondCodingContentProps) {
-  const { isAdmin } = useAdmin();
+  const { isAdmin, openAdminModal } = useAdmin();
   const [data, setData] = useState<BeyondCodingData>(initialData || {
     year: 2026,
     title: 'Beyond Coding — Digital Scrapbook & Planner',
@@ -101,9 +137,18 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [newImageUrlInput, setNewImageUrlInput] = useState<string>('');
   const [formSticker, setFormSticker] = useState<string>('sparkle');
   const [formStickerText, setFormStickerText] = useState<string>('');
-  const [formTapeColor, setFormTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender'>('gold');
+  const [formTapeColor, setFormTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach'>('gold');
   const [formLocation, setFormLocation] = useState<string>('');
   const [formMood, setFormMood] = useState<string>('Joyful');
+
+  // Dedicated Sticker & Washi Tape Studio State
+  const [isStickerStudioOpen, setIsStickerStudioOpen] = useState<boolean>(false);
+  const [stickerStudioMonth, setStickerStudioMonth] = useState<number>(12);
+  const [stickerStudioDay, setStickerStudioDay] = useState<number>(1);
+  const [stickerStudioTapeColor, setStickerStudioTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach'>('pink');
+  const [stickerStudioChoice, setStickerStudioChoice] = useState<string>('flower');
+  const [stickerStudioText, setStickerStudioText] = useState<string>('cozy moments 🌸');
+  const [stickerStudioNote, setStickerStudioNote] = useState<string>('');
 
   const plannerSheetRef = useRef<HTMLDivElement>(null);
 
@@ -334,6 +379,76 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     }
   };
 
+  const openStickerStudio = (preselectedSticker?: string, preselectedDay?: number) => {
+    setStickerStudioMonth(selectedMonth);
+    const dayToUse = preselectedDay || 1;
+    setStickerStudioDay(dayToUse);
+    if (preselectedSticker) {
+      setStickerStudioChoice(preselectedSticker);
+      if (preselectedSticker === 'flower' || preselectedSticker === '🌸') setStickerStudioText('cherry blossom vibes 🌸');
+      else if (preselectedSticker === 'coffee' || preselectedSticker === '☕') setStickerStudioText('cozy coffee time ☕');
+      else if (preselectedSticker === 'sparkle' || preselectedSticker === '✨') setStickerStudioText('magical day ✨');
+      else if (preselectedSticker === 'heart' || preselectedSticker === '💛') setStickerStudioText('happy heart 💛');
+      else if (preselectedSticker === 'cat' || preselectedSticker === '🐱') setStickerStudioText('kitty naps 🐱');
+      else if (preselectedSticker === 'croissant' || preselectedSticker === '🥐') setStickerStudioText('bakery treats 🥐');
+      else if (preselectedSticker === 'art' || preselectedSticker === '🎨') setStickerStudioText('art afternoon 🎨');
+    }
+    setIsStickerStudioOpen(true);
+  };
+
+  const handleSaveStickerStudio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin) {
+      alert('Please log in with admin privileges to save stickers to MongoDB Atlas.');
+      openAdminModal();
+      return;
+    }
+
+    const cleanText = stickerStudioText.trim();
+    const cleanNote = stickerStudioNote.trim();
+
+    let updatedList = [...(data.memories || [])];
+    const existingIndex = updatedList.findIndex(
+      (m) => m.month === stickerStudioMonth && m.day === stickerStudioDay && (m.year === selectedYear || !m.year)
+    );
+
+    if (existingIndex >= 0) {
+      // Merge into existing memory
+      updatedList[existingIndex] = {
+        ...updatedList[existingIndex],
+        sticker: stickerStudioChoice,
+        stickerText: cleanText || updatedList[existingIndex].stickerText,
+        tapeColor: stickerStudioTapeColor,
+        note: cleanNote || updatedList[existingIndex].note,
+      };
+    } else {
+      const newMemory: PlannerMemory = {
+        id: `sticker-${Date.now()}`,
+        year: selectedYear,
+        month: stickerStudioMonth,
+        day: stickerStudioDay,
+        title: cleanText || `${stickerStudioChoice} sticker`,
+        note: cleanNote || undefined,
+        sticker: stickerStudioChoice,
+        stickerText: cleanText || undefined,
+        tapeColor: stickerStudioTapeColor,
+        mood: 'Cozy',
+      };
+      updatedList.push(newMemory);
+    }
+
+    const updatedData: BeyondCodingData = {
+      ...data,
+      memories: updatedList,
+    };
+
+    const ok = await saveToMongoDB(updatedData);
+    if (ok) {
+      setIsStickerStudioOpen(false);
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+    }
+  };
+
   const handleDeleteMemory = async (id: string) => {
     if (!confirm('Remove this memory from the planner?')) return;
     const updatedList = (data.memories || []).filter((m) => m.id !== id);
@@ -388,11 +503,60 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
         .font-signature {
           font-family: 'Homemade Apple', cursive;
         }
+        .washi-pattern-gold {
+          background-color: #fef08a;
+          background-image: radial-gradient(#d97706 14%, transparent 15%);
+          background-size: 6px 6px;
+          border-left: 2px dashed rgba(217, 119, 6, 0.4);
+          border-right: 2px dashed rgba(217, 119, 6, 0.4);
+        }
+        .washi-pattern-pink {
+          background-color: #fbcfe8;
+          background-image: repeating-linear-gradient(45deg, rgba(236, 72, 153, 0.18), rgba(236, 72, 153, 0.18) 4px, transparent 4px, transparent 8px);
+          border-left: 2px dashed rgba(236, 72, 153, 0.4);
+          border-right: 2px dashed rgba(236, 72, 153, 0.4);
+        }
+        .washi-pattern-mint {
+          background-color: #a7f3d0;
+          background-image: linear-gradient(rgba(5, 150, 105, 0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(5, 150, 105, 0.18) 1px, transparent 1px);
+          background-size: 6px 6px;
+          border-left: 2px dashed rgba(5, 150, 105, 0.4);
+          border-right: 2px dashed rgba(5, 150, 105, 0.4);
+        }
+        .washi-pattern-lavender {
+          background-color: #e9d5ff;
+          background-image: repeating-linear-gradient(-45deg, rgba(147, 51, 234, 0.18), rgba(147, 51, 234, 0.18) 5px, transparent 5px, transparent 10px);
+          border-left: 2px dashed rgba(147, 51, 234, 0.4);
+          border-right: 2px dashed rgba(147, 51, 234, 0.4);
+        }
+        .washi-pattern-kraft {
+          background-color: #fed7aa;
+          background-image: repeating-linear-gradient(0deg, rgba(180, 83, 9, 0.15), rgba(180, 83, 9, 0.15) 2px, transparent 2px, transparent 5px);
+          border-left: 2px dashed rgba(180, 83, 9, 0.4);
+          border-right: 2px dashed rgba(180, 83, 9, 0.4);
+        }
+        .washi-pattern-sky {
+          background-color: #bae6fd;
+          background-image: radial-gradient(rgba(2, 132, 199, 0.2) 15%, transparent 16%);
+          background-size: 7px 7px;
+          border-left: 2px dashed rgba(2, 132, 199, 0.4);
+          border-right: 2px dashed rgba(2, 132, 199, 0.4);
+        }
+        .washi-pattern-peach {
+          background-color: #ffedd5;
+          background-image: repeating-linear-gradient(45deg, rgba(234, 88, 12, 0.18), rgba(234, 88, 12, 0.18) 4px, transparent 4px, transparent 8px);
+          border-left: 2px dashed rgba(234, 88, 12, 0.4);
+          border-right: 2px dashed rgba(234, 88, 12, 0.4);
+        }
       `}</style>
 
       <div className="max-w-7xl mx-auto relative z-10 space-y-6">
         {/* Top Floating Control Bar with Tagline View */}
-        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-2.5">
+        <div className="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-2.5">
+          {/* Authentic Washi Tape Accents Taped on Top Bar */}
+          <div className="absolute -top-3 left-10 w-16 sm:w-20 h-4 washi-pattern-pink rotate-[-3deg] shadow-xs rounded-xs pointer-events-none opacity-90 z-20" />
+          <div className="absolute -top-3 right-16 sm:right-28 w-16 sm:w-20 h-4 washi-pattern-gold rotate-[4deg] shadow-xs rounded-xs pointer-events-none opacity-90 z-20" />
+
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
@@ -428,16 +592,83 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
               </button>
 
-              {/* Admin Add Button */}
+              {/* Admin Add Memory Button */}
               {isAdmin && (
                 <button
                   onClick={() => openAddMemoryModal(1)}
                   className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <Plus size={14} />
-                  <span>Add Memory / Sticker (MongoDB)</span>
+                  <span>Add Memory / Photo (MongoDB)</span>
                 </button>
               )}
+
+              {/* Dedicated Add Stickers / Washi Tape Button */}
+              <button
+                type="button"
+                onClick={() => openStickerStudio()}
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-400 to-pink-500 hover:from-amber-600 hover:to-pink-600 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm hover:shadow transition-all cursor-pointer"
+                title="Add Stickers & Washi Tape to Planner (MongoDB Atlas)"
+              >
+                <Sparkles size={14} className="text-amber-100 animate-pulse" />
+                <span>+ Add Stickers / Washi Tape</span>
+              </button>
+
+              {/* Creative Washi Tape & Sticker Accents for Creative Scrapbook Feelings */}
+              <div className="flex items-center gap-1.5 pl-1.5 py-0.5 border-l border-slate-200/80 dark:border-slate-700/80">
+                <div
+                  onClick={() => openStickerStudio()}
+                  className="px-2 py-0.5 rounded-sm washi-pattern-mint rotate-[-2deg] text-[0.68rem] font-handwriting font-bold text-emerald-950 shadow-2xs flex items-center gap-1 select-none cursor-pointer hover:rotate-0 hover:scale-105 transition-all"
+                  title="Washi Tape Studio"
+                >
+                  <span>🏷️</span>
+                  <span>washi</span>
+                </div>
+                <div className="flex items-center -space-x-1 select-none" title="Click any sticker to stamp on planner">
+                  <span
+                    onClick={() => openStickerStudio('flower')}
+                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                    title="Cherry Blossom Sticker (🌸)"
+                  >
+                    🌸
+                  </span>
+                  <span
+                    onClick={() => openStickerStudio('coffee')}
+                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                    title="Warm Coffee Sticker (☕)"
+                  >
+                    ☕
+                  </span>
+                  <span
+                    onClick={() => openStickerStudio('sparkle')}
+                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                    title="Magic Sparkle Sticker (✨)"
+                  >
+                    ✨
+                  </span>
+                  <span
+                    onClick={() => openStickerStudio('heart')}
+                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                    title="Cozy Heart Sticker (💛)"
+                  >
+                    💛
+                  </span>
+                  <span
+                    onClick={() => openStickerStudio('cat')}
+                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                    title="Cute Kitty Sticker (🐱)"
+                  >
+                    🐱
+                  </span>
+                  <span
+                    onClick={() => openStickerStudio('croissant')}
+                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                    title="Bakery Croissant Sticker (🥐)"
+                  >
+                    🥐
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -769,25 +1000,39 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
                                 {/* Washi Tape on Photo */}
                                 <div
-                                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 sm:w-6 h-1.5 rounded-xs opacity-85 shadow-2xs z-10 pointer-events-none ${
-                                    primaryMem.tapeColor === 'pink'
-                                      ? 'bg-pink-300'
-                                      : primaryMem.tapeColor === 'mint'
-                                      ? 'bg-emerald-300'
-                                      : primaryMem.tapeColor === 'lavender'
-                                      ? 'bg-purple-300'
-                                      : primaryMem.tapeColor === 'kraft'
-                                      ? 'bg-amber-400'
-                                      : 'bg-yellow-300'
-                                  }`}
+                                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-2 rounded-xs opacity-90 shadow-2xs z-10 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)}`}
                                 />
+
+                                {/* Floating Sticker Accent on Photo */}
+                                {primaryMem.sticker && (
+                                  <div className="absolute -bottom-1 -right-1 text-sm sm:text-base select-none filter drop-shadow-xs rotate-[6deg] z-20">
+                                    {resolveStickerIcon(primaryMem.sticker)}
+                                  </div>
+                                )}
                               </div>
-                            ) : null}
+                            ) : (
+                              /* Pure Washi Tape + Sticker when no photo */
+                              <div className="w-full flex-1 flex flex-col items-center justify-center p-0.5 relative">
+                                {/* Washi Tape Strip at top of cell */}
+                                {primaryMem.tapeColor && (
+                                  <div
+                                    className={`w-10 sm:w-14 h-2.5 sm:h-3 rounded-xs shadow-2xs rotate-[-2deg] mb-1 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)}`}
+                                  />
+                                )}
+
+                                {/* Cozy Sticker Emoji */}
+                                {primaryMem.sticker && (
+                                  <div className="text-xl sm:text-2xl select-none filter drop-shadow-xs rotate-[3deg] hover:scale-115 transition-transform my-0.5">
+                                    {resolveStickerIcon(primaryMem.sticker)}
+                                  </div>
+                                )}
+                              </div>
+                            )}
 
                             {/* Handwritten Note / Doodle Sticker Text */}
                             {primaryMem.stickerText ? (
                               <span
-                                className={`text-[0.65rem] sm:text-xs font-handwriting font-bold leading-none text-center mt-0.5 line-clamp-1 ${
+                                className={`text-[0.62rem] sm:text-xs font-handwriting font-bold leading-none text-center mt-0.5 line-clamp-1 px-0.5 ${
                                   primaryMem.stickerText.includes('happy')
                                     ? 'text-rose-600 font-extrabold text-xs sm:text-sm'
                                     : primaryMem.stickerText.includes('mudanza')
@@ -797,13 +1042,6 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                               >
                                 {primaryMem.stickerText}
                               </span>
-                            ) : null}
-
-                            {/* Sticker Emoji */}
-                            {primaryMem.sticker && !hasPhotos && !primaryMem.stickerText ? (
-                              <div className="text-xl sm:text-2xl select-none filter drop-shadow-xs rotate-[4deg]">
-                                {STICKER_ICONS[primaryMem.sticker] || '✨'}
-                              </div>
                             ) : null}
                           </div>
                         )}
@@ -1213,11 +1451,13 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     onChange={(e) => setFormTapeColor(e.target.value as any)}
                     className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-sans"
                   >
-                    <option value="gold">Yellow / Gold Washi</option>
-                    <option value="pink">Pink Pastel Tape</option>
-                    <option value="mint">Mint Green Tape</option>
-                    <option value="kraft">Kraft Brown Paper Tape</option>
-                    <option value="lavender">Lavender Tape</option>
+                    <option value="gold">Yellow / Gold Shimmer Washi</option>
+                    <option value="pink">Sakura Pink Floral Tape</option>
+                    <option value="mint">Sage Mint Grid Tape</option>
+                    <option value="lavender">Lavender Pastel Tape</option>
+                    <option value="kraft">Kraft Vintage Paper Tape</option>
+                    <option value="sky">Sky Blue Clouds Tape</option>
+                    <option value="peach">Warm Peach Polka Tape</option>
                   </select>
                 </div>
 
@@ -1237,7 +1477,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1248,6 +1488,256 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 >
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   <span>Save to MongoDB Atlas</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* COZY STICKERS & WASHI TAPE STUDIO MODAL                   */}
+      {/* ========================================================= */}
+      {isStickerStudioOpen && (
+        <div className="fixed inset-0 z-[4700] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl bg-[#fdfbf7] dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl p-5 sm:p-7 space-y-4 border border-amber-900/20 dark:border-slate-800 max-h-[92vh] overflow-y-auto rotate-[-0.5deg]">
+            {/* Top Washi Tapes Taped on Studio Modal */}
+            <div className="absolute -top-3 left-10 w-20 h-4 washi-pattern-pink rotate-[-3deg] shadow-xs rounded-xs pointer-events-none opacity-90" />
+            <div className="absolute -top-3 right-16 w-20 h-4 washi-pattern-gold rotate-[4deg] shadow-xs rounded-xs pointer-events-none opacity-90" />
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-amber-900/15 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🏷️</span>
+                <div>
+                  <h3 className="text-base font-bold font-planner-title text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    Cozy Stickers & Washi Tape Studio
+                    <span className="text-amber-500 font-normal text-xs font-handwriting">✨ aesthetic</span>
+                  </h3>
+                  <p className="text-xs font-handwriting text-slate-500 dark:text-slate-400">
+                    Stamp cozy washi tapes, stickers & handwritten doodle notes onto any day
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsStickerStudioOpen(false)}
+                className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveStickerStudio} className="space-y-4 text-xs">
+              {/* Date Selection */}
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-amber-50/50 dark:bg-slate-800/50 border border-amber-900/10 dark:border-slate-800">
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1 font-planner-title">
+                    Planner Month
+                  </label>
+                  <select
+                    value={stickerStudioMonth}
+                    onChange={(e) => setStickerStudioMonth(Number(e.target.value))}
+                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-sans cursor-pointer"
+                  >
+                    {MONTH_NAMES_EN.map((m, idx) => (
+                      <option key={idx} value={idx + 1}>
+                        {idx + 1} - {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1 font-planner-title">
+                    Day (1 - 31)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={31}
+                    required
+                    value={stickerStudioDay}
+                    onChange={(e) => setStickerStudioDay(Number(e.target.value))}
+                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-code font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* 1. Washi Tape Style Palette */}
+              <div>
+                <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1.5 font-planner-title flex items-center justify-between">
+                  <span>1. Choose Washi Tape Pattern</span>
+                  <span className="text-[0.68rem] font-handwriting text-amber-700 dark:text-amber-400">
+                    authentic stationery tape textures
+                  </span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: 'gold', name: 'Gold Dots', class: 'washi-pattern-gold' },
+                    { id: 'pink', name: 'Sakura Pink', class: 'washi-pattern-pink' },
+                    { id: 'mint', name: 'Sage Grid', class: 'washi-pattern-mint' },
+                    { id: 'lavender', name: 'Lavender', class: 'washi-pattern-lavender' },
+                    { id: 'kraft', name: 'Kraft Paper', class: 'washi-pattern-kraft' },
+                    { id: 'sky', name: 'Sky Clouds', class: 'washi-pattern-sky' },
+                    { id: 'peach', name: 'Peach Polka', class: 'washi-pattern-peach' },
+                  ].map((tape) => (
+                    <button
+                      key={tape.id}
+                      type="button"
+                      onClick={() => setStickerStudioTapeColor(tape.id as any)}
+                      className={`p-2 rounded-xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                        stickerStudioTapeColor === tape.id
+                          ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 ring-2 ring-amber-400/50 shadow-sm'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-amber-300'
+                      }`}
+                    >
+                      <div className={`w-full h-4 rounded-xs shadow-2xs ${tape.class}`} />
+                      <span className="text-[0.65rem] font-code font-bold text-slate-700 dark:text-slate-300">
+                        {tape.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Cozy Stickers Collection Picker */}
+              <div>
+                <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1.5 font-planner-title flex items-center justify-between">
+                  <span>2. Pick Cute Scrapbook Sticker</span>
+                  <span className="text-[0.68rem] font-handwriting text-amber-700 dark:text-amber-400">
+                    tap any icon to stamp
+                  </span>
+                </label>
+                <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 p-2.5 rounded-2xl bg-amber-50/40 dark:bg-slate-800/40 border border-amber-900/10 dark:border-slate-800 max-h-36 overflow-y-auto">
+                  {Object.entries(STICKER_ICONS).map(([key, icon]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setStickerStudioChoice(key);
+                        if (!stickerStudioText || stickerStudioText === 'cozy moments 🌸') {
+                          if (key === 'coffee') setStickerStudioText('cozy coffee time ☕');
+                          else if (key === 'flower') setStickerStudioText('cherry blossom vibes 🌸');
+                          else if (key === 'sparkle') setStickerStudioText('magical day ✨');
+                          else if (key === 'heart') setStickerStudioText('happy heart 💛');
+                          else if (key === 'cat') setStickerStudioText('kitty naps 🐱');
+                          else if (key === 'croissant') setStickerStudioText('bakery treats 🥐');
+                          else if (key === 'art') setStickerStudioText('art afternoon 🎨');
+                          else if (key === 'music') setStickerStudioText('lo-fi tunes 🎧');
+                          else if (key === 'book') setStickerStudioText('reading journal 📖');
+                        }
+                      }}
+                      className={`h-11 rounded-xl flex items-center justify-center text-2xl transition-all cursor-pointer ${
+                        stickerStudioChoice === key
+                          ? 'bg-amber-200 dark:bg-amber-900/80 scale-110 shadow-sm ring-2 ring-amber-400'
+                          : 'bg-white dark:bg-slate-800 hover:scale-105 hover:bg-amber-100/50'
+                      }`}
+                      title={`${key} sticker`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Handwritten Note / Doodle Caption */}
+              <div>
+                <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1 font-planner-title">
+                  3. Handwritten Sticker Text / Doodle Note
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. coffee morning ☕, happy moments ✨, mudanza!!, art day 🎨"
+                  value={stickerStudioText}
+                  onChange={(e) => setStickerStudioText(e.target.value)}
+                  className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-handwriting text-base"
+                />
+
+                {/* Quick Inspiration Pills */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {[
+                    'cozy coffee ☕',
+                    'happy moments ✨',
+                    'cherry blossom 🌸',
+                    'reading & tea 📖',
+                    'art afternoon 🎨',
+                    'sunset walk 🌅',
+                    'sweet croissant 🥐',
+                    'lo-fi beats 🎧',
+                    'finals done! 🎓',
+                  ].map((phrase) => (
+                    <button
+                      key={phrase}
+                      type="button"
+                      onClick={() => setStickerStudioText(phrase)}
+                      className="px-2.5 py-0.5 rounded-full bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-handwriting text-xs transition-colors cursor-pointer"
+                    >
+                      {phrase}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. Optional Longer Journal Story */}
+              <div>
+                <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1 font-planner-title">
+                  Optional Journal Story / Memory Note
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="What made this day cozy or special?"
+                  value={stickerStudioNote}
+                  onChange={(e) => setStickerStudioNote(e.target.value)}
+                  className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-sans"
+                />
+              </div>
+
+              {/* 5. Live Scrapbook Cell Preview */}
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-800/80 border border-amber-900/15 dark:border-slate-700 space-y-1.5 text-center">
+                <span className="text-[0.65rem] font-code font-bold uppercase tracking-wider text-slate-400">
+                  ✦ Live Scrapbook Cell Preview ✦
+                </span>
+                <div className="w-28 sm:w-36 h-24 mx-auto bg-[#fdfbf7] dark:bg-slate-900 rounded-xl p-2 border border-amber-900/20 shadow-xs flex flex-col items-center justify-between relative rotate-[-1deg]">
+                  {/* Washi Tape Strip */}
+                  <div
+                    className={`w-14 h-2.5 rounded-xs shadow-2xs rotate-[-1deg] ${getWashiTapeClass(
+                      stickerStudioTapeColor
+                    )}`}
+                  />
+
+                  {/* Sticker Emoji */}
+                  <div className="text-3xl select-none filter drop-shadow-xs rotate-[3deg] my-0.5">
+                    {resolveStickerIcon(stickerStudioChoice)}
+                  </div>
+
+                  {/* Handwritten Text */}
+                  <span className="text-xs font-handwriting font-bold leading-tight line-clamp-1 text-slate-800 dark:text-slate-100">
+                    {stickerStudioText || 'cozy moment ✨'}
+                  </span>
+
+                  <span className="absolute bottom-1 right-1.5 text-[0.55rem] font-code font-bold text-slate-400">
+                    {stickerStudioMonth}/{stickerStudioDay}
+                  </span>
+                </div>
+              </div>
+
+              {/* Submit / Action Buttons */}
+              <div className="pt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsStickerStudioOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 hover:from-amber-600 hover:to-pink-600 text-white font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                  <span>{isAdmin ? 'Save to Planner (MongoDB Atlas)' : 'Log in as Admin to Save'}</span>
                 </button>
               </div>
             </form>
