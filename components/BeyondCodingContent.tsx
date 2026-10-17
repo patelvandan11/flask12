@@ -592,83 +592,86 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
               </button>
 
-              {/* Admin Add Memory Button */}
+              {/* Admin-Only Features: Add Memory, Add Stickers & Washi Tape */}
               {isAdmin && (
-                <button
-                  onClick={() => openAddMemoryModal(1)}
-                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                >
-                  <Plus size={14} />
-                  <span>Add Memory / Photo (MongoDB)</span>
-                </button>
+                <>
+                  {/* Admin Add Memory Button */}
+                  <button
+                    onClick={() => openAddMemoryModal(1)}
+                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Add Memory / Photo (MongoDB)</span>
+                  </button>
+
+                  {/* Dedicated Add Stickers / Washi Tape Button (Admin Only) */}
+                  <button
+                    type="button"
+                    onClick={() => openStickerStudio()}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-400 to-pink-500 hover:from-amber-600 hover:to-pink-600 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm hover:shadow transition-all cursor-pointer"
+                    title="Add Stickers & Washi Tape to Planner (MongoDB Atlas)"
+                  >
+                    <Sparkles size={14} className="text-amber-100 animate-pulse" />
+                    <span>+ Add Stickers / Washi Tape</span>
+                  </button>
+
+                  {/* Creative Washi Tape & Sticker Accents for Creative Scrapbook Feelings (Admin Only) */}
+                  <div className="flex items-center gap-1.5 pl-1.5 py-0.5 border-l border-slate-200/80 dark:border-slate-700/80">
+                    <div
+                      onClick={() => openStickerStudio()}
+                      className="px-2 py-0.5 rounded-sm washi-pattern-mint rotate-[-2deg] text-[0.68rem] font-handwriting font-bold text-emerald-950 shadow-2xs flex items-center gap-1 select-none cursor-pointer hover:rotate-0 hover:scale-105 transition-all"
+                      title="Washi Tape Studio"
+                    >
+                      <span>🏷️</span>
+                      <span>washi</span>
+                    </div>
+                    <div className="flex items-center -space-x-1 select-none" title="Click any sticker to stamp on planner">
+                      <span
+                        onClick={() => openStickerStudio('flower')}
+                        className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                        title="Cherry Blossom Sticker (🌸)"
+                      >
+                        🌸
+                      </span>
+                      <span
+                        onClick={() => openStickerStudio('coffee')}
+                        className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                        title="Warm Coffee Sticker (☕)"
+                      >
+                        ☕
+                      </span>
+                      <span
+                        onClick={() => openStickerStudio('sparkle')}
+                        className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                        title="Magic Sparkle Sticker (✨)"
+                      >
+                        ✨
+                      </span>
+                      <span
+                        onClick={() => openStickerStudio('heart')}
+                        className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                        title="Cozy Heart Sticker (💛)"
+                      >
+                        💛
+                      </span>
+                      <span
+                        onClick={() => openStickerStudio('cat')}
+                        className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                        title="Cute Kitty Sticker (🐱)"
+                      >
+                        🐱
+                      </span>
+                      <span
+                        onClick={() => openStickerStudio('croissant')}
+                        className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
+                        title="Bakery Croissant Sticker (🥐)"
+                      >
+                        🥐
+                      </span>
+                    </div>
+                  </div>
+                </>
               )}
-
-              {/* Dedicated Add Stickers / Washi Tape Button */}
-              <button
-                type="button"
-                onClick={() => openStickerStudio()}
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-400 to-pink-500 hover:from-amber-600 hover:to-pink-600 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm hover:shadow transition-all cursor-pointer"
-                title="Add Stickers & Washi Tape to Planner (MongoDB Atlas)"
-              >
-                <Sparkles size={14} className="text-amber-100 animate-pulse" />
-                <span>+ Add Stickers / Washi Tape</span>
-              </button>
-
-              {/* Creative Washi Tape & Sticker Accents for Creative Scrapbook Feelings */}
-              <div className="flex items-center gap-1.5 pl-1.5 py-0.5 border-l border-slate-200/80 dark:border-slate-700/80">
-                <div
-                  onClick={() => openStickerStudio()}
-                  className="px-2 py-0.5 rounded-sm washi-pattern-mint rotate-[-2deg] text-[0.68rem] font-handwriting font-bold text-emerald-950 shadow-2xs flex items-center gap-1 select-none cursor-pointer hover:rotate-0 hover:scale-105 transition-all"
-                  title="Washi Tape Studio"
-                >
-                  <span>🏷️</span>
-                  <span>washi</span>
-                </div>
-                <div className="flex items-center -space-x-1 select-none" title="Click any sticker to stamp on planner">
-                  <span
-                    onClick={() => openStickerStudio('flower')}
-                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
-                    title="Cherry Blossom Sticker (🌸)"
-                  >
-                    🌸
-                  </span>
-                  <span
-                    onClick={() => openStickerStudio('coffee')}
-                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
-                    title="Warm Coffee Sticker (☕)"
-                  >
-                    ☕
-                  </span>
-                  <span
-                    onClick={() => openStickerStudio('sparkle')}
-                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
-                    title="Magic Sparkle Sticker (✨)"
-                  >
-                    ✨
-                  </span>
-                  <span
-                    onClick={() => openStickerStudio('heart')}
-                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
-                    title="Cozy Heart Sticker (💛)"
-                  >
-                    💛
-                  </span>
-                  <span
-                    onClick={() => openStickerStudio('cat')}
-                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
-                    title="Cute Kitty Sticker (🐱)"
-                  >
-                    🐱
-                  </span>
-                  <span
-                    onClick={() => openStickerStudio('croissant')}
-                    className="text-base hover:scale-130 transition-transform cursor-pointer drop-shadow-xs"
-                    title="Bakery Croissant Sticker (🥐)"
-                  >
-                    🥐
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -1496,9 +1499,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       )}
 
       {/* ========================================================= */}
-      {/* COZY STICKERS & WASHI TAPE STUDIO MODAL                   */}
+      {/* COZY STICKERS & WASHI TAPE STUDIO MODAL (ADMIN ONLY)     */}
       {/* ========================================================= */}
-      {isStickerStudioOpen && (
+      {isAdmin && isStickerStudioOpen && (
         <div className="fixed inset-0 z-[4700] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-xl bg-[#fdfbf7] dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl p-5 sm:p-7 space-y-4 border border-amber-900/20 dark:border-slate-800 max-h-[92vh] overflow-y-auto rotate-[-0.5deg]">
             {/* Top Washi Tapes Taped on Studio Modal */}
