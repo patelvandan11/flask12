@@ -48,6 +48,19 @@ export interface Links {
   instagram: string;
 }
 
+export interface StackSection {
+  ai_ml: string[];
+  data: string[];
+  backend: string[];
+  infra: string[];
+}
+
+export interface CoreStackOverview {
+  ai_ml: string;
+  data: string;
+  backend: string;
+}
+
 export interface ResumeData {
   name: string;
   title: string;
@@ -58,6 +71,17 @@ export interface ResumeData {
   institution: string;
   graduation_year: string;
   cgpa: string;
+  summary?: string;
+  hero_bio?: string;
+  hero_badges?: string[];
+  projects_count?: string;
+  projects_count_label?: string;
+  metric_badge?: string;
+  core_stack_overview?: CoreStackOverview;
+  stack_section?: StackSection;
+  soft_skills?: string[];
+  hobbies?: string[];
+  about_bio?: string;
   technical_skills: TechnicalSkills;
   work_experience: WorkExperience[];
   featured_projects: Array<{

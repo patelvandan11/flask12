@@ -750,7 +750,31 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
                 <span>Delete / Manage Explore</span>
               </button>
 
-              {/* 5. FLOWCHARTS */}
+              {/* 5. PROFILE & RESUME */}
+              <button
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  router.push('/about');
+                }}
+                className="w-full px-3 py-2 rounded-xl text-left text-slate-200 hover:text-white hover:bg-cyan-600/60 font-semibold flex items-center gap-2.5 transition-all cursor-pointer"
+              >
+                <Sparkles size={14} className="text-cyan-400 shrink-0" />
+                <span>Manage Profile &amp; Experience</span>
+              </button>
+
+              {/* 6. TECH STACK */}
+              <button
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  router.push('/#stack');
+                }}
+                className="w-full px-3 py-2 rounded-xl text-left text-slate-200 hover:text-white hover:bg-indigo-600/60 font-semibold flex items-center gap-2.5 transition-all cursor-pointer"
+              >
+                <Layers size={14} className="text-indigo-400 shrink-0" />
+                <span>Manage Tech Stack</span>
+              </button>
+
+              {/* 7. FLOWCHARTS */}
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);

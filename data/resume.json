@@ -9,6 +9,75 @@
   "institution": "A.D. Patel Institute of Technology",
   "graduation_year": "Aug 2022 - May 2026",
   "summary": "AI & Data Science graduate passionate about building intelligent solutions using Deep Learning, Generative AI, Machine Learning, and Data Analytics. Experienced in developing AI-powered chatbots, RAG systems, AI agents, computer vision applications, and full-stack AI solutions.",
+  "hero_bio": "Building intelligent applications with LLMs, RAG pipelines, AI agents, and computer vision. Software engineer focused on building commercial AI systems and scalable web architecture.",
+  "hero_badges": [
+    "LangChain",
+    "FastAPI",
+    "OpenAI API",
+    "React.js / Next.js",
+    "PyTorch",
+    "ChromaDB",
+    "OpenCV",
+    "Docker"
+  ],
+  "projects_count": "2+",
+  "projects_count_label": "Production & Research Projects",
+  "metric_badge": "RAG • Agents • Vision",
+  "core_stack_overview": {
+    "ai_ml": "PyTorch, TensorFlow, LangChain, LangGraph, scikit-learn",
+    "data": "ChromaDB, Qdrant, FAISS, PostgreSQL, MongoDB",
+    "backend": "Python, FastAPI, Docker, Microservices, REST APIs"
+  },
+  "stack_section": {
+    "ai_ml": [
+      "PyTorch",
+      "TensorFlow",
+      "LangChain",
+      "LangGraph",
+      "scikit-learn",
+      "XGBoost",
+      "OpenCV",
+      "HuggingFace"
+    ],
+    "data": [
+      "PostgreSQL",
+      "MongoDB",
+      "Neo4j graph",
+      "Qdrant",
+      "ChromaDB",
+      "FAISS",
+      "Pandas / NumPy"
+    ],
+    "backend": [
+      "Python",
+      "FastAPI",
+      "Flask / Django",
+      "REST / ORM",
+      "Microservices",
+      "JavaScript / TS",
+      "React / Next.js"
+    ],
+    "infra": [
+      "Docker",
+      "Kubernetes",
+      "AWS",
+      "Databricks",
+      "Supabase",
+      "Git / GitHub",
+      "Postman / FastMCP"
+    ]
+  },
+  "soft_skills": [
+    "Critical Thinking",
+    "Problem Solving",
+    "Creative Thinking"
+  ],
+  "hobbies": [
+    "Tech Exploration",
+    "Painting & Digital Art",
+    "Storytelling"
+  ],
+  "about_bio": "Graduate in Artificial Intelligence & Data Science from A.D. Patel Institute of Technology. Experienced in LLM applications, RAG pipelines, and deep learning.",
   "links": {
     "github": "https://github.com/patelvandan11",
     "linkedin": "https://www.linkedin.com/in/patelvandan11",
@@ -35,9 +104,33 @@
     }
   ],
   "technical_skills": {
-    "programming_languages": ["Python", "JavaScript", "C++", "Java"],
-    "frameworks": ["React.js", "FastAPI", "Flask", "Streamlit"],
-    "ai_ml_libraries": ["LangChain", "LangGraph", "OpenAI API", "PyTorch", "TensorFlow", "Keras", "OpenCV", "HuggingFace", "ChromaDB", "FastMCP", "Pydantic", "Selenium", "NLTK"]
+    "programming_languages": [
+      "Python",
+      "JavaScript",
+      "C++",
+      "Java"
+    ],
+    "frameworks": [
+      "React.js",
+      "FastAPI",
+      "Flask",
+      "Streamlit"
+    ],
+    "ai_ml_libraries": [
+      "LangChain",
+      "LangGraph",
+      "OpenAI API",
+      "PyTorch",
+      "TensorFlow",
+      "Keras",
+      "OpenCV",
+      "HuggingFace",
+      "ChromaDB",
+      "FastMCP",
+      "Pydantic",
+      "Selenium",
+      "NLTK"
+    ]
   },
   "featured_projects": [
     {
