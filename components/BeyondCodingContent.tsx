@@ -27,6 +27,9 @@ import {
   Volume2,
   VolumeX,
   Languages,
+  Play,
+  Pause,
+  Layers,
 } from 'lucide-react';
 
 interface BeyondCodingContentProps {
@@ -78,6 +81,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [language, setLanguage] = useState<'es' | 'en'>('es'); // Default to Spanish to match screenshot
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [selectedMemory, setSelectedMemory] = useState<PlannerMemory | null>(null);
+  const [lightboxPhotoIndex, setLightboxPhotoIndex] = useState<number>(0);
+  const [isLightboxSlideshowPlaying, setIsLightboxSlideshowPlaying] = useState<boolean>(true);
+  const [slideTick, setSlideTick] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -91,6 +97,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [formTitle, setFormTitle] = useState<string>('');
   const [formNote, setFormNote] = useState<string>('');
   const [formImageUrl, setFormImageUrl] = useState<string>('');
+  const [formImages, setFormImages] = useState<string[]>([]);
+  const [newImageUrlInput, setNewImageUrlInput] = useState<string>('');
   const [formSticker, setFormSticker] = useState<string>('sparkle');
   const [formStickerText, setFormStickerText] = useState<string>('');
   const [formTapeColor, setFormTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender'>('gold');
@@ -98,6 +106,34 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [formMood, setFormMood] = useState<string>('Joyful');
 
   const plannerSheetRef = useRef<HTMLDivElement>(null);
+
+  // Global 2-second slideshow ticker for days with multiple photos
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideTick((t) => t + 1);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Lightbox 2-second slideshow ticker
+  useEffect(() => {
+    if (!selectedMemory || !isLightboxSlideshowPlaying) return;
+    const photos: string[] = [];
+    if (selectedMemory.images && Array.isArray(selectedMemory.images)) {
+      selectedMemory.images.forEach((img) => {
+        if (img && !photos.includes(img)) photos.push(img);
+      });
+    }
+    if (selectedMemory.imageUrl && !photos.includes(selectedMemory.imageUrl)) {
+      photos.push(selectedMemory.imageUrl);
+    }
+    if (photos.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setLightboxPhotoIndex((prev) => (prev + 1) % photos.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [selectedMemory, isLightboxSlideshowPlaying]);
 
   useEffect(() => {
     fetchPlannerData();
@@ -201,6 +237,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     const memories = monthMemoriesMap.get(dayNumber);
     if (memories && memories.length > 0) {
       setSelectedMemory(memories[0]);
+      setLightboxPhotoIndex(0);
+      setIsLightboxSlideshowPlaying(true);
       if (memories[0].day === 31 || memories[0].stickerText?.includes('happy new year')) {
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       }
@@ -216,6 +254,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setFormTitle('');
     setFormNote('');
     setFormImageUrl('');
+    setFormImages([]);
+    setNewImageUrlInput('');
     setFormSticker('sun');
     setFormStickerText('');
     setFormTapeColor('gold');
@@ -230,7 +270,18 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setFormDay(mem.day);
     setFormTitle(mem.title || '');
     setFormNote(mem.note || '');
-    setFormImageUrl(mem.imageUrl || '');
+    const imgs: string[] = [];
+    if (mem.images && Array.isArray(mem.images)) {
+      mem.images.forEach((img) => {
+        if (img && !imgs.includes(img)) imgs.push(img);
+      });
+    }
+    if (mem.imageUrl && !imgs.includes(mem.imageUrl)) {
+      imgs.unshift(mem.imageUrl);
+    }
+    setFormImages(imgs);
+    setFormImageUrl(mem.imageUrl || imgs[0] || '');
+    setNewImageUrlInput('');
     setFormSticker(mem.sticker || 'sparkle');
     setFormStickerText(mem.stickerText || '');
     setFormTapeColor(mem.tapeColor || 'gold');
@@ -242,6 +293,11 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
   const handleSaveMemoryForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanImages = formImages.map((img) => img.trim()).filter((img) => img.length > 0);
+    if (formImageUrl.trim() && !cleanImages.includes(formImageUrl.trim())) {
+      cleanImages.unshift(formImageUrl.trim());
+    }
+
     const newMemory: PlannerMemory = {
       id: editingMemoryId || `mem-${Date.now()}`,
       year: selectedYear,
@@ -249,7 +305,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       day: formDay,
       title: formTitle.trim(),
       note: formNote.trim(),
-      imageUrl: formImageUrl.trim(),
+      imageUrl: cleanImages[0] || formImageUrl.trim() || undefined,
+      images: cleanImages.length > 0 ? cleanImages : undefined,
       sticker: formSticker,
       stickerText: formStickerText.trim(),
       tapeColor: formTapeColor,
@@ -558,13 +615,30 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     const hasMemory = dayMemories.length > 0;
                     const primaryMem = hasMemory ? dayMemories[0] : null;
 
+                    // Aggregate all photos for this day cell
+                    const dayPhotos: string[] = [];
+                    dayMemories.forEach((m) => {
+                      if (m.images && Array.isArray(m.images)) {
+                        m.images.forEach((img) => {
+                          if (img && !dayPhotos.includes(img)) dayPhotos.push(img);
+                        });
+                      }
+                      if (m.imageUrl && !dayPhotos.includes(m.imageUrl)) {
+                        dayPhotos.push(m.imageUrl);
+                      }
+                    });
+
+                    const hasPhotos = dayPhotos.length > 0;
+                    const activePhotoIndex = hasPhotos ? (slideTick % dayPhotos.length) : 0;
+                    const activePhotoUrl = hasPhotos ? dayPhotos[activePhotoIndex] : null;
+
                     return (
                       <div
                         key={idx}
                         onClick={() => {
                           if (!isBlank) handleDayClick(cell.dayNumber!);
                         }}
-                        className={`min-h-[72px] sm:min-h-[92px] md:min-h-[105px] border-r border-b border-amber-900/15 p-1 sm:p-1.5 relative transition-all duration-200 flex flex-col justify-between group ${
+                        className={`min-h-[76px] sm:min-h-[96px] md:min-h-[110px] border-r border-b border-amber-900/15 p-1 sm:p-1.5 relative transition-all duration-200 flex flex-col justify-between group ${
                           isBlank
                             ? 'bg-amber-50/20 opacity-30 select-none'
                             : 'hover:bg-amber-50/50 cursor-pointer'
@@ -597,19 +671,35 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         {!isBlank && hasMemory && primaryMem && (
                           <div className="flex-1 flex flex-col justify-center items-center my-0.5 relative group-hover:scale-103 transition-transform">
                             {/* Photo Polaroid Thumbnail if image exists */}
-                            {primaryMem.imageUrl ? (
-                              <div className="relative w-full aspect-4/3 rounded-sm overflow-hidden bg-white shadow-xs border border-amber-900/15 p-0.5 rotate-[-1deg] group-hover:rotate-0 transition-transform">
-                                <Image
-                                  src={primaryMem.imageUrl}
-                                  alt={primaryMem.title}
-                                  fill
-                                  sizes="80px"
-                                  className="object-cover rounded-xs"
-                                />
+                            {hasPhotos && activePhotoUrl ? (
+                              <div className="relative w-full h-14 sm:h-16 md:h-20 rounded-md overflow-hidden bg-white shadow-xs border border-amber-900/20 p-1 rotate-[-1deg] group-hover:rotate-0 transition-all duration-300">
+                                <div className="relative w-full h-full rounded-2xs overflow-hidden bg-slate-100">
+                                  <Image
+                                    key={activePhotoUrl}
+                                    src={activePhotoUrl}
+                                    alt={primaryMem.title || 'Planner moment'}
+                                    fill
+                                    sizes="(max-width: 640px) 70px, (max-width: 768px) 95px, 115px"
+                                    className="object-cover rounded-2xs transition-opacity duration-500 ease-in-out"
+                                  />
+                                </div>
+
+                                {/* Multi-photo 2-second Slideshow indicator badge */}
+                                {dayPhotos.length > 1 && (
+                                  <div
+                                    className="absolute bottom-1 right-1 px-1 py-0.5 rounded-xs bg-slate-900/85 backdrop-blur-xs text-[0.55rem] font-code font-bold text-white flex items-center gap-0.5 shadow-xs select-none z-10"
+                                    title="2s slideshow active"
+                                  >
+                                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                                    <span>
+                                      {activePhotoIndex + 1}/{dayPhotos.length}
+                                    </span>
+                                  </div>
+                                )}
 
                                 {/* Washi Tape on Photo */}
                                 <div
-                                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 h-1.5 rounded-xs opacity-85 shadow-2xs ${
+                                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 sm:w-6 h-1.5 rounded-xs opacity-85 shadow-2xs z-10 pointer-events-none ${
                                     primaryMem.tapeColor === 'pink'
                                       ? 'bg-pink-300'
                                       : primaryMem.tapeColor === 'mint'
@@ -640,7 +730,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                             ) : null}
 
                             {/* Sticker Emoji */}
-                            {primaryMem.sticker && !primaryMem.imageUrl && !primaryMem.stickerText ? (
+                            {primaryMem.sticker && !hasPhotos && !primaryMem.stickerText ? (
                               <div className="text-xl sm:text-2xl select-none filter drop-shadow-xs rotate-[4deg]">
                                 {STICKER_ICONS[primaryMem.sticker] || '✨'}
                               </div>
@@ -692,17 +782,109 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
             {/* Polaroid Frame */}
             <div className="p-3 bg-white rounded-2xl shadow-md border border-slate-200">
-              {selectedMemory.imageUrl ? (
-                <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-slate-100 mb-3">
-                  <Image
-                    src={selectedMemory.imageUrl}
-                    alt={selectedMemory.title}
-                    fill
-                    sizes="400px"
-                    className="object-cover"
-                  />
-                </div>
-              ) : null}
+              {(() => {
+                const modalPhotos: string[] = [];
+                if (selectedMemory.images && Array.isArray(selectedMemory.images)) {
+                  selectedMemory.images.forEach((img) => {
+                    if (img && !modalPhotos.includes(img)) modalPhotos.push(img);
+                  });
+                }
+                if (selectedMemory.imageUrl && !modalPhotos.includes(selectedMemory.imageUrl)) {
+                  modalPhotos.push(selectedMemory.imageUrl);
+                }
+                const activeModalPhoto = modalPhotos[lightboxPhotoIndex] || modalPhotos[0];
+
+                if (!activeModalPhoto) return null;
+
+                return (
+                  <div className="relative w-full h-64 sm:h-80 rounded-xl overflow-hidden bg-slate-100 mb-3 group/slide">
+                    <Image
+                      key={activeModalPhoto}
+                      src={activeModalPhoto}
+                      alt={selectedMemory.title}
+                      fill
+                      sizes="(max-width: 640px) 380px, 480px"
+                      className="object-cover transition-opacity duration-500 ease-in-out"
+                    />
+
+                    {/* Multi-photo Slideshow Controls & Badge in Lightbox */}
+                    {modalPhotos.length > 1 && (
+                      <>
+                        {/* Top-Right Badge: 2s Slideshow Status & Play/Pause */}
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-[0.68rem] font-code text-white flex items-center gap-1.5 shadow-md z-10 select-none">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              isLightboxSlideshowPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                            }`}
+                          />
+                          <span>
+                            {lightboxPhotoIndex + 1} / {modalPhotos.length}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsLightboxSlideshowPlaying(!isLightboxSlideshowPlaying);
+                            }}
+                            className="ml-1 p-0.5 text-slate-300 hover:text-white cursor-pointer transition-colors"
+                            title={isLightboxSlideshowPlaying ? 'Pause 2s slideshow' : 'Play 2s slideshow'}
+                          >
+                            {isLightboxSlideshowPlaying ? <Pause size={10} /> : <Play size={10} />}
+                          </button>
+                        </div>
+
+                        {/* Left Arrow */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxPhotoIndex(
+                              (prev) => (prev - 1 + modalPhotos.length) % modalPhotos.length
+                            );
+                          }}
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 hover:bg-white text-slate-800 flex items-center justify-center shadow-md backdrop-blur-xs transition-transform hover:scale-110 cursor-pointer z-10"
+                          title="Previous photo"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+
+                        {/* Right Arrow */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxPhotoIndex((prev) => (prev + 1) % modalPhotos.length);
+                          }}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 hover:bg-white text-slate-800 flex items-center justify-center shadow-md backdrop-blur-xs transition-transform hover:scale-110 cursor-pointer z-10"
+                          title="Next photo"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+
+                        {/* Bottom Dots Indicator */}
+                        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/60 backdrop-blur-xs z-10">
+                          {modalPhotos.map((_, pIdx) => (
+                            <button
+                              key={pIdx}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLightboxPhotoIndex(pIdx);
+                              }}
+                              className={`h-2 rounded-full transition-all cursor-pointer ${
+                                pIdx === lightboxPhotoIndex
+                                  ? 'w-5 bg-amber-400'
+                                  : 'w-2 bg-white/60 hover:bg-white'
+                              }`}
+                              title={`Photo ${pIdx + 1}`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="flex items-center justify-between text-xs font-code text-slate-500 border-b border-slate-100 pb-2 mb-2">
                 <span>
@@ -833,13 +1015,91 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 />
               </div>
 
-              {/* Image Uploader */}
-              <div>
+              {/* Image Uploader & Multi-photo Slideshow Manager */}
+              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Camera size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>Memory Photos ({formImages.length} {formImages.length === 1 ? 'photo' : 'photos'})</span>
+                  </label>
+                  {formImages.length > 1 && (
+                    <span className="text-[0.65rem] font-code px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      2s slideshow active
+                    </span>
+                  )}
+                </div>
+
+                {/* Existing Photos Thumbnails Grid */}
+                {formImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {formImages.map((imgUrl, iIdx) => (
+                      <div
+                        key={iIdx}
+                        className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group/img bg-slate-100"
+                      >
+                        <Image
+                          src={imgUrl}
+                          alt={`Photo ${iIdx + 1}`}
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const filtered = formImages.filter((_, idx) => idx !== iIdx);
+                            setFormImages(filtered);
+                            setFormImageUrl(filtered[0] || '');
+                          }}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer shadow-xs"
+                          title="Remove photo"
+                        >
+                          <X size={10} />
+                        </button>
+                        <span className="absolute bottom-0.5 left-1 text-[0.55rem] font-code font-bold text-white bg-black/60 px-1 rounded-xs">
+                          #{iIdx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload or Drop New Image */}
                 <ImageDropzone
-                  value={formImageUrl}
-                  onChange={setFormImageUrl}
-                  label="Memory Photo (Optional Polaroid Image)"
+                  value=""
+                  onChange={(uploadedUrl) => {
+                    if (uploadedUrl) {
+                      setFormImages((prev) => [...prev, uploadedUrl]);
+                      if (!formImageUrl) setFormImageUrl(uploadedUrl);
+                    }
+                  }}
+                  label="Upload / Drag New Photo to Slideshow"
                 />
+
+                {/* Or Paste Image URL */}
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL (e.g. /images/art1.jpg)"
+                    value={newImageUrlInput}
+                    onChange={(e) => setNewImageUrlInput(e.target.value)}
+                    className="flex-1 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-code"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newImageUrlInput.trim()) {
+                        setFormImages((prev) => [...prev, newImageUrlInput.trim()]);
+                        if (!formImageUrl) setFormImageUrl(newImageUrlInput.trim());
+                        setNewImageUrlInput('');
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer"
+                  >
+                    + Add URL
+                  </button>
+                </div>
               </div>
 
               {/* Sticker Text & Sticker Emoji */}

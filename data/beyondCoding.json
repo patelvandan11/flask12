@@ -121,6 +121,11 @@
       "title": "Quiet Reading & Tea",
       "note": "Starting December with warm chamomile tea and a fresh notebook.",
       "imageUrl": "/images/art2.jpg",
+      "images": [
+        "/images/art2.jpg",
+        "/images/art1.jpg",
+        "/images/art4.jpg"
+      ],
       "sticker": "coffee",
       "tapeColor": "kraft",
       "location": "Home Library",
@@ -159,6 +164,10 @@
       "title": "Semester Finals Grind",
       "note": "Late afternoon study session at the window desk. Almost done!",
       "imageUrl": "/images/karl1.jpg",
+      "images": [
+        "/images/karl1.jpg",
+        "/images/karl2.jpg"
+      ],
       "sticker": "plant",
       "stickerText": "finals, finals, finals...",
       "tapeColor": "gold",
@@ -208,6 +217,11 @@
       "title": "Golden Hour at the Lake",
       "note": "Stunning fiery orange horizon reflecting on tranquil water.",
       "imageUrl": "/images/vandan_lake.png",
+      "images": [
+        "/images/vandan_lake.png",
+        "/images/ai_trip1.jpg",
+        "/images/vandan.jpg"
+      ],
       "sticker": "camera",
       "stickerText": "golden horizon 🌅",
       "tapeColor": "pink",
@@ -235,6 +249,10 @@
       "title": "Walk through the Pine Park",
       "note": "Brisk evening stroll through the tall trees path.",
       "imageUrl": "/images/ai_trip1.jpg",
+      "images": [
+        "/images/ai_trip1.jpg",
+        "/images/ai_trip2.jpg"
+      ],
       "sticker": "tape",
       "stickerText": "SKM 🌲",
       "tapeColor": "mint",
@@ -249,6 +267,10 @@
       "title": "Cozy Puppy Cuddles",
       "note": "A sleepy puppy curled up on the fleece blanket.",
       "imageUrl": "/images/karl2.jpg",
+      "images": [
+        "/images/karl2.jpg",
+        "/images/karl1.jpg"
+      ],
       "sticker": "cat",
       "tapeColor": "gold",
       "mood": "Adoring"
@@ -285,6 +307,11 @@
       "title": "Nochebuena & Red Lanterns",
       "note": "Christmas Eve gathering, roasted chestnuts, and festive cheer with loved ones.",
       "imageUrl": "/images/ai_trip2.jpg",
+      "images": [
+        "/images/ai_trip2.jpg",
+        "/images/art6.jpg",
+        "/images/art3.jpg"
+      ],
       "sticker": "flower",
       "stickerText": "navidad 🎄✨",
       "tapeColor": "pink",
@@ -312,6 +339,10 @@
       "title": "Aesthetic Cafe Brunch",
       "note": "Sourdough avocado toast with poached eggs and iced oat milk matcha latte.",
       "imageUrl": "/images/art3.jpg",
+      "images": [
+        "/images/art3.jpg",
+        "/images/art5.jpg"
+      ],
       "sticker": "coffee",
       "stickerText": "matcha & toast 🥑🍵",
       "tapeColor": "mint",

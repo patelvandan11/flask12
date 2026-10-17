@@ -155,6 +155,7 @@ export interface PlannerMemory {
   title: string;
   note?: string;
   imageUrl?: string;
+  images?: string[]; // Multiple photos support for 2s slideshow
   sticker?: PlannerSticker | string;
   stickerText?: string;
   tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender';
