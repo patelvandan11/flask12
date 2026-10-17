@@ -212,8 +212,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     for (let d = 1; d <= totalDaysInMonth; d++) {
       days.push({ dayNumber: d, isCurrentMonth: true });
     }
-    // Trailing blanks to complete 35 or 42 grid
-    while (days.length % 7 !== 0 || days.length < 35) {
+    // Trailing blanks: ALWAYS fill to exactly 42 cells (6 full rows x 7 days)
+    // so every single month has identical 6-row geometry, height, and layout in fullscreen mode!
+    while (days.length < 42) {
       days.push({ dayNumber: null, isCurrentMonth: false });
     }
     return days;
@@ -344,23 +345,31 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setSelectedMemory(null);
   };
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   const toggleFullscreen = () => {
     if (!plannerSheetRef.current) return;
     if (!isFullscreen) {
       if (plannerSheetRef.current.requestFullscreen) {
-        plannerSheetRef.current.requestFullscreen();
+        plannerSheetRef.current.requestFullscreen().catch(() => {});
       }
       setIsFullscreen(true);
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
       }
       setIsFullscreen(false);
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f3f4f6] dark:bg-[#0c1017] text-slate-800 dark:text-slate-100 py-12 px-3 md:px-6 relative selection:bg-amber-200">
+    <div className="w-full min-h-screen bg-[#f3f4f6] dark:bg-[#0c1017] text-slate-800 dark:text-slate-100 pt-28 md:pt-32 pb-16 px-3 md:px-6 relative selection:bg-amber-200">
       {/* Bullet Journal Dot Grid Background */}
       <div className="fixed inset-0 pointer-events-none opacity-45 dark:opacity-20 bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] [background-size:22px_22px] z-0" />
 
@@ -382,39 +391,62 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       `}</style>
 
       <div className="max-w-7xl mx-auto relative z-10 space-y-6">
-        {/* Top Floating Control Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-3.5 px-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-            <h1 className="text-sm md:text-base font-bold font-planner-title tracking-wide text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <span>Beyond Coding</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/50 font-handwriting text-sm font-bold">
-                Digital Life Planner ✨
-              </span>
-            </h1>
+        {/* Top Floating Control Bar with Tagline View */}
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-base sm:text-lg font-bold font-planner-title tracking-wide text-slate-800 dark:text-slate-100">
+                  Beyond Coding
+                </h1>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/50 font-handwriting text-sm font-bold">
+                  Digital Life Planner ✨
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Language Switcher */}
+              <button
+                onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-code font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Toggle Month Names (Spanish / English)"
+              >
+                <Languages size={14} className="text-indigo-600 dark:text-indigo-400" />
+                <span>{language === 'es' ? 'ES (diciembre)' : 'EN (December)'}</span>
+              </button>
+
+              {/* Fullscreen Button */}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold font-code flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Toggle Fullscreen Mode"
+              >
+                {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
+              </button>
+
+              {/* Admin Add Button */}
+              {isAdmin && (
+                <button
+                  onClick={() => openAddMemoryModal(1)}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Add Memory / Sticker (MongoDB)</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {/* Language Switcher */}
-            <button
-              onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-code font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Toggle Month Names (Spanish / English)"
-            >
-              <Languages size={14} className="text-indigo-600 dark:text-indigo-400" />
-              <span>{language === 'es' ? 'ES (diciembre)' : 'EN (December)'}</span>
-            </button>
-
-            {/* Admin Add Button */}
-            {isAdmin && (
-              <button
-                onClick={() => openAddMemoryModal(1)}
-                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-              >
-                <Plus size={14} />
-                <span>Add Memory / Sticker (MongoDB)</span>
-              </button>
-            )}
+          {/* Cozy Tagline View */}
+          <div className="border-t border-slate-200/70 dark:border-slate-800/70 pt-2 flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs sm:text-sm font-handwriting">
+            <span className="text-amber-500 font-sans text-xs">✦</span>
+            <p className="leading-snug">
+              {data.subtitle || 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys beyond software engineering.'}
+            </p>
           </div>
         </div>
 
@@ -522,10 +554,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
           <div className="col-span-12 lg:col-span-8">
             <div
               ref={plannerSheetRef}
-              className={`relative rounded-3xl p-4 sm:p-7 md:p-9 shadow-2xl transition-all duration-300 overflow-hidden ${
+              className={`relative rounded-3xl shadow-2xl transition-all duration-300 overflow-hidden ${
                 isFullscreen
-                  ? 'fixed inset-0 z-[4000] p-6 bg-[#2d3748] flex items-center justify-center overflow-auto'
-                  : 'bg-cover bg-center'
+                  ? 'fixed inset-0 z-[4000] p-3 sm:p-5 md:p-6 bg-[#1a202c] flex items-center justify-center overflow-y-auto'
+                  : 'p-4 sm:p-7 md:p-9 bg-cover bg-center'
               }`}
               style={{
                 backgroundImage:
@@ -535,46 +567,76 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               {/* Dim Palm Trees Atmosphere Overlay */}
               <div className="absolute inset-0 bg-slate-900/25 backdrop-blur-[2px] pointer-events-none" />
 
-              {/* TROPICAL HIBISCUS FLOWERS DECORATION (Top-Right Corner like screenshot) */}
-              <div className="absolute top-2 right-4 sm:top-4 sm:right-7 z-30 select-none pointer-events-none drop-shadow-md">
-                <span className="text-4xl sm:text-5xl">🌺</span>
-                <span className="text-3xl sm:text-4xl -ml-3">🌸</span>
-              </div>
-
-              {/* VINTAGE BRASS BINDER CLIP (Top Center like screenshot) */}
-              <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center pointer-events-none select-none">
-                <div className="w-16 sm:w-20 h-5 sm:h-6 bg-gradient-to-b from-[#fcd34d] via-[#f59e0b] to-[#b45309] rounded-md shadow-lg border border-amber-600/60" />
-                <div className="w-9 h-7 border-2 border-[#b45309] rounded-t-lg -mt-3.5 bg-black/10" />
-              </div>
-
               {/* THE CREAM PAPER PLANNER SHEET */}
-              <div className="relative z-20 w-full bg-[#fdfbf7] text-slate-800 rounded-2xl shadow-2xl p-4 sm:p-7 md:p-8 border border-amber-900/10 mt-3 sm:mt-4">
+              <div
+                className={`relative z-20 w-full bg-[#fdfbf7] text-slate-800 rounded-2xl shadow-2xl border border-amber-900/15 transition-all flex flex-col justify-between ${
+                  isFullscreen
+                    ? 'max-w-6xl h-[94vh] max-h-[94vh] p-4 sm:p-6 md:p-7 mt-5 sm:mt-6'
+                    : 'p-4 sm:p-7 md:p-8 mt-3 sm:mt-4'
+                }`}
+              >
                 {/* Vintage Paper Texture Line */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-amber-900/5" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-amber-900/5 rounded-t-2xl" />
 
-                {/* Corner Washi Tape Accents */}
-                <div className="absolute -top-3 left-6 w-14 h-4 bg-[#fde68a]/90 rotate-[-4deg] shadow-xs" />
-                <div className="absolute -top-3 right-20 w-14 h-4 bg-[#fbcfe8]/90 rotate-[5deg] shadow-xs" />
+                {/* Corner Washi Tape Accents (Anchored directly to Paper Sheet) */}
+                <div className="absolute -top-3 left-6 sm:left-10 w-14 h-4 bg-[#fde68a]/90 rotate-[-4deg] shadow-xs z-30 rounded-xs pointer-events-none" />
+                <div className="absolute -top-3 right-16 sm:right-28 w-14 h-4 bg-[#fbcfe8]/90 rotate-[5deg] shadow-xs z-30 rounded-xs pointer-events-none" />
+
+                {/* TROPICAL HIBISCUS FLOWERS DECORATION (Anchored to top-right corner of Paper Sheet) */}
+                <div className="absolute -top-3.5 -right-3.5 sm:-top-4 sm:-right-4 z-40 select-none pointer-events-none drop-shadow-md">
+                  <span className="text-3xl sm:text-4xl md:text-5xl">🌺</span>
+                  <span className="text-2xl sm:text-3xl md:text-4xl -ml-2.5">🌸</span>
+                </div>
+
+                {/* VINTAGE BRASS BINDER CLIP (Anchored to top center of Paper Sheet) */}
+                <div className="absolute -top-3.5 sm:-top-4 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center pointer-events-none select-none">
+                  <div className="w-16 sm:w-20 h-5 sm:h-6 bg-gradient-to-b from-[#fcd34d] via-[#f59e0b] to-[#b45309] rounded-md shadow-lg border border-amber-600/60" />
+                  <div className="w-9 h-7 border-2 border-[#b45309] rounded-t-lg -mt-3.5 bg-black/10" />
+                </div>
 
                 {/* Sheet Header: Month Number & Month Name (e.g. "12 diciembre") */}
-                <div className="flex flex-wrap items-end justify-between border-b border-amber-900/15 pb-4 mb-4 gap-2">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-4xl sm:text-6xl font-planner-title font-extrabold text-slate-800 leading-none">
+                <div className="flex flex-wrap items-center justify-between border-b border-amber-900/15 pb-3 mb-2 gap-2 flex-shrink-0">
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-3xl sm:text-5xl font-planner-title font-extrabold text-slate-800 leading-none">
                       {String(selectedMonth).padStart(2, '0')}
                     </span>
-                    <span className="text-2xl sm:text-4xl font-handwriting font-bold text-slate-700 lowercase tracking-wide">
+                    <span className="text-2xl sm:text-3xl font-handwriting font-bold text-slate-700 lowercase tracking-wide">
                       {language === 'es'
                         ? MONTH_NAMES_ES[selectedMonth - 1]
                         : MONTH_NAMES_EN[selectedMonth - 1]}
                     </span>
+                    <span className="text-xs font-handwriting text-slate-400">
+                      ({selectedYear})
+                    </span>
                   </div>
 
                   {/* Navigation & Controls */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 relative z-20">
+                    {/* Quick Month Switcher in Fullscreen */}
+                    {isFullscreen && (
+                      <div className="hidden md:flex items-center gap-1 p-1 bg-amber-100/70 rounded-xl mr-1 shadow-2xs">
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map((mNum) => (
+                          <button
+                            key={mNum}
+                            type="button"
+                            onClick={() => setSelectedMonth(mNum)}
+                            className={`w-6 h-6 rounded-lg text-[0.68rem] font-bold font-planner-title transition-all cursor-pointer ${
+                              selectedMonth === mNum
+                                ? 'bg-amber-400 text-slate-900 shadow-xs scale-105 ring-1 ring-amber-500/40'
+                                : 'text-slate-600 hover:bg-amber-200 hover:text-slate-900'
+                            }`}
+                            title={language === 'es' ? MONTH_NAMES_ES[mNum - 1] : MONTH_NAMES_EN[mNum - 1]}
+                          >
+                            {mNum}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       onClick={prevMonth}
-                      className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                       title="Previous Month"
                     >
                       <ChevronLeft size={16} />
@@ -582,7 +644,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     <button
                       type="button"
                       onClick={nextMonth}
-                      className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                       title="Next Month"
                     >
                       <ChevronRight size={16} />
@@ -590,8 +652,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     <button
                       type="button"
                       onClick={toggleFullscreen}
-                      className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer ml-1"
-                      title="Toggle Fullscreen"
+                      className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer ml-1 shadow-xs"
+                      title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Sheet'}
                     >
                       {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                     </button>
@@ -599,7 +661,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 </div>
 
                 {/* Day of the Week Header Row (LUN, MAR, MIE...) */}
-                <div className="grid grid-cols-7 text-center font-planner-title text-[0.68rem] sm:text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-amber-900/15 pb-2 mb-1">
+                <div className="grid grid-cols-7 text-center font-planner-title text-[0.68rem] sm:text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-amber-900/15 pb-2 mb-1 flex-shrink-0">
                   {(language === 'es' ? DAYS_HEADER_ES : DAYS_HEADER_EN).map((dayName, idx) => (
                     <div key={idx} className={idx >= 5 ? 'text-amber-800 font-extrabold' : ''}>
                       {dayName}
@@ -608,7 +670,11 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 </div>
 
                 {/* CALENDAR CELLS GRID */}
-                <div className="grid grid-cols-7 border-t border-l border-amber-900/15 bg-white/40">
+                <div
+                  className={`grid grid-cols-7 border-t border-l border-amber-900/15 bg-white/40 ${
+                    isFullscreen ? 'flex-1 grid-rows-6' : ''
+                  }`}
+                >
                   {calendarDays.map((cell, idx) => {
                     const isBlank = !cell.isCurrentMonth || cell.dayNumber === null;
                     const dayMemories = !isBlank ? monthMemoriesMap.get(cell.dayNumber!) || [] : [];
@@ -638,7 +704,11 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         onClick={() => {
                           if (!isBlank) handleDayClick(cell.dayNumber!);
                         }}
-                        className={`min-h-[76px] sm:min-h-[96px] md:min-h-[110px] border-r border-b border-amber-900/15 p-1 sm:p-1.5 relative transition-all duration-200 flex flex-col justify-between group ${
+                        className={`border-r border-b border-amber-900/15 p-1 sm:p-1.5 relative transition-all duration-200 flex flex-col justify-between group ${
+                          isFullscreen
+                            ? 'h-full min-h-[60px] sm:min-h-[75px]'
+                            : 'min-h-[76px] sm:min-h-[96px] md:min-h-[110px]'
+                        } ${
                           isBlank
                             ? 'bg-amber-50/20 opacity-30 select-none'
                             : 'hover:bg-amber-50/50 cursor-pointer'
@@ -742,9 +812,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   })}
                 </div>
 
-                {/* Bottom Paper Footer with Fullscreen Expand button like screenshot */}
-                <div className="flex items-center justify-between pt-4 mt-2 border-t border-amber-900/15 text-xs text-slate-500 font-handwriting">
-                  <span className="text-base">
+                {/* Bottom Paper Footer */}
+                <div className="flex items-center justify-between pt-3 mt-1 border-t border-amber-900/15 text-xs text-slate-500 font-handwriting flex-shrink-0">
+                  <span className="text-sm sm:text-base">
                     ✦ handwritten with love &middot; {selectedYear} life moments
                   </span>
 
@@ -752,9 +822,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     type="button"
                     onClick={toggleFullscreen}
                     className="p-1.5 rounded-xl hover:bg-amber-100 text-slate-700 flex items-center gap-1 font-sans text-xs transition-colors cursor-pointer"
-                    title="Fullscreen Sheet"
+                    title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Sheet'}
                   >
-                    <Maximize2 size={16} />
+                    {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                   </button>
                 </div>
               </div>
