@@ -562,7 +562,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-base sm:text-lg font-bold font-planner-title tracking-wide text-slate-800 dark:text-slate-100">
-                  Beyond Coding
+                  Calander 
                 </h1>
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/50 font-handwriting text-sm font-bold">
                   Digital Life Planner ✨
