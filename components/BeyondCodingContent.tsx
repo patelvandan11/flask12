@@ -113,8 +113,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     memories: [],
   });
 
-  const [selectedMonth, setSelectedMonth] = useState<number>(12); // Default to December as in screenshot
-  const [selectedYear, setSelectedYear] = useState<number>(data.year || 2026);
+  // Real-time current day, month and year
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState<number>(() => data.year || new Date().getFullYear());
   const [language, setLanguage] = useState<'es' | 'en'>('es'); // Default to Spanish to match screenshot
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [selectedMemory, setSelectedMemory] = useState<PlannerMemory | null>(null);
@@ -128,9 +129,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
 
-  // Form State
-  const [formMonth, setFormMonth] = useState<number>(12);
-  const [formDay, setFormDay] = useState<number>(1);
+  // Form State (initialized to real-time current date)
+  const [formMonth, setFormMonth] = useState<number>(() => new Date().getMonth() + 1);
+  const [formDay, setFormDay] = useState<number>(() => new Date().getDate());
   const [formTitle, setFormTitle] = useState<string>('');
   const [formNote, setFormNote] = useState<string>('');
   const [formImageUrl, setFormImageUrl] = useState<string>('');
@@ -142,18 +143,18 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [formLocation, setFormLocation] = useState<string>('');
   const [formMood, setFormMood] = useState<string>('Joyful');
 
-  // Dedicated Sticker & Washi Tape Studio State
+  // Dedicated Sticker & Washi Tape Studio State (initialized to real-time date)
   const [isStickerStudioOpen, setIsStickerStudioOpen] = useState<boolean>(false);
-  const [stickerStudioMonth, setStickerStudioMonth] = useState<number>(12);
-  const [stickerStudioDay, setStickerStudioDay] = useState<number>(1);
+  const [stickerStudioMonth, setStickerStudioMonth] = useState<number>(() => new Date().getMonth() + 1);
+  const [stickerStudioDay, setStickerStudioDay] = useState<number>(() => new Date().getDate());
   const [stickerStudioTapeColor, setStickerStudioTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach'>('pink');
   const [stickerStudioChoice, setStickerStudioChoice] = useState<string>('flower');
   const [stickerStudioText, setStickerStudioText] = useState<string>('cozy moments 🌸');
   const [stickerStudioNote, setStickerStudioNote] = useState<string>('');
 
-  // Dedicated Month Cover Photo Studio State (jan - dec, 1 to 31 days memories selection)
+  // Dedicated Month Cover Photo Studio State (initialized to real-time month)
   const [isCoverModalOpen, setIsCoverModalOpen] = useState<boolean>(false);
-  const [coverModalMonth, setCoverModalMonth] = useState<number>(10);
+  const [coverModalMonth, setCoverModalMonth] = useState<number>(() => new Date().getMonth() + 1);
   const [selectedCoverUrl, setSelectedCoverUrl] = useState<string>('');
   const [customCoverUrlInput, setCustomCoverUrlInput] = useState<string>('');
   const [coverVibeText, setCoverVibeText] = useState<string>('');
@@ -190,6 +191,15 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   }, [selectedMemory, isLightboxSlideshowPlaying]);
 
   useEffect(() => {
+    // Automatically open on the current real-time month and day
+    const now = new Date();
+    setSelectedMonth(now.getMonth() + 1);
+    setSelectedYear(now.getFullYear());
+    setFormMonth(now.getMonth() + 1);
+    setFormDay(now.getDate());
+    setStickerStudioMonth(now.getMonth() + 1);
+    setStickerStudioDay(now.getDate());
+    setCoverModalMonth(now.getMonth() + 1);
     fetchPlannerData();
   }, []);
 
@@ -302,10 +312,16 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     }
   };
 
-  const openAddMemoryModal = (dayNumber: number = 1) => {
+  const openAddMemoryModal = (dayNumber?: number) => {
     setEditingMemoryId(null);
     setFormMonth(selectedMonth);
-    setFormDay(dayNumber);
+    const dayToUse =
+      dayNumber !== undefined
+        ? dayNumber
+        : selectedMonth === new Date().getMonth() + 1
+        ? new Date().getDate()
+        : 1;
+    setFormDay(dayToUse);
     setFormTitle('');
     setFormNote('');
     setFormImageUrl('');
@@ -390,7 +406,12 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
   const openStickerStudio = (preselectedSticker?: string, preselectedDay?: number) => {
     setStickerStudioMonth(selectedMonth);
-    const dayToUse = preselectedDay || 1;
+    const dayToUse =
+      preselectedDay !== undefined
+        ? preselectedDay
+        : selectedMonth === new Date().getMonth() + 1
+        ? new Date().getDate()
+        : 1;
     setStickerStudioDay(dayToUse);
     if (preselectedSticker) {
       setStickerStudioChoice(preselectedSticker);
@@ -793,7 +814,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 <>
                   {/* Admin Add Memory Button */}
                   <button
-                    onClick={() => openAddMemoryModal(1)}
+                    onClick={() => openAddMemoryModal()}
                     className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   >
                     <Plus size={14} />
@@ -940,9 +961,16 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   >
                     {/* Month Label & Action */}
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100 group-hover:text-amber-700">
-                        {m.name}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100 group-hover:text-amber-700">
+                          {m.name}
+                        </span>
+                        {m.month === (new Date().getMonth() + 1) && (
+                          <span className="text-[0.55rem] font-code px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-900 font-extrabold shadow-2xs">
+                            now
+                          </span>
+                        )}
+                      </div>
                       {isSelected ? (
                         <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
                       ) : (
@@ -1063,6 +1091,14 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       ({selectedYear})
                     </span>
 
+                    {/* Real-time Month & Day Indicator */}
+                    {selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear() && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100/90 text-emerald-800 text-[0.68rem] font-bold font-code flex items-center gap-1 border border-emerald-300 shadow-2xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Today: Day {new Date().getDate()}
+                      </span>
+                    )}
+
                     {/* Quick Month Cover Button (Only in normal view mode, hidden during fullscreen mode) */}
                     {!isFullscreen && (
                       <button
@@ -1079,6 +1115,23 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
                   {/* Navigation & Controls */}
                   <div className="flex items-center gap-1.5 relative z-20">
+                    {/* Jump to Today button if navigated away from current month */}
+                    {(selectedMonth !== new Date().getMonth() + 1 || selectedYear !== new Date().getFullYear()) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          setSelectedMonth(now.getMonth() + 1);
+                          setSelectedYear(now.getFullYear());
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-amber-200/90 hover:bg-amber-300 text-slate-800 text-[0.7rem] font-bold font-planner-title transition-colors cursor-pointer shadow-2xs flex items-center gap-1 mr-1"
+                        title="Jump back to real-time month and day"
+                      >
+                        <span className="text-amber-700">✦</span>
+                        <span>Today</span>
+                      </button>
+                    )}
+
                     {/* Quick Month Switcher in Fullscreen */}
                     {isFullscreen && (
                       <div className="hidden md:flex items-center gap-1 p-1 bg-amber-100/70 rounded-xl mr-1 shadow-2xs">
@@ -1165,6 +1218,13 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     const activePhotoIndex = hasPhotos ? (slideTick % dayPhotos.length) : 0;
                     const activePhotoUrl = hasPhotos ? dayPhotos[activePhotoIndex] : null;
 
+                    const now = new Date();
+                    const isToday =
+                      !isBlank &&
+                      cell.dayNumber === now.getDate() &&
+                      selectedMonth === now.getMonth() + 1 &&
+                      selectedYear === now.getFullYear();
+
                     return (
                       <div
                         key={idx}
@@ -1178,17 +1238,30 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         } ${
                           isBlank
                             ? 'bg-amber-50/20 opacity-30 select-none'
+                            : isToday
+                            ? 'bg-amber-100/60 hover:bg-amber-100/90 ring-2 ring-amber-500/70 ring-inset cursor-pointer shadow-xs z-10'
                             : 'hover:bg-amber-50/50 cursor-pointer'
                         }`}
                       >
                         {/* Day Number */}
                         {!isBlank && (
                           <div className="flex items-center justify-between">
-                            <span className="text-[0.65rem] sm:text-xs font-bold font-planner-title text-slate-600 group-hover:text-amber-800">
+                            <span
+                              className={`text-[0.65rem] sm:text-xs font-bold font-planner-title ${
+                                isToday
+                                  ? 'bg-amber-600 text-white px-1.5 py-0.2 rounded-full shadow-xs'
+                                  : 'text-slate-600 group-hover:text-amber-800'
+                              }`}
+                            >
                               {cell.dayNumber}
                             </span>
+                            {isToday && (
+                              <span className="text-[0.52rem] font-code font-bold text-amber-800 bg-amber-200/90 px-1 py-0.2 rounded border border-amber-400 shadow-2xs uppercase tracking-tighter">
+                                today
+                              </span>
+                            )}
                             {/* Admin Quick Add Icon on empty days */}
-                            {isAdmin && !hasMemory && (
+                            {isAdmin && !hasMemory && !isToday && (
                               <button
                                 type="button"
                                 onClick={(e) => {
