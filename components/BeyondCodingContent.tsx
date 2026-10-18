@@ -30,6 +30,7 @@ import {
   Play,
   Pause,
   Layers,
+  Check,
 } from 'lucide-react';
 
 interface BeyondCodingContentProps {
@@ -149,6 +150,14 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [stickerStudioChoice, setStickerStudioChoice] = useState<string>('flower');
   const [stickerStudioText, setStickerStudioText] = useState<string>('cozy moments 🌸');
   const [stickerStudioNote, setStickerStudioNote] = useState<string>('');
+
+  // Dedicated Month Cover Photo Studio State (jan - dec, 1 to 31 days memories selection)
+  const [isCoverModalOpen, setIsCoverModalOpen] = useState<boolean>(false);
+  const [coverModalMonth, setCoverModalMonth] = useState<number>(10);
+  const [selectedCoverUrl, setSelectedCoverUrl] = useState<string>('');
+  const [customCoverUrlInput, setCustomCoverUrlInput] = useState<string>('');
+  const [coverVibeText, setCoverVibeText] = useState<string>('');
+  const [coverStickers, setCoverStickers] = useState<string[]>([]);
 
   const plannerSheetRef = useRef<HTMLDivElement>(null);
 
@@ -460,6 +469,193 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setSelectedMemory(null);
   };
 
+  // Resolve active cover image for a month (custom cover or first uploaded photo in days 1 to 31)
+  const getMonthCoverImage = (monthNum: number): string => {
+    const existing = (data.months || []).find((m) => m.month === monthNum);
+    if (existing?.coverImages && existing.coverImages.length > 0 && existing.coverImages[0]) {
+      return existing.coverImages[0];
+    }
+    // Check if any memories uploaded in this month (days 1 to 31) have photos
+    const monthMems = (data.memories || []).filter((mem) => mem.month === monthNum);
+    for (const mem of monthMems) {
+      if (mem.imageUrl) return mem.imageUrl;
+      if (mem.images && mem.images.length > 0 && mem.images[0]) return mem.images[0];
+    }
+    return '/images/vandan_lake.png';
+  };
+
+  // Normalized 12 months array (Jan to Dec) with guaranteed cover images & metadata
+  const normalizedMonths: MonthScrapbook[] = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const monthNum = i + 1;
+      const existing = (data.months || []).find((m) => m.month === monthNum);
+      if (existing) {
+        return {
+          ...existing,
+          coverImages:
+            existing.coverImages && existing.coverImages.length > 0
+              ? existing.coverImages
+              : [getMonthCoverImage(monthNum)],
+        };
+      }
+      return {
+        month: monthNum,
+        name: MONTH_NAMES_EN[i].substring(0, 3),
+        fullSpanishName: MONTH_NAMES_ES[i],
+        fullEnglishName: MONTH_NAMES_EN[i],
+        coverImages: [getMonthCoverImage(monthNum)],
+        vibeText: 'Cozy moments',
+        stickers: ['✨', '💛'],
+      };
+    });
+  }, [data.months, data.memories]);
+
+  // Open Month Cover Photo Studio modal
+  const openEditCoverModal = (monthNum: number) => {
+    setCoverModalMonth(monthNum);
+    const cover = getMonthCoverImage(monthNum);
+    setSelectedCoverUrl(cover);
+    setCustomCoverUrlInput('');
+    const existingMonth = (data.months || []).find((m) => m.month === monthNum);
+    setCoverVibeText(existingMonth?.vibeText || '');
+    setCoverStickers(existingMonth?.stickers || ['✨', '💛']);
+    setIsCoverModalOpen(true);
+  };
+
+  const handleSwitchCoverModalMonth = (newMonth: number) => {
+    setCoverModalMonth(newMonth);
+    setSelectedCoverUrl(getMonthCoverImage(newMonth));
+    setCustomCoverUrlInput('');
+    const existingMonth = (data.months || []).find((m) => m.month === newMonth);
+    setCoverVibeText(existingMonth?.vibeText || '');
+    setCoverStickers(existingMonth?.stickers || ['✨', '💛']);
+  };
+
+  // Photos uploaded during the month being edited (days 1 to 31)
+  const modalMonthPhotos = useMemo(() => {
+    const list: { url: string; day: number; title: string; memoryId: string }[] = [];
+    (data.memories || []).forEach((mem) => {
+      if (mem.month === coverModalMonth && (mem.year === selectedYear || !mem.year)) {
+        if (mem.images && Array.isArray(mem.images)) {
+          mem.images.forEach((img) => {
+            if (img && !list.some((item) => item.url === img)) {
+              list.push({
+                url: img,
+                day: mem.day,
+                title: mem.title || `Day ${mem.day}`,
+                memoryId: mem.id,
+              });
+            }
+          });
+        }
+        if (mem.imageUrl && !list.some((item) => item.url === mem.imageUrl)) {
+          list.push({
+            url: mem.imageUrl,
+            day: mem.day,
+            title: mem.title || `Day ${mem.day}`,
+            memoryId: mem.id,
+          });
+        }
+      }
+    });
+    return list.sort((a, b) => a.day - b.day);
+  }, [data.memories, coverModalMonth, selectedYear]);
+
+  // Save updated month cover photo to MongoDB Atlas
+  const handleSaveMonthCover = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!isAdmin) {
+      alert('Please log in with admin privileges to save changes to MongoDB Atlas.');
+      openAdminModal();
+      return;
+    }
+
+    if (!selectedCoverUrl) {
+      alert('Please select or upload a cover image.');
+      return;
+    }
+
+    const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
+    const existingIdx = currentMonths.findIndex((m) => m.month === coverModalMonth);
+    const existingMonth = existingIdx >= 0 ? currentMonths[existingIdx] : null;
+
+    const otherImages = (existingMonth?.coverImages || []).filter((img) => img !== selectedCoverUrl);
+    const updatedCoverImages = [selectedCoverUrl, ...otherImages];
+
+    const updatedMonthObj: MonthScrapbook = {
+      month: coverModalMonth,
+      name: existingMonth?.name || MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3),
+      fullSpanishName: existingMonth?.fullSpanishName || MONTH_NAMES_ES[coverModalMonth - 1],
+      fullEnglishName: existingMonth?.fullEnglishName || MONTH_NAMES_EN[coverModalMonth - 1],
+      coverImages: updatedCoverImages,
+      vibeText: coverVibeText || existingMonth?.vibeText || 'Cozy moments',
+      stickers: coverStickers && coverStickers.length > 0 ? coverStickers : (existingMonth?.stickers || ['✨', '💛']),
+    };
+
+    let newMonthsList: MonthScrapbook[];
+    if (existingIdx >= 0) {
+      newMonthsList = currentMonths.map((m, idx) => (idx === existingIdx ? updatedMonthObj : m));
+    } else {
+      newMonthsList = [...currentMonths, updatedMonthObj];
+    }
+
+    const updatedData: BeyondCodingData = {
+      ...data,
+      months: newMonthsList,
+    };
+
+    const ok = await saveToMongoDB(updatedData);
+    if (ok) {
+      setIsCoverModalOpen(false);
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+    }
+  };
+
+  // Directly set a memory photo as month cover from the lightbox
+  const handleSetMemoryAsCover = async (mem: PlannerMemory, photoUrl: string) => {
+    if (!isAdmin) {
+      alert('Please log in with admin privileges to update month cover.');
+      openAdminModal();
+      return;
+    }
+
+    const targetMonth = mem.month;
+    const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
+    const existingIdx = currentMonths.findIndex((m) => m.month === targetMonth);
+    const existingMonth = existingIdx >= 0 ? currentMonths[existingIdx] : null;
+
+    const otherImages = (existingMonth?.coverImages || []).filter((img) => img !== photoUrl);
+    const updatedCoverImages = [photoUrl, ...otherImages];
+
+    const updatedMonthObj: MonthScrapbook = {
+      month: targetMonth,
+      name: existingMonth?.name || MONTH_NAMES_EN[targetMonth - 1].substring(0, 3),
+      fullSpanishName: existingMonth?.fullSpanishName || MONTH_NAMES_ES[targetMonth - 1],
+      fullEnglishName: existingMonth?.fullEnglishName || MONTH_NAMES_EN[targetMonth - 1],
+      coverImages: updatedCoverImages,
+      vibeText: existingMonth?.vibeText || 'Cozy moments',
+      stickers: existingMonth?.stickers || ['✨', '💛'],
+    };
+
+    let newMonthsList: MonthScrapbook[];
+    if (existingIdx >= 0) {
+      newMonthsList = currentMonths.map((m, idx) => (idx === existingIdx ? updatedMonthObj : m));
+    } else {
+      newMonthsList = [...currentMonths, updatedMonthObj];
+    }
+
+    const updatedData: BeyondCodingData = {
+      ...data,
+      months: newMonthsList,
+    };
+
+    const ok = await saveToMongoDB(updatedData);
+    if (ok) {
+      confetti({ particleCount: 40, spread: 50, origin: { y: 0.5 } });
+      alert(`Set as ${MONTH_NAMES_EN[targetMonth - 1]} cover photo!`);
+    }
+  };
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -615,6 +811,17 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     <span>+ Add Stickers / Washi Tape</span>
                   </button>
 
+                  {/* Dedicated Edit Month Cover Button (Admin Only) */}
+                  <button
+                    type="button"
+                    onClick={() => openEditCoverModal(selectedMonth)}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 hover:from-sky-600 hover:to-purple-700 text-white text-xs font-bold font-code flex items-center gap-1.5 shadow-sm hover:shadow transition-all cursor-pointer"
+                    title={`Edit ${MONTH_NAMES_EN[selectedMonth - 1]} Cover Photo (select from month photos or upload)`}
+                  >
+                    <Camera size={14} className="text-sky-100" />
+                    <span>🖼️ Edit Month Cover</span>
+                  </button>
+
                   {/* Creative Washi Tape & Sticker Accents for Creative Scrapbook Feelings (Admin Only) */}
                   <div className="flex items-center gap-1.5 pl-1.5 py-0.5 border-l border-slate-200/80 dark:border-slate-700/80">
                     <div
@@ -706,53 +913,49 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
             {/* 12 Months Scrapbook Cards Grid (3 columns on desktop) */}
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-3 p-3 bg-white/70 dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md shadow-inner max-h-[85vh] overflow-y-auto">
-              {(data.months && data.months.length > 0
-                ? data.months
-                : Array.from({ length: 12 }, (_, i) => ({
-                    month: i + 1,
-                    name: MONTH_NAMES_EN[i].substring(0, 3),
-                    fullSpanishName: MONTH_NAMES_ES[i],
-                    fullEnglishName: MONTH_NAMES_EN[i],
-                    coverImages: ['/images/vandan_lake.png'],
-                    vibeText: 'Cozy moments',
-                    stickers: ['✨', '💛'],
-                  }))
-              ).map((m) => {
+              {normalizedMonths.map((m) => {
                 const isSelected = selectedMonth === m.month;
                 const memoryCount = (data.memories || []).filter((mem) => mem.month === m.month).length;
+                const coverImageSrc = getMonthCoverImage(m.month);
 
                 return (
-                  <button
+                  <div
                     key={m.month}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => {
                       setSelectedMonth(m.month);
                       confetti({ particleCount: 20, spread: 40, origin: { x: 0.3, y: 0.6 } });
                     }}
-                    className={`group relative flex flex-col p-2.5 rounded-2xl transition-all duration-300 text-left cursor-pointer border ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedMonth(m.month);
+                      }
+                    }}
+                    className={`group relative flex flex-col p-2.5 rounded-2xl transition-all duration-300 text-left cursor-pointer border select-none ${
                       isSelected
                         ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-400 dark:border-amber-500 shadow-md scale-102 ring-2 ring-amber-400/40'
                         : 'bg-white dark:bg-slate-800/80 border-slate-200/90 dark:border-slate-700/80 hover:border-amber-300 hover:shadow-sm hover:scale-101'
                     }`}
                   >
-                    {/* Month Label */}
+                    {/* Month Label & Action */}
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100 group-hover:text-amber-700">
                         {m.name}
                       </span>
-                      {isSelected && (
+                      {isSelected ? (
                         <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                      ) : (
+                        <span className="text-[0.6rem] font-code text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {String(m.month).padStart(2, '0')}
+                        </span>
                       )}
                     </div>
 
-                    {/* Mini Scrapbook Photo Collage Box */}
+                    {/* Mini Scrapbook Photo Box */}
                     <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700">
                       <Image
-                        src={
-                          m.coverImages && m.coverImages.length > 0
-                            ? m.coverImages[0]
-                            : '/images/vandan_lake.png'
-                        }
+                        src={coverImageSrc}
                         alt={m.name}
                         fill
                         sizes="100px"
@@ -760,14 +963,31 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       />
 
                       {/* Cute Tape Sticker on Top */}
-                      <div className="absolute top-1 left-2 w-7 h-2 bg-amber-200/90 dark:bg-amber-400/70 rotate-[-8deg] shadow-xs rounded-xs" />
+                      <div className="absolute top-1 left-2 w-7 h-2 bg-amber-200/90 dark:bg-amber-400/70 rotate-[-8deg] shadow-xs rounded-xs pointer-events-none" />
 
                       {/* Memory Count Badge */}
                       {memoryCount > 0 && (
-                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.6rem] font-bold backdrop-blur-xs">
+                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.6rem] font-bold backdrop-blur-xs pointer-events-none">
                           {memoryCount} {memoryCount === 1 ? 'pic' : 'pics'}
                         </span>
                       )}
+
+                      {/* Dedicated Change Cover Photo Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditCoverModal(m.month);
+                        }}
+                        className={`absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/85 hover:bg-amber-500 text-white backdrop-blur-xs transition-all duration-200 shadow-md z-20 cursor-pointer ${
+                          isAdmin
+                            ? 'opacity-85 hover:opacity-100 hover:scale-110'
+                            : 'opacity-0 group-hover:opacity-85 hover:opacity-100 hover:scale-110'
+                        }`}
+                        title={`Change cover photo for ${m.name} (select from uploaded photos or upload new)`}
+                      >
+                        <Camera size={11} className="drop-shadow-xs" />
+                      </button>
                     </div>
 
                     {/* Stickers Footer */}
@@ -776,7 +996,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         <span key={sIdx}>{stk}</span>
                       ))}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -788,10 +1008,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
           <div className="col-span-12 lg:col-span-8">
             <div
               ref={plannerSheetRef}
-              className={`relative rounded-3xl shadow-2xl transition-all duration-300 overflow-hidden ${
+              className={`relative rounded-3xl shadow-2xl transition-all duration-300 ${
                 isFullscreen
-                  ? 'fixed inset-0 z-[4000] p-3 sm:p-5 md:p-6 bg-[#1a202c] flex items-center justify-center overflow-y-auto'
-                  : 'p-4 sm:p-7 md:p-9 bg-cover bg-center'
+                  ? 'fixed inset-0 z-[4000] p-2 sm:p-4 bg-[#1a202c] flex items-center justify-center overflow-y-auto'
+                  : 'p-4 sm:p-7 md:p-9 bg-cover bg-center overflow-hidden'
               }`}
               style={{
                 backgroundImage:
@@ -805,7 +1025,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               <div
                 className={`relative z-20 w-full bg-[#fdfbf7] text-slate-800 rounded-2xl shadow-2xl border border-amber-900/15 transition-all flex flex-col justify-between ${
                   isFullscreen
-                    ? 'max-w-6xl h-[94vh] max-h-[94vh] p-4 sm:p-6 md:p-7 mt-5 sm:mt-6'
+                    ? 'max-w-6xl h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] p-3 sm:p-5 md:p-6 overflow-hidden'
                     : 'p-4 sm:p-7 md:p-8 mt-3 sm:mt-4'
                 }`}
               >
@@ -842,6 +1062,17 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     <span className="text-xs font-handwriting text-slate-400">
                       ({selectedYear})
                     </span>
+
+                    {/* Quick Month Cover Button */}
+                    <button
+                      type="button"
+                      onClick={() => openEditCoverModal(selectedMonth)}
+                      className="ml-1 sm:ml-2 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                      title={`Change cover photo for ${MONTH_NAMES_EN[selectedMonth - 1]}`}
+                    >
+                      <Camera size={12} className="text-amber-700" />
+                      <span className="hidden sm:inline">Cover Photo</span>
+                    </button>
                   </div>
 
                   {/* Navigation & Controls */}
@@ -906,7 +1137,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 {/* CALENDAR CELLS GRID */}
                 <div
                   className={`grid grid-cols-7 border-t border-l border-amber-900/15 bg-white/40 ${
-                    isFullscreen ? 'flex-1 grid-rows-6' : ''
+                    isFullscreen ? 'flex-1 min-h-0 grid-rows-6' : ''
                   }`}
                 >
                   {calendarDays.map((cell, idx) => {
@@ -940,7 +1171,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         }}
                         className={`border-r border-b border-amber-900/15 p-1 sm:p-1.5 relative transition-all duration-200 flex flex-col justify-between group ${
                           isFullscreen
-                            ? 'h-full min-h-[60px] sm:min-h-[75px]'
+                            ? 'h-full min-h-0 overflow-hidden'
                             : 'min-h-[76px] sm:min-h-[96px] md:min-h-[110px]'
                         } ${
                           isBlank
@@ -951,7 +1182,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         {/* Day Number */}
                         {!isBlank && (
                           <div className="flex items-center justify-between">
-                            <span className="text-[0.68rem] sm:text-xs font-bold font-planner-title text-slate-600 group-hover:text-amber-800">
+                            <span className="text-[0.65rem] sm:text-xs font-bold font-planner-title text-slate-600 group-hover:text-amber-800">
                               {cell.dayNumber}
                             </span>
                             {/* Admin Quick Add Icon on empty days */}
@@ -973,10 +1204,16 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
                         {/* CELL CONTENT (Photo snapshot, sticker, doodle text) */}
                         {!isBlank && hasMemory && primaryMem && (
-                          <div className="flex-1 flex flex-col justify-center items-center my-0.5 relative group-hover:scale-103 transition-transform">
+                          <div className="flex-1 min-h-0 flex flex-col justify-center items-center my-0.5 relative group-hover:scale-103 transition-transform overflow-hidden">
                             {/* Photo Polaroid Thumbnail if image exists */}
                             {hasPhotos && activePhotoUrl ? (
-                              <div className="relative w-full h-14 sm:h-16 md:h-20 rounded-md overflow-hidden bg-white shadow-xs border border-amber-900/20 p-1 rotate-[-1deg] group-hover:rotate-0 transition-all duration-300">
+                              <div
+                                className={`relative w-full rounded-md overflow-hidden bg-white shadow-xs border border-amber-900/20 p-0.5 sm:p-1 rotate-[-1deg] group-hover:rotate-0 transition-all duration-300 ${
+                                  isFullscreen
+                                    ? 'h-8 sm:h-10 md:h-11 lg:h-13 max-h-[52px]'
+                                    : 'h-14 sm:h-16 md:h-20'
+                                }`}
+                              >
                                 <div className="relative w-full h-full rounded-2xs overflow-hidden bg-slate-100">
                                   <Image
                                     key={activePhotoUrl}
@@ -991,7 +1228,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                                 {/* Multi-photo 2-second Slideshow indicator badge */}
                                 {dayPhotos.length > 1 && (
                                   <div
-                                    className="absolute bottom-1 right-1 px-1 py-0.5 rounded-xs bg-slate-900/85 backdrop-blur-xs text-[0.55rem] font-code font-bold text-white flex items-center gap-0.5 shadow-xs select-none z-10"
+                                    className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded-xs bg-slate-900/85 backdrop-blur-xs text-[0.5rem] font-code font-bold text-white flex items-center gap-0.5 shadow-xs select-none z-10"
                                     title="2s slideshow active"
                                   >
                                     <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
@@ -1003,29 +1240,41 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
                                 {/* Washi Tape on Photo */}
                                 <div
-                                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-2 rounded-xs opacity-90 shadow-2xs z-10 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)}`}
+                                  className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-xs opacity-90 shadow-2xs z-10 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)} ${
+                                    isFullscreen ? 'w-5 sm:w-6 h-1 sm:h-1.5' : 'w-6 sm:w-8 h-2'
+                                  }`}
                                 />
 
                                 {/* Floating Sticker Accent on Photo */}
                                 {primaryMem.sticker && (
-                                  <div className="absolute -bottom-1 -right-1 text-sm sm:text-base select-none filter drop-shadow-xs rotate-[6deg] z-20">
+                                  <div
+                                    className={`absolute -bottom-1 -right-1 select-none filter drop-shadow-xs rotate-[6deg] z-20 ${
+                                      isFullscreen ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'
+                                    }`}
+                                  >
                                     {resolveStickerIcon(primaryMem.sticker)}
                                   </div>
                                 )}
                               </div>
                             ) : (
                               /* Pure Washi Tape + Sticker when no photo */
-                              <div className="w-full flex-1 flex flex-col items-center justify-center p-0.5 relative">
+                              <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center p-0.5 relative">
                                 {/* Washi Tape Strip at top of cell */}
                                 {primaryMem.tapeColor && (
                                   <div
-                                    className={`w-10 sm:w-14 h-2.5 sm:h-3 rounded-xs shadow-2xs rotate-[-2deg] mb-1 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)}`}
+                                    className={`rounded-xs shadow-2xs rotate-[-2deg] mb-0.5 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)} ${
+                                      isFullscreen ? 'w-6 sm:w-8 h-1 sm:h-1.5' : 'w-10 sm:w-14 h-2.5 sm:h-3'
+                                    }`}
                                   />
                                 )}
 
                                 {/* Cozy Sticker Emoji */}
                                 {primaryMem.sticker && (
-                                  <div className="text-xl sm:text-2xl select-none filter drop-shadow-xs rotate-[3deg] hover:scale-115 transition-transform my-0.5">
+                                  <div
+                                    className={`select-none filter drop-shadow-xs rotate-[3deg] hover:scale-115 transition-transform my-0.5 ${
+                                      isFullscreen ? 'text-base sm:text-lg' : 'text-xl sm:text-2xl'
+                                    }`}
+                                  >
                                     {resolveStickerIcon(primaryMem.sticker)}
                                   </div>
                                 )}
@@ -1035,9 +1284,11 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                             {/* Handwritten Note / Doodle Sticker Text */}
                             {primaryMem.stickerText ? (
                               <span
-                                className={`text-[0.62rem] sm:text-xs font-handwriting font-bold leading-none text-center mt-0.5 line-clamp-1 px-0.5 ${
+                                className={`font-handwriting font-bold leading-none text-center px-0.5 truncate max-w-full ${
+                                  isFullscreen ? 'text-[0.55rem] sm:text-[0.62rem] mt-0.5' : 'text-[0.62rem] sm:text-xs mt-0.5'
+                                } ${
                                   primaryMem.stickerText.includes('happy')
-                                    ? 'text-rose-600 font-extrabold text-xs sm:text-sm'
+                                    ? 'text-rose-600 font-extrabold'
                                     : primaryMem.stickerText.includes('mudanza')
                                     ? 'text-amber-700'
                                     : 'text-slate-800'
@@ -1054,7 +1305,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 </div>
 
                 {/* Bottom Paper Footer */}
-                <div className="flex items-center justify-between pt-3 mt-1 border-t border-amber-900/15 text-xs text-slate-500 font-handwriting flex-shrink-0">
+                <div className="flex items-center justify-between pt-2 sm:pt-2.5 mt-0.5 sm:mt-1 border-t border-amber-900/15 text-xs text-slate-500 font-handwriting flex-shrink-0">
                   <span className="text-sm sm:text-base">
                     ✦ handwritten with love &middot; {selectedYear} life moments
                   </span>
@@ -1077,37 +1328,37 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       {/* ========================================================= */}
       {/* POLAROID MEMORY LIGHTBOX MODAL                             */}
       {/* ========================================================= */}
-      {selectedMemory && (
-        <div className="fixed inset-0 z-[4500] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-[#fdfbf7] text-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 space-y-4 border border-amber-900/20 rotate-[-1deg]">
-            {/* Top Tape */}
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#fde68a] shadow-xs rotate-[2deg] rounded-xs" />
+      {selectedMemory && (() => {
+        const modalPhotos: string[] = [];
+        if (selectedMemory.images && Array.isArray(selectedMemory.images)) {
+          selectedMemory.images.forEach((img) => {
+            if (img && !modalPhotos.includes(img)) modalPhotos.push(img);
+          });
+        }
+        if (selectedMemory.imageUrl && !modalPhotos.includes(selectedMemory.imageUrl)) {
+          modalPhotos.push(selectedMemory.imageUrl);
+        }
+        const activeModalPhoto = modalPhotos[lightboxPhotoIndex] || modalPhotos[0];
+        const monthCover = getMonthCoverImage(selectedMemory.month);
+        const isCurrentCover = activeModalPhoto && monthCover === activeModalPhoto;
 
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedMemory(null)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 flex items-center justify-center cursor-pointer transition-colors"
-            >
-              <X size={16} />
-            </button>
+        return (
+          <div className="fixed inset-0 z-[4500] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md bg-[#fdfbf7] text-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 space-y-4 border border-amber-900/20 rotate-[-1deg]">
+              {/* Top Tape */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#fde68a] shadow-xs rotate-[2deg] rounded-xs" />
 
-            {/* Polaroid Frame */}
-            <div className="p-3 bg-white rounded-2xl shadow-md border border-slate-200">
-              {(() => {
-                const modalPhotos: string[] = [];
-                if (selectedMemory.images && Array.isArray(selectedMemory.images)) {
-                  selectedMemory.images.forEach((img) => {
-                    if (img && !modalPhotos.includes(img)) modalPhotos.push(img);
-                  });
-                }
-                if (selectedMemory.imageUrl && !modalPhotos.includes(selectedMemory.imageUrl)) {
-                  modalPhotos.push(selectedMemory.imageUrl);
-                }
-                const activeModalPhoto = modalPhotos[lightboxPhotoIndex] || modalPhotos[0];
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedMemory(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
 
-                if (!activeModalPhoto) return null;
-
-                return (
+              {/* Polaroid Frame */}
+              <div className="p-3 bg-white rounded-2xl shadow-md border border-slate-200">
+                {activeModalPhoto && (
                   <div className="relative w-full h-64 sm:h-80 rounded-xl overflow-hidden bg-slate-100 mb-3 group/slide">
                     <Image
                       key={activeModalPhoto}
@@ -1194,8 +1445,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       </>
                     )}
                   </div>
-                );
-              })()}
+                )}
 
               <div className="flex items-center justify-between text-xs font-code text-slate-500 border-b border-slate-100 pb-2 mb-2">
                 <span>
@@ -1229,7 +1479,26 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
             {/* Admin Actions */}
             {isAdmin && (
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-900/10">
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-amber-900/10">
+                {activeModalPhoto && (
+                  <button
+                    type="button"
+                    onClick={() => handleSetMemoryAsCover(selectedMemory, activeModalPhoto)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold font-code flex items-center gap-1 cursor-pointer shadow-xs transition-colors ${
+                      isCurrentCover
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'bg-amber-500 hover:bg-amber-600 text-white'
+                    }`}
+                    title={`Set this photo as the cover for ${MONTH_NAMES_EN[selectedMemory.month - 1]}`}
+                  >
+                    <Camera size={12} />
+                    <span>
+                      {isCurrentCover
+                        ? `✓ Active ${MONTH_NAMES_EN[selectedMemory.month - 1].substring(0, 3)} Cover`
+                        : `Set as ${MONTH_NAMES_EN[selectedMemory.month - 1].substring(0, 3)} Cover`}
+                    </span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => openEditMemoryModal(selectedMemory)}
@@ -1248,7 +1517,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
             )}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ========================================================= */}
       {/* ADMIN ADD / EDIT MEMORY MODAL                              */}
@@ -1744,6 +2014,282 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MONTH COVER PHOTO STUDIO MODAL                            */}
+      {/* ========================================================= */}
+      {isCoverModalOpen && (
+        <div className="fixed inset-0 z-[4700] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-[#fdfbf7] dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl p-5 sm:p-7 space-y-4 border border-amber-900/20 dark:border-slate-800 max-h-[92vh] overflow-y-auto rotate-[-0.3deg]">
+            {/* Top Washi Tapes Accents */}
+            <div className="absolute -top-3 left-10 w-24 h-4 washi-pattern-gold rotate-[-3deg] shadow-xs rounded-xs pointer-events-none opacity-90" />
+            <div className="absolute -top-3 right-16 w-20 h-4 washi-pattern-pink rotate-[4deg] shadow-xs rounded-xs pointer-events-none opacity-90" />
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-amber-900/15 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🖼️</span>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold font-planner-title text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    Month Cover Photo Studio
+                    <span className="text-amber-500 font-normal text-xs font-handwriting">
+                      ✦ 12-month scrapbook
+                    </span>
+                  </h3>
+                  <p className="text-xs font-handwriting text-slate-500 dark:text-slate-400">
+                    Select a cover photo from memories uploaded in this month (Days 1–31) or upload a custom image
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCoverModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Month Switcher Dropdown */}
+            <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-900/10 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <CalendarIcon size={16} className="text-amber-600" />
+                <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-200">
+                  Select Month to Customize:
+                </span>
+              </div>
+              <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                <select
+                  value={coverModalMonth}
+                  onChange={(e) => handleSwitchCoverModalMonth(Number(e.target.value))}
+                  className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold font-planner-title cursor-pointer shadow-2xs"
+                >
+                  {MONTH_NAMES_EN.map((mName, idx) => (
+                    <option key={idx} value={idx + 1}>
+                      {idx + 1} - {mName} ({MONTH_NAMES_ES[idx]})
+                    </option>
+                  ))}
+                </select>
+                <span className="text-[0.68rem] font-code px-2 py-1 rounded-lg bg-amber-200/70 dark:bg-amber-950 text-amber-900 dark:text-amber-300 font-bold whitespace-nowrap">
+                  1 to {new Date(selectedYear, coverModalMonth, 0).getDate()} days
+                </span>
+              </div>
+            </div>
+
+            {/* SECTION 1: Photos uploaded during this month (Days 1 to 31) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 font-planner-title text-xs sm:text-sm">
+                  <Sparkles size={14} className="text-amber-500" />
+                  <span>
+                    Photos Uploaded in {MONTH_NAMES_EN[coverModalMonth - 1]} (Days 1–{new Date(selectedYear, coverModalMonth, 0).getDate()})
+                  </span>
+                </label>
+                <span className="text-[0.68rem] font-code px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold">
+                  {modalMonthPhotos.length} {modalMonthPhotos.length === 1 ? 'photo uploaded' : 'photos uploaded'}
+                </span>
+              </div>
+
+              {modalMonthPhotos.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-2.5 bg-amber-50/40 dark:bg-slate-800/40 rounded-2xl border border-amber-900/10 dark:border-slate-800">
+                  {modalMonthPhotos.map((photo, pIdx) => {
+                    const isChosen = selectedCoverUrl === photo.url;
+                    return (
+                      <div
+                        key={pIdx}
+                        onClick={() => setSelectedCoverUrl(photo.url)}
+                        className={`group/item relative rounded-xl overflow-hidden border p-1.5 transition-all cursor-pointer ${
+                          isChosen
+                            ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-950/60 ring-2 ring-amber-400 shadow-md scale-102'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-amber-300 hover:scale-101'
+                        }`}
+                      >
+                        <div className="relative w-full h-24 sm:h-28 rounded-lg overflow-hidden bg-slate-100">
+                          <Image
+                            src={photo.url}
+                            alt={photo.title}
+                            fill
+                            sizes="(max-width: 640px) 140px, 180px"
+                            className="object-cover group-hover/item:scale-105 transition-transform"
+                          />
+                          <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.62rem] font-bold backdrop-blur-xs">
+                            Day {photo.day}
+                          </span>
+                          {isChosen && (
+                            <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white font-code text-[0.62rem] font-bold shadow-xs flex items-center gap-0.5">
+                              <Check size={10} /> Active Cover
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 px-1 flex items-center justify-between text-[0.68rem]">
+                          <span className="font-handwriting font-bold truncate max-w-[110px] text-slate-800 dark:text-slate-200">
+                            {photo.title}
+                          </span>
+                          <span
+                            className={`text-[0.65rem] font-bold ${
+                              isChosen ? 'text-amber-600 dark:text-amber-400 font-extrabold' : 'text-slate-400'
+                            }`}
+                          >
+                            {isChosen ? 'Selected' : 'Select'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-dashed border-amber-300/80 dark:border-slate-700 text-center space-y-2">
+                  <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300 text-base">
+                    No memory photos uploaded for {MONTH_NAMES_EN[coverModalMonth - 1]} yet (Days 1–{new Date(selectedYear, coverModalMonth, 0).getDate()}).
+                  </p>
+                  <p className="text-[0.7rem] text-slate-400 font-sans">
+                    You can upload a custom cover photo below, or add photos to any day of {MONTH_NAMES_EN[coverModalMonth - 1]} on the planner calendar!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* SECTION 2: Upload or enter custom URL */}
+            <div className="space-y-2.5 p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+              <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 font-planner-title text-xs sm:text-sm">
+                <Camera size={14} className="text-indigo-600 dark:text-indigo-400" />
+                <span>Upload New Cover Photo (Drag & Drop or File)</span>
+              </label>
+
+              <ImageDropzone
+                value={selectedCoverUrl}
+                onChange={(uploadedUrl) => {
+                  if (uploadedUrl) {
+                    setSelectedCoverUrl(uploadedUrl);
+                  }
+                }}
+                label={`Upload Cover Photo for ${MONTH_NAMES_EN[coverModalMonth - 1]}`}
+              />
+
+              <div className="flex gap-2 pt-1">
+                <input
+                  type="text"
+                  placeholder="Or paste image URL (e.g. /images/art1.jpg or Cloudinary URL)"
+                  value={customCoverUrlInput}
+                  onChange={(e) => setCustomCoverUrlInput(e.target.value)}
+                  className="flex-1 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-code"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (customCoverUrlInput.trim()) {
+                      setSelectedCoverUrl(customCoverUrlInput.trim());
+                      setCustomCoverUrlInput('');
+                    }
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-xs"
+                >
+                  Apply URL
+                </button>
+              </div>
+            </div>
+
+            {/* SECTION 3: Quick Preset Portfolio Photos */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-slate-700 dark:text-slate-300 block text-[0.7rem] font-planner-title">
+                Quick Preset Portfolio Artwork & Photos:
+              </label>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {[
+                  { url: '/images/vandan_lake.png', label: 'Lake' },
+                  { url: '/images/vandan.jpg', label: 'Sunlight Tree' },
+                  { url: '/images/art1.jpg', label: 'Autumn Tree' },
+                  { url: '/images/art2.jpg', label: 'Travel Books' },
+                  { url: '/images/art3.jpg', label: 'Scatter Plot' },
+                  { url: '/images/art4.jpg', label: 'Sunset Trees' },
+                  { url: '/images/art5.jpg', label: 'Art 5' },
+                  { url: '/images/art6.jpg', label: 'Art 6' },
+                  { url: '/images/vaan.jpg', label: 'Portrait' },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedCoverUrl(preset.url)}
+                    className={`relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                      selectedCoverUrl === preset.url
+                        ? 'ring-2 ring-amber-500 scale-105 border-amber-500 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100'
+                    }`}
+                    title={preset.label}
+                  >
+                    <Image src={preset.url} alt={preset.label} fill sizes="48px" className="object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 4: Live Scrapbook Card Preview */}
+            <div className="p-3 sm:p-4 rounded-2xl bg-amber-50/60 dark:bg-slate-800/50 border border-amber-900/15 dark:border-slate-700 flex flex-wrap sm:flex-nowrap items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[0.65rem] font-code font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                  ✦ Live Month Card Preview
+                </span>
+                <p className="text-xs font-handwriting text-slate-700 dark:text-slate-300 text-sm">
+                  This is how {MONTH_NAMES_EN[coverModalMonth - 1]} will display in your 12-month overview grid.
+                </p>
+                {selectedCoverUrl && (
+                  <p className="text-[0.68rem] font-code text-slate-500 dark:text-slate-400 truncate max-w-xs">
+                    Image: {selectedCoverUrl}
+                  </p>
+                )}
+              </div>
+
+              <div className="w-24 sm:w-28 p-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 shadow-md flex flex-col pointer-events-none rotate-[1.5deg] flex-shrink-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100">
+                    {MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                </div>
+                <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 border border-amber-900/20">
+                  {selectedCoverUrl ? (
+                    <Image src={selectedCoverUrl} alt="Cover preview" fill sizes="100px" className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 font-sans">
+                      No image
+                    </div>
+                  )}
+                  <div className="absolute top-1 left-2 w-6 h-2 bg-amber-200/90 rotate-[-8deg] shadow-xs rounded-xs" />
+                </div>
+                <div className="flex items-center gap-1 mt-1 text-[0.65rem] select-none">
+                  {coverStickers?.slice(0, 3).map((stk, sIdx) => (
+                    <span key={sIdx}>{stk}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsCoverModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveMonthCover}
+                disabled={isSaving || !selectedCoverUrl}
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                <span>
+                  {isAdmin
+                    ? `Save ${MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)} Cover (MongoDB Atlas)`
+                    : 'Log in as Admin to Save'}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}
