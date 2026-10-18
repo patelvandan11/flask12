@@ -1025,7 +1025,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               <div
                 className={`relative z-20 w-full bg-[#fdfbf7] text-slate-800 rounded-2xl shadow-2xl border border-amber-900/15 transition-all flex flex-col justify-between ${
                   isFullscreen
-                    ? 'max-w-6xl h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] p-3 sm:p-5 md:p-6 overflow-hidden'
+                    ? 'max-w-6xl h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] p-3 sm:p-5 md:p-6'
                     : 'p-4 sm:p-7 md:p-8 mt-3 sm:mt-4'
                 }`}
               >
@@ -1063,16 +1063,18 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       ({selectedYear})
                     </span>
 
-                    {/* Quick Month Cover Button */}
-                    <button
-                      type="button"
-                      onClick={() => openEditCoverModal(selectedMonth)}
-                      className="ml-1 sm:ml-2 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
-                      title={`Change cover photo for ${MONTH_NAMES_EN[selectedMonth - 1]}`}
-                    >
-                      <Camera size={12} className="text-amber-700" />
-                      <span className="hidden sm:inline">Cover Photo</span>
-                    </button>
+                    {/* Quick Month Cover Button (Only in normal view mode, hidden during fullscreen mode) */}
+                    {!isFullscreen && (
+                      <button
+                        type="button"
+                        onClick={() => openEditCoverModal(selectedMonth)}
+                        className="ml-1 sm:ml-2 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                        title={`Change cover photo for ${MONTH_NAMES_EN[selectedMonth - 1]}`}
+                      >
+                        <Camera size={12} className="text-amber-700" />
+                        <span className="hidden sm:inline">Cover Photo</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Navigation & Controls */}
