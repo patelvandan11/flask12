@@ -101,6 +101,7 @@ const resolveStickerIcon = (stickerKey?: string): string => {
 };
 
 const getWashiTapeClass = (color?: string) => {
+  if (!color || color === 'none') return 'hidden opacity-0 pointer-events-none';
   switch (color) {
     case 'pink':
       return 'washi-pattern-pink';
@@ -210,7 +211,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [newImageUrlInput, setNewImageUrlInput] = useState<string>('');
   const [formSticker, setFormSticker] = useState<string>('sparkle');
   const [formStickerText, setFormStickerText] = useState<string>('');
-  const [formTapeColor, setFormTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach'>('gold');
+  const [formTapeColor, setFormTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach' | 'none'>('none');
   const [formLocation, setFormLocation] = useState<string>('');
   const [formMood, setFormMood] = useState<string>('Joyful');
 
@@ -223,7 +224,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [isStickerStudioOpen, setIsStickerStudioOpen] = useState<boolean>(false);
   const [stickerStudioMonth, setStickerStudioMonth] = useState<number>(() => new Date().getMonth() + 1);
   const [stickerStudioDay, setStickerStudioDay] = useState<number>(() => new Date().getDate());
-  const [stickerStudioTapeColor, setStickerStudioTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach'>('pink');
+  const [stickerStudioTapeColor, setStickerStudioTapeColor] = useState<'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach' | 'none'>('none');
   const [stickerStudioChoice, setStickerStudioChoice] = useState<string>('flower');
   const [stickerStudioText, setStickerStudioText] = useState<string>('cozy moments 🌸');
   const [stickerStudioNote, setStickerStudioNote] = useState<string>('');
@@ -424,7 +425,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setNewImageUrlInput('');
     setFormSticker('sun');
     setFormStickerText('');
-    setFormTapeColor('gold');
+    setFormTapeColor('none');
     setFormLocation('');
     setFormMood('Cozy');
     setFormMode('photo');
@@ -453,7 +454,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setNewImageUrlInput('');
     setFormSticker(mem.sticker || 'sparkle');
     setFormStickerText(mem.stickerText || '');
-    setFormTapeColor(mem.tapeColor || 'gold');
+    setFormTapeColor(mem.tapeColor || 'none');
     setFormLocation(mem.location || '');
     setFormMood(mem.mood || 'Cozy');
     setFormMode(
@@ -2463,12 +2464,14 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                                   </div>
                                 )}
 
-                                {/* Washi Tape on Photo */}
-                                <div
-                                  className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-xs opacity-90 shadow-2xs z-10 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)} ${
-                                    isFullscreen ? 'w-5 sm:w-6 h-1 sm:h-1.5' : 'w-6 sm:w-8 h-2'
-                                  }`}
-                                />
+                                {/* Washi Tape on Photo (Optional) */}
+                                {primaryMem.tapeColor && primaryMem.tapeColor !== 'none' && (
+                                  <div
+                                    className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-xs opacity-90 shadow-2xs z-10 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)} ${
+                                      isFullscreen ? 'w-5 sm:w-6 h-1 sm:h-1.5' : 'w-6 sm:w-8 h-2'
+                                    }`}
+                                  />
+                                )}
 
                                 {/* Floating Sticker Accent on Photo */}
                                 {primaryMem.sticker && (
@@ -2484,8 +2487,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                             ) : (
                               /* Pure Washi Tape + Sticker when no photo */
                               <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center p-0.5 relative">
-                                {/* Washi Tape Strip at top of cell */}
-                                {primaryMem.tapeColor && (
+                                {/* Washi Tape Strip at top of cell (Optional) */}
+                                {primaryMem.tapeColor && primaryMem.tapeColor !== 'none' && (
                                   <div
                                     className={`rounded-xs shadow-2xs rotate-[-2deg] mb-0.5 pointer-events-none ${getWashiTapeClass(primaryMem.tapeColor)} ${
                                       isFullscreen ? 'w-6 sm:w-8 h-1 sm:h-1.5' : 'w-10 sm:w-14 h-2.5 sm:h-3'
@@ -2767,6 +2770,24 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         ? `✓ Active ${MONTH_NAMES_EN[selectedMemory.month - 1].substring(0, 3)} Cover`
                         : `Set as ${MONTH_NAMES_EN[selectedMemory.month - 1].substring(0, 3)} Cover`}
                     </span>
+                  </button>
+                )}
+                {selectedMemory.tapeColor && selectedMemory.tapeColor !== 'none' && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const updatedMemories = (data.memories || []).map((m) =>
+                        m.id === selectedMemory.id ? { ...m, tapeColor: 'none' as const } : m
+                      );
+                      const updatedData = { ...data, memories: updatedMemories };
+                      setData(updatedData);
+                      setSelectedMemory({ ...selectedMemory, tapeColor: 'none' });
+                      await saveToMongoDB(updatedData);
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold font-code flex items-center gap-1 cursor-pointer transition-colors border border-amber-200"
+                    title="Remove washi tape from this day"
+                  >
+                    🚫 Remove Tape
                   </button>
                 )}
                 <button
@@ -3126,12 +3147,16 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tape Color</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center justify-between">
+                    <span>Tape Color</span>
+                    <span className="text-[0.62rem] font-code text-slate-500 uppercase">Optional</span>
+                  </label>
                   <select
                     value={formTapeColor}
                     onChange={(e) => setFormTapeColor(e.target.value as any)}
                     className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-sans"
                   >
+                    <option value="none">🚫 No Tape (None — Default)</option>
                     <option value="gold">Yellow / Gold Shimmer Washi</option>
                     <option value="pink">Sakura Pink Floral Tape</option>
                     <option value="mint">Sage Mint Grid Tape</option>
@@ -3255,6 +3280,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
+                    { id: 'none', name: '🚫 No Tape (Optional)', class: 'border-dashed border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800' },
                     { id: 'gold', name: 'Gold Dots', class: 'washi-pattern-gold' },
                     { id: 'pink', name: 'Sakura Pink', class: 'washi-pattern-pink' },
                     { id: 'mint', name: 'Sage Grid', class: 'washi-pattern-mint' },
@@ -3380,12 +3406,14 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   ✦ Live Scrapbook Cell Preview ✦
                 </span>
                 <div className="w-28 sm:w-36 h-24 mx-auto bg-[#fdfbf7] dark:bg-slate-900 rounded-xl p-2 border border-amber-900/20 shadow-xs flex flex-col items-center justify-between relative rotate-[-1deg]">
-                  {/* Washi Tape Strip */}
-                  <div
-                    className={`w-14 h-2.5 rounded-xs shadow-2xs rotate-[-1deg] ${getWashiTapeClass(
-                      stickerStudioTapeColor
-                    )}`}
-                  />
+                  {/* Washi Tape Strip (Optional) */}
+                  {stickerStudioTapeColor && stickerStudioTapeColor !== 'none' && (
+                    <div
+                      className={`w-14 h-2.5 rounded-xs shadow-2xs rotate-[-1deg] ${getWashiTapeClass(
+                        stickerStudioTapeColor
+                      )}`}
+                    />
+                  )}
 
                   {/* Sticker Emoji */}
                   <div className="text-3xl select-none filter drop-shadow-xs rotate-[3deg] my-0.5">

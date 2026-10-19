@@ -204,7 +204,7 @@ export interface CanvasSticker {
   label?: string; // handwritten note / caption
   relatedPhotoUrl?: string; // photo reference if related to picture
   frameStyle?: 'polaroid' | 'cutout' | 'tape' | 'paperclip' | 'plain';
-  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach';
+  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach' | 'none';
 }
 
 export interface PlannerMemory {
@@ -218,7 +218,7 @@ export interface PlannerMemory {
   images?: string[]; // Multiple photos support for 2s slideshow
   sticker?: PlannerSticker | string;
   stickerText?: string;
-  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach';
+  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach' | 'none';
   location?: string;
   mood?: string;
   pinned?: boolean;
