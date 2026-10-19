@@ -653,7 +653,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               ? existing.stickers
               : defaultEmojis,
           checklist:
-            existing.checklist && existing.checklist.length > 0 ? existing.checklist : defaultGoals,
+            existing.checklist !== undefined && Array.isArray(existing.checklist)
+              ? existing.checklist
+              : [],
           cardBgTheme: existing.cardBgTheme || 'cream',
           canvasStickers: existing.canvasStickers || [],
         };
@@ -668,7 +670,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
         vibeText: 'Cozy moments',
         stickers: defaultEmojis,
         emojiVibe: defaultEmojis,
-        checklist: defaultGoals,
+        checklist: [],
         cardBgTheme: 'cream',
         canvasStickers: [],
       };
@@ -697,13 +699,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
         ? existingMonth.stickers
         : defaultEmojis
     );
-    const defaultGoals = (DEFAULT_MONTH_GOALS[monthNum] || ['Cozy moments', 'Daily joy']).map(
-      (g, idx) => ({ id: `g-${monthNum}-${idx}`, text: g, completed: false })
-    );
     setCoverChecklist(
-      existingMonth?.checklist && existingMonth.checklist.length > 0
+      existingMonth?.checklist !== undefined && Array.isArray(existingMonth.checklist)
         ? existingMonth.checklist
-        : defaultGoals
+        : []
     );
     setCoverCardTheme(existingMonth?.cardBgTheme || 'cream');
     setNewMonthGoalInput('');
@@ -731,13 +730,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
         ? existingMonth.stickers
         : defaultEmojis
     );
-    const defaultGoals = (DEFAULT_MONTH_GOALS[newMonth] || ['Cozy moments', 'Daily joy']).map(
-      (g, idx) => ({ id: `g-${newMonth}-${idx}`, text: g, completed: false })
-    );
     setCoverChecklist(
-      existingMonth?.checklist && existingMonth.checklist.length > 0
+      existingMonth?.checklist !== undefined && Array.isArray(existingMonth.checklist)
         ? existingMonth.checklist
-        : defaultGoals
+        : []
     );
     setCoverCardTheme(existingMonth?.cardBgTheme || 'cream');
   };
@@ -3802,17 +3798,33 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     <label className="font-bold text-slate-800 dark:text-slate-200 font-planner-title text-xs sm:text-sm flex items-center gap-1.5">
                       <ListTodo size={14} className="text-amber-600" />
                       <span>Monthly Goals & Checklist</span>
-                      <span className="text-[0.68rem] font-code text-slate-500 font-normal">
-                        ({coverChecklist.filter((c) => c.completed).length}/{coverChecklist.length} completed)
+                      <span className="text-[0.62rem] font-code px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-bold uppercase tracking-wider">
+                        Optional
                       </span>
+                      {coverChecklist.length > 0 && (
+                        <span className="text-[0.68rem] font-code text-slate-500 font-normal">
+                          ({coverChecklist.filter((c) => c.completed).length}/{coverChecklist.length} completed)
+                        </span>
+                      )}
                     </label>
+                    {coverChecklist.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCoverChecklist([])}
+                        className="text-[0.68rem] font-code text-rose-500 hover:text-rose-700 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                        title="Remove all goals (keep checklist empty)"
+                      >
+                        <Trash2 size={11} />
+                        <span>Clear All</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Add Goal Input */}
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder={`+ Add a new goal or to-do for ${MONTH_NAMES_EN[coverModalMonth - 1]}...`}
+                      placeholder={`+ Add a new goal or to-do for ${MONTH_NAMES_EN[coverModalMonth - 1]} (optional)...`}
                       value={newMonthGoalInput}
                       onChange={(e) => setNewMonthGoalInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -3847,49 +3859,52 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   </div>
 
                   {/* Checklist Items List */}
-                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                    {coverChecklist.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 gap-2"
-                      >
+                  {coverChecklist.length > 0 ? (
+                    <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                      {coverChecklist.map((item) => (
                         <div
-                          onClick={() => {
-                            setCoverChecklist((prev) =>
-                              prev.map((g) => (g.id === item.id ? { ...g, completed: !g.completed } : g))
-                            );
-                          }}
-                          className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+                          key={item.id}
+                          className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 gap-2"
                         >
-                          {item.completed ? (
-                            <CheckSquare size={14} className="text-emerald-600 flex-shrink-0" />
-                          ) : (
-                            <Square size={14} className="text-amber-600 flex-shrink-0" />
-                          )}
-                          <span
-                            className={`text-xs font-handwriting truncate ${
-                              item.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-bold'
-                            }`}
+                          <div
+                            onClick={() => {
+                              setCoverChecklist((prev) =>
+                                prev.map((g) => (g.id === item.id ? { ...g, completed: !g.completed } : g))
+                              );
+                            }}
+                            className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                           >
-                            {item.text}
-                          </span>
+                            {item.completed ? (
+                              <CheckSquare size={14} className="text-emerald-600 flex-shrink-0" />
+                            ) : (
+                              <Square size={14} className="text-amber-600 flex-shrink-0" />
+                            )}
+                            <span
+                              className={`text-xs font-handwriting truncate ${
+                                item.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-bold'
+                              }`}
+                            >
+                              {item.text}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setCoverChecklist((prev) => prev.filter((g) => g.id !== item.id))}
+                            className="p-1 hover:bg-rose-100 dark:hover:bg-rose-950/60 rounded text-slate-400 hover:text-rose-600 cursor-pointer"
+                            title="Delete goal"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setCoverChecklist((prev) => prev.filter((g) => g.id !== item.id))}
-                          className="p-1 hover:bg-rose-100 dark:hover:bg-rose-950/60 rounded text-slate-400 hover:text-rose-600 cursor-pointer"
-                          title="Delete goal"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                    {coverChecklist.length === 0 && (
-                      <p className="text-xs text-slate-400 font-handwriting text-center py-2">
-                        No goals added yet. Add goals above to display on this month's card!
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-3 px-2 rounded-xl bg-amber-50/40 dark:bg-slate-900 border border-dashed border-amber-200 dark:border-slate-700">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-handwriting">
+                        ✨ Checklist is completely optional! Leave it empty if you only want emojis and aesthetic vibe.
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 3. Paper Background Theme Palette */}
@@ -3966,7 +3981,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       {MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)}
                     </span>
                     <span className="text-[0.6rem] font-code text-amber-700 font-bold">
-                      {coverChecklist.filter((c) => c.completed).length}/{coverChecklist.length}
+                      {coverChecklist.length > 0
+                        ? `${coverChecklist.filter((c) => c.completed).length}/${coverChecklist.length}`
+                        : 'No goals'}
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1 text-base my-1">
@@ -3977,20 +3994,18 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   <p className="text-[0.55rem] font-handwriting font-bold truncate text-center mb-1">
                     {coverVibeText || 'Cozy moments'}
                   </p>
-                  <div className="w-full h-1 bg-amber-200/80 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 rounded-full"
-                      style={{
-                        width: `${
-                          coverChecklist.length > 0
-                            ? Math.round(
-                                (coverChecklist.filter((c) => c.completed).length / coverChecklist.length) * 100
-                              )
-                            : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
+                  {coverChecklist.length > 0 && (
+                    <div className="w-full h-1 bg-amber-200/80 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-500 rounded-full"
+                        style={{
+                          width: `${Math.round(
+                            (coverChecklist.filter((c) => c.completed).length / coverChecklist.length) * 100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* Polaroid Photo Card Preview */
