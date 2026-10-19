@@ -178,6 +178,35 @@ export type PlannerSticker =
   | 'star'
   | 'custom';
 
+export interface MonthChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface DayChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface CanvasSticker {
+  id: string;
+  month: number;
+  year?: number;
+  type: 'photo' | 'scrapbook' | 'emoji' | 'text' | 'washi';
+  content: string; // image url, emoji, cutout identifier, or text note
+  x: number; // percentage 0 - 100 on canvas
+  y: number; // percentage 0 - 100 on canvas
+  rotation?: number; // degrees -45 to 45
+  scale?: number; // 0.6 to 2.0
+  zIndex?: number;
+  label?: string; // handwritten note / caption
+  relatedPhotoUrl?: string; // photo reference if related to picture
+  frameStyle?: 'polaroid' | 'cutout' | 'tape' | 'paperclip' | 'plain';
+  tapeColor?: 'gold' | 'pink' | 'mint' | 'kraft' | 'lavender' | 'sky' | 'peach';
+}
+
 export interface PlannerMemory {
   id: string;
   year: number;
@@ -193,6 +222,8 @@ export interface PlannerMemory {
   location?: string;
   mood?: string;
   pinned?: boolean;
+  noPicMode?: boolean;
+  checklist?: DayChecklistItem[];
 }
 
 export interface MonthScrapbook {
@@ -203,6 +234,11 @@ export interface MonthScrapbook {
   coverImages: string[];
   vibeText?: string;
   stickers: string[];
+  noPicMode?: boolean;
+  emojiVibe?: string[];
+  checklist?: MonthChecklistItem[];
+  cardBgTheme?: 'cream' | 'pink' | 'mint' | 'lavender' | 'peach' | 'sky' | 'amber';
+  canvasStickers?: CanvasSticker[];
 }
 
 export interface BeyondCodingData {
@@ -214,5 +250,6 @@ export interface BeyondCodingData {
   quotes?: QuoteItem[];
   books?: BookItem[];
   personalStats?: PersonalStats;
+  canvasStickers?: CanvasSticker[];
 }
 

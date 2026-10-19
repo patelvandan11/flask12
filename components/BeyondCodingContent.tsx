@@ -3,7 +3,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import confetti from 'canvas-confetti';
-import { BeyondCodingData, PlannerMemory, MonthScrapbook, PlannerSticker } from '@/types/portfolio';
+import {
+  BeyondCodingData,
+  PlannerMemory,
+  MonthScrapbook,
+  PlannerSticker,
+  MonthChecklistItem,
+  DayChecklistItem,
+  CanvasSticker,
+} from '@/types/portfolio';
 import { useAdmin, getSafeImageUrl, ImageDropzone } from './AdminContext';
 import {
   ChevronLeft,
@@ -31,6 +39,12 @@ import {
   Pause,
   Layers,
   Check,
+  Square,
+  CheckSquare,
+  ListTodo,
+  Move,
+  RotateCw,
+  Paperclip,
 } from 'lucide-react';
 
 interface BeyondCodingContentProps {
@@ -103,6 +117,56 @@ const getWashiTapeClass = (color?: string) => {
   }
 };
 
+const getCardBgThemeClass = (theme?: string) => {
+  switch (theme) {
+    case 'pink':
+      return 'bg-[#fff1f2] dark:bg-pink-950/40 border-pink-300 dark:border-pink-900/60 text-pink-950 dark:text-pink-100';
+    case 'mint':
+      return 'bg-[#ecfdf5] dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-900/60 text-emerald-950 dark:text-emerald-100';
+    case 'lavender':
+      return 'bg-[#faf5ff] dark:bg-purple-950/40 border-purple-300 dark:border-purple-900/60 text-purple-950 dark:text-purple-100';
+    case 'peach':
+      return 'bg-[#fff7ed] dark:bg-orange-950/40 border-orange-300 dark:border-orange-900/60 text-orange-950 dark:text-orange-100';
+    case 'sky':
+      return 'bg-[#f0f9ff] dark:bg-sky-950/40 border-sky-300 dark:border-sky-900/60 text-sky-950 dark:text-sky-100';
+    case 'amber':
+      return 'bg-[#fefce8] dark:bg-amber-950/40 border-amber-300 dark:border-amber-900/60 text-amber-950 dark:text-amber-100';
+    case 'cream':
+    default:
+      return 'bg-[#fdfbf7] dark:bg-slate-800/90 border-amber-900/20 dark:border-slate-700 text-slate-800 dark:text-slate-100';
+  }
+};
+
+const DEFAULT_MONTH_EMOJIS: Record<number, string[]> = {
+  1: ['❄️', '☕', '✨'],
+  2: ['💌', '🍫', '🕯️'],
+  3: ['🌱', '☀️', '🌸'],
+  4: ['🌷', '🚲', '📖'],
+  5: ['🌻', '🎨', '🍵'],
+  6: ['🏖️', '🌊', '🍉'],
+  7: ['☀️', '🍦', '🏕️'],
+  8: ['🌴', '✈️', '📸'],
+  9: ['🍂', '🎒', '📚'],
+  10: ['🎃', '🍁', '☕'],
+  11: ['🥧', '🧶', '✨'],
+  12: ['🎄', '🎁', '❄️'],
+};
+
+const DEFAULT_MONTH_GOALS: Record<number, string[]> = {
+  1: ['Set 2026 goals', 'Cozy reading routine', 'Drink 2L water'],
+  2: ['Learn a new AI tool', 'Weekend gallery walk', 'Daily gratitude'],
+  3: ['Spring refresh', '30-min daily walk', 'Deploy side project'],
+  4: ['Read 2 books', 'Outdoor sketch session', 'Cook a new recipe'],
+  5: ['Finish portfolio updates', 'Visit a new cafe', 'Capture spring flowers'],
+  6: ['Morning run 3x/week', 'Tech blog post', 'Sunset picnic'],
+  7: ['Camping trip ⛺', 'Read sci-fi novel', 'Try gelato flavors 🍦'],
+  8: ['Photography walk 📸', 'Learn Three.js', 'Summer road trip'],
+  9: ['Autumn study mood 🍂', 'Read 2 research papers', 'Organize workspace'],
+  10: ['Autumn photography 🍁', 'Pumpkin spice latte', 'Hackathon project'],
+  11: ['Cozy sweater season 🧶', 'Gratitude journal', 'Prep holiday plans'],
+  12: ['Year in review ✨', 'Celebrate milestones', 'Winter holiday cozy 🎄'],
+};
+
 export default function BeyondCodingContent({ initialData }: BeyondCodingContentProps) {
   const { isAdmin, openAdminModal } = useAdmin();
   const [data, setData] = useState<BeyondCodingData>(initialData || {
@@ -125,6 +189,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
+  // Month Checklist Ribbon State
+  const [isMonthChecklistExpanded, setIsMonthChecklistExpanded] = useState<boolean>(false);
+  const [quickNewGoalText, setQuickNewGoalText] = useState<string>('');
+
   // Admin Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
@@ -143,6 +211,11 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [formLocation, setFormLocation] = useState<string>('');
   const [formMood, setFormMood] = useState<string>('Joyful');
 
+  // Day Checklist State in Add/Edit Modal
+  const [formMode, setFormMode] = useState<'photo' | 'checklist' | 'hybrid'>('photo');
+  const [formChecklist, setFormChecklist] = useState<DayChecklistItem[]>([]);
+  const [newDayChecklistInput, setNewDayChecklistInput] = useState<string>('');
+
   // Dedicated Sticker & Washi Tape Studio State (initialized to real-time date)
   const [isStickerStudioOpen, setIsStickerStudioOpen] = useState<boolean>(false);
   const [stickerStudioMonth, setStickerStudioMonth] = useState<number>(() => new Date().getMonth() + 1);
@@ -152,15 +225,33 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [stickerStudioText, setStickerStudioText] = useState<string>('cozy moments 🌸');
   const [stickerStudioNote, setStickerStudioNote] = useState<string>('');
 
-  // Dedicated Month Cover Photo Studio State (initialized to real-time month)
+  // Dedicated Month Cover Photo & Theme Studio State
   const [isCoverModalOpen, setIsCoverModalOpen] = useState<boolean>(false);
   const [coverModalMonth, setCoverModalMonth] = useState<number>(() => new Date().getMonth() + 1);
+  const [coverModeTab, setCoverModeTab] = useState<'photo' | 'nopic'>('photo');
+  const [coverNoPicMode, setCoverNoPicMode] = useState<boolean>(false);
   const [selectedCoverUrl, setSelectedCoverUrl] = useState<string>('');
   const [customCoverUrlInput, setCustomCoverUrlInput] = useState<string>('');
   const [coverVibeText, setCoverVibeText] = useState<string>('');
   const [coverStickers, setCoverStickers] = useState<string[]>([]);
+  const [coverEmojiVibe, setCoverEmojiVibe] = useState<string[]>(['✨', '💛', '☕']);
+  const [coverChecklist, setCoverChecklist] = useState<MonthChecklistItem[]>([]);
+  const [newMonthGoalInput, setNewMonthGoalInput] = useState<string>('');
+  const [coverCardTheme, setCoverCardTheme] = useState<'cream' | 'pink' | 'mint' | 'lavender' | 'peach' | 'sky' | 'amber'>('cream');
+
+  // FREEFORM CANVAS STICKERS LAYER STATE (matching Image 2)
+  const [isCanvasStudioOpen, setIsCanvasStudioOpen] = useState<boolean>(false);
+  const [canvasStudioTab, setCanvasStudioTab] = useState<'photo' | 'cutouts' | 'notes' | 'emojis' | 'upload'>('photo');
+  const [isCanvasEditMode, setIsCanvasEditMode] = useState<boolean>(true); // default true so user can immediately drag & reposition
+  const [activeSelectedStickerId, setActiveSelectedStickerId] = useState<string | null>(null);
+  const [isDraggingStickerId, setIsDraggingStickerId] = useState<string | null>(null);
+  const [canvasDoodleInput, setCanvasDoodleInput] = useState<string>('festa con camping ⛺');
+  const [canvasSelectedPhoto, setCanvasSelectedPhoto] = useState<string>('');
+  const [canvasFrameStyle, setCanvasFrameStyle] = useState<'polaroid' | 'cutout' | 'paperclip' | 'tape'>('polaroid');
+  const [canvasCustomImageUrl, setCanvasCustomImageUrl] = useState<string>('');
 
   const plannerSheetRef = useRef<HTMLDivElement>(null);
+  const plannerCanvasRef = useRef<HTMLDivElement>(null);
 
   // Global 2-second slideshow ticker for days with multiple photos
   useEffect(() => {
@@ -332,6 +423,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setFormTapeColor('gold');
     setFormLocation('');
     setFormMood('Cozy');
+    setFormMode('photo');
+    setFormChecklist([]);
+    setNewDayChecklistInput('');
     setIsAddModalOpen(true);
   };
 
@@ -358,6 +452,15 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setFormTapeColor(mem.tapeColor || 'gold');
     setFormLocation(mem.location || '');
     setFormMood(mem.mood || 'Cozy');
+    setFormMode(
+      mem.noPicMode
+        ? 'checklist'
+        : mem.checklist && mem.checklist.length > 0
+        ? 'hybrid'
+        : 'photo'
+    );
+    setFormChecklist(mem.checklist || []);
+    setNewDayChecklistInput('');
     setSelectedMemory(null);
     setIsAddModalOpen(true);
   };
@@ -369,20 +472,26 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       cleanImages.unshift(formImageUrl.trim());
     }
 
+    const isNoPic = formMode === 'checklist';
+    const finalImages = isNoPic ? undefined : cleanImages.length > 0 ? cleanImages : undefined;
+    const finalImageUrl = isNoPic ? undefined : (cleanImages[0] || formImageUrl.trim() || undefined);
+
     const newMemory: PlannerMemory = {
       id: editingMemoryId || `mem-${Date.now()}`,
       year: selectedYear,
       month: formMonth,
       day: formDay,
-      title: formTitle.trim(),
+      title: formTitle.trim() || (isNoPic ? `Day ${formDay} Checklist` : 'Planner moment'),
       note: formNote.trim(),
-      imageUrl: cleanImages[0] || formImageUrl.trim() || undefined,
-      images: cleanImages.length > 0 ? cleanImages : undefined,
+      imageUrl: finalImageUrl,
+      images: finalImages,
       sticker: formSticker,
       stickerText: formStickerText.trim(),
       tapeColor: formTapeColor,
       location: formLocation.trim(),
       mood: formMood.trim(),
+      noPicMode: isNoPic,
+      checklist: formChecklist.length > 0 ? formChecklist : undefined,
     };
 
     let updatedList = [...(data.memories || [])];
