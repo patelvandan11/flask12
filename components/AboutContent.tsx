@@ -312,9 +312,8 @@ export default function AboutContent({
             BIOGRAPHY &amp; PROFILE
           </span>
         ) : null}
-
-        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">
-          About <span className="bg-gradient-to-r from-cyber-cyan via-cyber-blue to-cyber-violet bg-clip-text text-transparent">{resume.name || 'Vandan Patel'}</span>
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100 text-center">
+          About
         </h2>
         <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed">
           AI &amp; Data Science Engineer dedicated to constructing intelligent, scalable, and impact-driven technology.

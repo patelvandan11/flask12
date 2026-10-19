@@ -24,6 +24,9 @@ module.exports = {
           secondaryDark: '#cbd5e1',
           muted: '#64748b',
         },
+        'cyber-cyan': '#06b6d4',
+        'cyber-blue': '#3b82f6',
+        'cyber-violet': '#8b5cf6',
         aesthetic: {
           indigo: '#6366f1',
           violet: '#8b5cf6',
