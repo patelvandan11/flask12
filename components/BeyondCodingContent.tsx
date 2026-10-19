@@ -741,8 +741,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setCoverCardTheme(existingMonth?.cardBgTheme || 'cream');
   };
 
-  // Toggle Month Checklist Item
+  // Toggle Month Checklist Item (Admin Only)
   const toggleMonthChecklistItem = async (monthNum: number, itemId: string) => {
+    if (!isAdmin) return;
     const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
     const existingIdx = currentMonths.findIndex((m) => m.month === monthNum);
     if (existingIdx < 0) return;
@@ -767,8 +768,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     await saveToMongoDB(updatedData);
   };
 
-  // Toggle Day Checklist Item
+  // Toggle Day Checklist Item (Admin Only)
   const toggleDayChecklistItem = async (memoryId: string, itemId: string) => {
+    if (!isAdmin) return;
     let updatedList = (data.memories || []).map((m) => {
       if (m.id === memoryId && m.checklist) {
         return {
@@ -1762,22 +1764,20 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                           </span>
                         )}
 
-                        {/* Dedicated Change Cover Photo Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditCoverModal(m.month);
-                          }}
-                          className={`absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/85 hover:bg-amber-500 text-white backdrop-blur-xs transition-all duration-200 shadow-md z-20 cursor-pointer ${
-                            isAdmin
-                              ? 'opacity-85 hover:opacity-100 hover:scale-110'
-                              : 'opacity-0 group-hover:opacity-85 hover:opacity-100 hover:scale-110'
-                          }`}
-                          title={`Edit ${m.name} Cover or switch to Emoji & Checklist Mode`}
-                        >
-                          <Camera size={11} className="drop-shadow-xs" />
-                        </button>
+                        {/* Dedicated Change Cover Photo Button - Admin Only */}
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditCoverModal(m.month);
+                            }}
+                            className="absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/85 hover:bg-amber-500 text-white backdrop-blur-xs transition-all duration-200 shadow-md z-20 cursor-pointer opacity-85 hover:opacity-100 hover:scale-110"
+                            title={`Edit ${m.name} Cover or switch to Emoji & Checklist Mode`}
+                          >
+                            <Camera size={11} className="drop-shadow-xs" />
+                          </button>
+                        )}
                       </div>
                     ) : (
                       /* NO PIC MODE: COZY EMOJI & CHECKLIST SCRAPBOOK CARD */
@@ -1828,9 +1828,13 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                               <div
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  toggleMonthChecklistItem(m.month, m.checklist![0].id);
+                                  if (isAdmin) {
+                                    toggleMonthChecklistItem(m.month, m.checklist![0].id);
+                                  }
                                 }}
-                                className="flex items-center gap-1 text-[0.52rem] font-handwriting truncate text-slate-800 dark:text-slate-200 cursor-pointer hover:text-indigo-600 transition-colors"
+                                className={`flex items-center gap-1 text-[0.52rem] font-handwriting truncate text-slate-800 dark:text-slate-200 ${
+                                  isAdmin ? 'cursor-pointer hover:text-indigo-600 transition-colors' : ''
+                                }`}
                               >
                                 {m.checklist[0].completed ? (
                                   <CheckSquare size={9} className="text-emerald-600 flex-shrink-0" />
@@ -1842,29 +1846,34 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                                 </span>
                               </div>
                             </div>
-                          ) : (
-                            <div className="text-[0.52rem] font-handwriting text-center text-amber-800/70 dark:text-amber-300/70 italic">
+                          ) : isAdmin ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditCoverModal(m.month);
+                              }}
+                              className="w-full text-[0.52rem] font-handwriting text-center text-amber-800/70 dark:text-amber-300/70 italic hover:text-amber-900 cursor-pointer"
+                            >
                               + Add checklist
-                            </div>
-                          )}
+                            </button>
+                          ) : null}
                         </div>
 
-                        {/* Dedicated Admin Edit Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditCoverModal(m.month);
-                          }}
-                          className={`absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/80 hover:bg-amber-500 text-white backdrop-blur-xs transition-all shadow-md z-20 cursor-pointer ${
-                            isAdmin
-                              ? 'opacity-85 hover:opacity-100 hover:scale-110'
-                              : 'opacity-0 group-hover:opacity-85 hover:opacity-100 hover:scale-110'
-                          }`}
-                          title={`Customize ${m.name} Emojis & Checklist (Admin)`}
-                        >
-                          <Pencil size={10} className="drop-shadow-xs" />
-                        </button>
+                        {/* Dedicated Admin Edit Button - Admin Only */}
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditCoverModal(m.month);
+                            }}
+                            className="absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/80 hover:bg-amber-500 text-white backdrop-blur-xs transition-all shadow-md z-20 cursor-pointer opacity-85 hover:opacity-100 hover:scale-110"
+                            title={`Customize ${m.name} Emojis & Checklist (Admin)`}
+                          >
+                            <Pencil size={10} className="drop-shadow-xs" />
+                          </button>
+                        )}
                       </div>
                     )}
 
@@ -1952,45 +1961,50 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       </span>
                     )}
 
-                    {/* Quick Month Cover / Theme Button */}
-                    {!isFullscreen && (
-                      <button
-                        type="button"
-                        onClick={() => openEditCoverModal(selectedMonth)}
-                        className="ml-1 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
-                        title={`Edit ${MONTH_NAMES_EN[selectedMonth - 1]} Cover, Emojis or Checklist`}
-                      >
-                        <Camera size={12} className="text-amber-700" />
-                        <span className="hidden sm:inline">Cover / Theme</span>
-                      </button>
-                    )}
+                    {/* Admin Only Controls: Month Cover / Theme, Canvas Stickers Studio, Move Stickers Mode */}
+                    {isAdmin && (
+                      <>
+                        {/* Quick Month Cover / Theme Button */}
+                        {!isFullscreen && (
+                          <button
+                            type="button"
+                            onClick={() => openEditCoverModal(selectedMonth)}
+                            className="ml-1 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                            title={`Edit ${MONTH_NAMES_EN[selectedMonth - 1]} Cover, Emojis or Checklist`}
+                          >
+                            <Camera size={12} className="text-amber-700" />
+                            <span className="hidden sm:inline">Cover / Theme</span>
+                          </button>
+                        )}
 
-                    {/* Canvas Stickers Studio Button (matching Image 2) */}
-                    <button
-                      type="button"
-                      onClick={() => setIsCanvasStudioOpen(true)}
-                      className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 via-rose-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-white text-[0.7rem] font-bold font-code flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
-                      title="Paste Stickers on Month Canvas (Photos, Cutouts, Notes)"
-                    >
-                      <Sparkles size={11} className="text-amber-100 animate-pulse" />
-                      <span>🎨 Canvas ({currentMonthCanvasStickers.length})</span>
-                    </button>
+                        {/* Canvas Stickers Studio Button (matching Image 2) */}
+                        <button
+                          type="button"
+                          onClick={() => setIsCanvasStudioOpen(true)}
+                          className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 via-rose-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-white text-[0.7rem] font-bold font-code flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                          title="Paste Stickers on Month Canvas (Photos, Cutouts, Notes)"
+                        >
+                          <Sparkles size={11} className="text-amber-100 animate-pulse" />
+                          <span>🎨 Canvas ({currentMonthCanvasStickers.length})</span>
+                        </button>
 
-                    {/* Move Stickers Mode Toggle */}
-                    {currentMonthCanvasStickers.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setIsCanvasEditMode(!isCanvasEditMode)}
-                        className={`px-2 py-1 rounded-xl text-[0.68rem] font-bold font-code flex items-center gap-1 cursor-pointer transition-colors ${
-                          isCanvasEditMode
-                            ? 'bg-amber-200/90 text-amber-900 ring-1 ring-amber-400'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                        title="Toggle Draggable Stickers Mode"
-                      >
-                        <Move size={10} />
-                        <span>{isCanvasEditMode ? 'Move: ON' : 'Move: OFF'}</span>
-                      </button>
+                        {/* Move Stickers Mode Toggle */}
+                        {currentMonthCanvasStickers.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setIsCanvasEditMode(!isCanvasEditMode)}
+                            className={`px-2 py-1 rounded-xl text-[0.68rem] font-bold font-code flex items-center gap-1 cursor-pointer transition-colors ${
+                              isCanvasEditMode
+                                ? 'bg-amber-200/90 text-amber-900 ring-1 ring-amber-400'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                            title="Toggle Draggable Stickers Mode"
+                          >
+                            <Move size={10} />
+                            <span>{isCanvasEditMode ? 'Move: ON' : 'Move: OFF'}</span>
+                          </button>
+                        )}
+                      </>
                     )}
 
                     {/* Month Goals & Checklist Toggle Pill */}
@@ -2090,13 +2104,15 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                           {(normalizedMonths[selectedMonth - 1]?.checklist || []).length} completed
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => openEditCoverModal(selectedMonth)}
-                        className="text-[0.68rem] text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <Pencil size={10} /> Edit in Studio
-                      </button>
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => openEditCoverModal(selectedMonth)}
+                          className="text-[0.68rem] text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Pencil size={10} /> Edit in Studio
+                        </button>
+                      )}
                     </div>
 
                     {/* Goals List with Clickable Checkboxes */}
@@ -2104,11 +2120,15 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       {(normalizedMonths[selectedMonth - 1]?.checklist || []).map((goal) => (
                         <div
                           key={goal.id}
-                          onClick={() => toggleMonthChecklistItem(selectedMonth, goal.id)}
-                          className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all cursor-pointer ${
+                          onClick={() => {
+                            if (isAdmin) toggleMonthChecklistItem(selectedMonth, goal.id);
+                          }}
+                          className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all ${
+                            isAdmin ? 'cursor-pointer hover:border-amber-400' : ''
+                          } ${
                             goal.completed
                               ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-slate-500'
-                              : 'bg-white dark:bg-slate-800 border-amber-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-amber-400'
+                              : 'bg-white dark:bg-slate-800 border-amber-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
                           }`}
                         >
                           {goal.completed ? (
@@ -2164,19 +2184,23 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                           transform: `translate(-50%, -50%) rotate(${stk.rotation || 0}deg) scale(${stk.scale || 1})`,
                           zIndex: stk.zIndex || 20,
                         }}
-                        onPointerDown={(e) => handleStickerPointerDown(stk.id, e)}
+                        onPointerDown={(e) => {
+                          if (isAdmin) handleStickerPointerDown(stk.id, e);
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveSelectedStickerId(isSelected ? null : stk.id);
+                          if (isAdmin) {
+                            setActiveSelectedStickerId(isSelected ? null : stk.id);
+                          }
                         }}
                         className={`absolute pointer-events-auto select-none transition-shadow ${
-                          isCanvasEditMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-amber-400 rounded-xl' : ''
-                        } ${isSelected ? 'ring-2 ring-indigo-500 shadow-xl' : ''}`}
+                          isAdmin && isCanvasEditMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-amber-400 rounded-xl' : ''
+                        } ${isSelected && isAdmin ? 'ring-2 ring-indigo-500 shadow-xl' : ''}`}
                       >
                         {renderCanvasStickerContent(stk)}
 
-                        {/* Selected Floating Toolbar */}
-                        {isSelected && isCanvasEditMode && (
+                        {/* Selected Floating Toolbar - Admin Only */}
+                        {isSelected && isCanvasEditMode && isAdmin && (
                           <div
                             onClick={(e) => e.stopPropagation()}
                             className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-slate-900/90 text-white rounded-xl shadow-xl backdrop-blur-md text-[0.62rem] z-50 whitespace-nowrap"
@@ -2426,10 +2450,14 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                                     type="button"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      toggleDayChecklistItem(primaryMem.id, item.id);
+                                      if (isAdmin) {
+                                        toggleDayChecklistItem(primaryMem.id, item.id);
+                                      }
                                     }}
-                                    className="w-full flex items-center gap-1 text-left group/dtask cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/40 rounded px-0.5 py-0.2 transition-colors"
-                                    title={item.completed ? 'Mark incomplete' : 'Mark completed'}
+                                    className={`w-full flex items-center gap-1 text-left group/dtask rounded px-0.5 py-0.2 transition-colors ${
+                                      isAdmin ? 'cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/40' : ''
+                                    }`}
+                                    title={isAdmin ? (item.completed ? 'Mark incomplete' : 'Mark completed') : undefined}
                                   >
                                     {item.completed ? (
                                       <CheckSquare size={10} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
