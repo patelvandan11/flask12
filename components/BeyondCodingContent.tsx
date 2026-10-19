@@ -599,19 +599,30 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setSelectedMemory(null);
   };
 
+  // Broken image tracker to guarantee zero broken image icons
+  const [brokenMonthImages, setBrokenMonthImages] = useState<Record<number, boolean>>({});
+
   // Resolve active cover image for a month (custom cover or first uploaded photo in days 1 to 31)
   const getMonthCoverImage = (monthNum: number): string => {
+    if (brokenMonthImages[monthNum]) return '';
     const existing = (data.months || []).find((m) => m.month === monthNum);
-    if (existing?.coverImages && existing.coverImages.length > 0 && existing.coverImages[0]) {
-      return existing.coverImages[0];
+    if (existing?.noPicMode) {
+      return '';
+    }
+    if (existing?.coverImages && existing.coverImages.length > 0) {
+      const first = existing.coverImages[0]?.trim();
+      if (first && first !== 'none' && first !== 'null' && first !== 'undefined' && first !== '') {
+        return first;
+      }
     }
     // Check if any memories uploaded in this month (days 1 to 31) have photos
     const monthMems = (data.memories || []).filter((mem) => mem.month === monthNum);
     for (const mem of monthMems) {
-      if (mem.imageUrl) return mem.imageUrl;
-      if (mem.images && mem.images.length > 0 && mem.images[0]) return mem.images[0];
+      if (mem.imageUrl && mem.imageUrl.trim()) return mem.imageUrl.trim();
+      if (mem.images && mem.images.length > 0 && mem.images[0]?.trim()) return mem.images[0].trim();
     }
-    return '/images/vandan_lake.png';
+    // NO images during month -> return empty string to show beautiful emoji & checklist card
+    return '';
   };
 
   // Normalized 12 months array (Jan to Dec) with guaranteed cover images & metadata
@@ -619,13 +630,31 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     return Array.from({ length: 12 }, (_, i) => {
       const monthNum = i + 1;
       const existing = (data.months || []).find((m) => m.month === monthNum);
+      const cover = getMonthCoverImage(monthNum);
+      const defaultEmojis = DEFAULT_MONTH_EMOJIS[monthNum] || ['✨', '💛', '☕'];
+      const defaultGoals = (DEFAULT_MONTH_GOALS[monthNum] || ['Cozy moments', 'Daily joy']).map(
+        (g, idx) => ({ id: `g-${monthNum}-${idx}`, text: g, completed: false })
+      );
+
+      const hasValidPhoto = Boolean(
+        cover && cover.trim().length > 0 && !brokenMonthImages[monthNum] && !existing?.noPicMode
+      );
+
       if (existing) {
         return {
           ...existing,
-          coverImages:
-            existing.coverImages && existing.coverImages.length > 0
-              ? existing.coverImages
-              : [getMonthCoverImage(monthNum)],
+          coverImages: hasValidPhoto ? [cover] : [],
+          noPicMode: existing.noPicMode !== undefined ? existing.noPicMode : !hasValidPhoto,
+          emojiVibe:
+            existing.emojiVibe && existing.emojiVibe.length > 0
+              ? existing.emojiVibe
+              : existing.stickers && existing.stickers.length > 0
+              ? existing.stickers
+              : defaultEmojis,
+          checklist:
+            existing.checklist && existing.checklist.length > 0 ? existing.checklist : defaultGoals,
+          cardBgTheme: existing.cardBgTheme || 'cream',
+          canvasStickers: existing.canvasStickers || [],
         };
       }
       return {
@@ -633,32 +662,404 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
         name: MONTH_NAMES_EN[i].substring(0, 3),
         fullSpanishName: MONTH_NAMES_ES[i],
         fullEnglishName: MONTH_NAMES_EN[i],
-        coverImages: [getMonthCoverImage(monthNum)],
+        coverImages: hasValidPhoto ? [cover] : [],
+        noPicMode: !hasValidPhoto,
         vibeText: 'Cozy moments',
-        stickers: ['✨', '💛'],
+        stickers: defaultEmojis,
+        emojiVibe: defaultEmojis,
+        checklist: defaultGoals,
+        cardBgTheme: 'cream',
+        canvasStickers: [],
       };
     });
-  }, [data.months, data.memories]);
+  }, [data.months, data.memories, brokenMonthImages]);
 
-  // Open Month Cover Photo Studio modal
+  // Open Month Cover Photo & Theme Studio modal
   const openEditCoverModal = (monthNum: number) => {
     setCoverModalMonth(monthNum);
+    const existingMonth = (data.months || []).find((m) => m.month === monthNum);
     const cover = getMonthCoverImage(monthNum);
     setSelectedCoverUrl(cover);
     setCustomCoverUrlInput('');
-    const existingMonth = (data.months || []).find((m) => m.month === monthNum);
-    setCoverVibeText(existingMonth?.vibeText || '');
-    setCoverStickers(existingMonth?.stickers || ['✨', '💛']);
+    const isNoPic = Boolean(existingMonth?.noPicMode || !cover || cover.trim() === '');
+    setCoverNoPicMode(isNoPic);
+    setCoverModeTab(isNoPic ? 'nopic' : 'photo');
+    setCoverVibeText(existingMonth?.vibeText || 'Cozy moments');
+    const defaultEmojis = DEFAULT_MONTH_EMOJIS[monthNum] || ['✨', '💛', '☕'];
+    setCoverStickers(
+      existingMonth?.stickers && existingMonth.stickers.length > 0 ? existingMonth.stickers : defaultEmojis
+    );
+    setCoverEmojiVibe(
+      existingMonth?.emojiVibe && existingMonth.emojiVibe.length > 0
+        ? existingMonth.emojiVibe
+        : existingMonth?.stickers && existingMonth.stickers.length > 0
+        ? existingMonth.stickers
+        : defaultEmojis
+    );
+    const defaultGoals = (DEFAULT_MONTH_GOALS[monthNum] || ['Cozy moments', 'Daily joy']).map(
+      (g, idx) => ({ id: `g-${monthNum}-${idx}`, text: g, completed: false })
+    );
+    setCoverChecklist(
+      existingMonth?.checklist && existingMonth.checklist.length > 0
+        ? existingMonth.checklist
+        : defaultGoals
+    );
+    setCoverCardTheme(existingMonth?.cardBgTheme || 'cream');
+    setNewMonthGoalInput('');
     setIsCoverModalOpen(true);
   };
 
   const handleSwitchCoverModalMonth = (newMonth: number) => {
     setCoverModalMonth(newMonth);
-    setSelectedCoverUrl(getMonthCoverImage(newMonth));
+    const cover = getMonthCoverImage(newMonth);
+    setSelectedCoverUrl(cover);
     setCustomCoverUrlInput('');
     const existingMonth = (data.months || []).find((m) => m.month === newMonth);
-    setCoverVibeText(existingMonth?.vibeText || '');
-    setCoverStickers(existingMonth?.stickers || ['✨', '💛']);
+    const isNoPic = Boolean(existingMonth?.noPicMode || !cover || cover.trim() === '');
+    setCoverNoPicMode(isNoPic);
+    setCoverModeTab(isNoPic ? 'nopic' : 'photo');
+    setCoverVibeText(existingMonth?.vibeText || 'Cozy moments');
+    const defaultEmojis = DEFAULT_MONTH_EMOJIS[newMonth] || ['✨', '💛', '☕'];
+    setCoverStickers(
+      existingMonth?.stickers && existingMonth.stickers.length > 0 ? existingMonth.stickers : defaultEmojis
+    );
+    setCoverEmojiVibe(
+      existingMonth?.emojiVibe && existingMonth.emojiVibe.length > 0
+        ? existingMonth.emojiVibe
+        : existingMonth?.stickers && existingMonth.stickers.length > 0
+        ? existingMonth.stickers
+        : defaultEmojis
+    );
+    const defaultGoals = (DEFAULT_MONTH_GOALS[newMonth] || ['Cozy moments', 'Daily joy']).map(
+      (g, idx) => ({ id: `g-${newMonth}-${idx}`, text: g, completed: false })
+    );
+    setCoverChecklist(
+      existingMonth?.checklist && existingMonth.checklist.length > 0
+        ? existingMonth.checklist
+        : defaultGoals
+    );
+    setCoverCardTheme(existingMonth?.cardBgTheme || 'cream');
+  };
+
+  // Toggle Month Checklist Item
+  const toggleMonthChecklistItem = async (monthNum: number, itemId: string) => {
+    const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
+    const existingIdx = currentMonths.findIndex((m) => m.month === monthNum);
+    if (existingIdx < 0) return;
+
+    const targetMonth = currentMonths[existingIdx];
+    const updatedChecklist = (targetMonth.checklist || []).map((item) =>
+      item.id === itemId ? { ...item, completed: !item.completed } : item
+    );
+
+    const updatedMonthObj: MonthScrapbook = {
+      ...targetMonth,
+      checklist: updatedChecklist,
+    };
+
+    const newMonthsList = currentMonths.map((m, idx) => (idx === existingIdx ? updatedMonthObj : m));
+    const updatedData: BeyondCodingData = {
+      ...data,
+      months: newMonthsList,
+    };
+    setData(updatedData);
+    confetti({ particleCount: 25, spread: 45, origin: { y: 0.5 } });
+    await saveToMongoDB(updatedData);
+  };
+
+  // Toggle Day Checklist Item
+  const toggleDayChecklistItem = async (memoryId: string, itemId: string) => {
+    let updatedList = (data.memories || []).map((m) => {
+      if (m.id === memoryId && m.checklist) {
+        return {
+          ...m,
+          checklist: m.checklist.map((item) =>
+            item.id === itemId ? { ...item, completed: !item.completed } : item
+          ),
+        };
+      }
+      return m;
+    });
+
+    const updatedData: BeyondCodingData = {
+      ...data,
+      memories: updatedList,
+    };
+    setData(updatedData);
+    await saveToMongoDB(updatedData);
+  };
+
+  // Add a Quick Goal to Current Month
+  const addQuickMonthGoal = async (monthNum: number, text: string) => {
+    if (!text.trim()) return;
+    const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
+    const existingIdx = currentMonths.findIndex((m) => m.month === monthNum);
+    const existingMonth = existingIdx >= 0 ? currentMonths[existingIdx] : null;
+
+    const newGoal: MonthChecklistItem = {
+      id: `mgoal-${Date.now()}`,
+      text: text.trim(),
+      completed: false,
+    };
+
+    const updatedChecklist = [...(existingMonth?.checklist || []), newGoal];
+    const updatedMonthObj: MonthScrapbook = {
+      month: monthNum,
+      name: existingMonth?.name || MONTH_NAMES_EN[monthNum - 1].substring(0, 3),
+      fullSpanishName: existingMonth?.fullSpanishName || MONTH_NAMES_ES[monthNum - 1],
+      fullEnglishName: existingMonth?.fullEnglishName || MONTH_NAMES_EN[monthNum - 1],
+      coverImages: existingMonth?.coverImages || [],
+      vibeText: existingMonth?.vibeText || 'Cozy moments',
+      stickers: existingMonth?.stickers || ['✨', '💛'],
+      noPicMode: existingMonth?.noPicMode,
+      emojiVibe: existingMonth?.emojiVibe,
+      checklist: updatedChecklist,
+      cardBgTheme: existingMonth?.cardBgTheme,
+      canvasStickers: existingMonth?.canvasStickers,
+    };
+
+    let newMonthsList: MonthScrapbook[];
+    if (existingIdx >= 0) {
+      newMonthsList = currentMonths.map((m, idx) => (idx === existingIdx ? updatedMonthObj : m));
+    } else {
+      newMonthsList = [...currentMonths, updatedMonthObj];
+    }
+
+    const updatedData: BeyondCodingData = {
+      ...data,
+      months: newMonthsList,
+    };
+    setData(updatedData);
+    setQuickNewGoalText('');
+    await saveToMongoDB(updatedData);
+  };
+
+  // ACTIVE CANVAS STICKERS FOR CURRENT MONTH (matching Image 2)
+  const currentMonthCanvasStickers: CanvasSticker[] = useMemo(() => {
+    const currentMonthObj = (data.months || []).find((m) => m.month === selectedMonth);
+    if (currentMonthObj?.canvasStickers && currentMonthObj.canvasStickers.length > 0) {
+      return currentMonthObj.canvasStickers;
+    }
+    const globalMatches = (data.canvasStickers || []).filter(
+      (s) => s.month === selectedMonth && (s.year === selectedYear || !s.year)
+    );
+    if (globalMatches.length > 0) return globalMatches;
+
+    // Default sample collage for July matching Image 2 "Luglio 2025"
+    if (selectedMonth === 7) {
+      return [
+        {
+          id: 'sample-jul-camera',
+          month: 7,
+          type: 'scrapbook',
+          content: 'retro-camera',
+          x: 90,
+          y: 19,
+          rotation: 3,
+          scale: 1.15,
+          zIndex: 25,
+        },
+        {
+          id: 'sample-jul-dog',
+          month: 7,
+          type: 'scrapbook',
+          content: 'dog-polaroid',
+          x: 11,
+          y: 22,
+          rotation: -4,
+          scale: 1.05,
+          frameStyle: 'paperclip',
+          zIndex: 20,
+        },
+        {
+          id: 'sample-jul-phone',
+          month: 7,
+          type: 'scrapbook',
+          content: 'phone-player',
+          x: 88,
+          y: 80,
+          rotation: 2,
+          scale: 1,
+          zIndex: 25,
+        },
+        {
+          id: 'sample-jul-star',
+          month: 7,
+          type: 'scrapbook',
+          content: 'star-doodle',
+          x: 27,
+          y: 24,
+          rotation: 8,
+          scale: 1.2,
+          zIndex: 15,
+        },
+        {
+          id: 'sample-jul-qrcode',
+          month: 7,
+          type: 'scrapbook',
+          content: 'qr-clip',
+          x: 43,
+          y: 38,
+          rotation: -5,
+          scale: 0.95,
+          zIndex: 22,
+        },
+        {
+          id: 'sample-jul-flower',
+          month: 7,
+          type: 'scrapbook',
+          content: 'blue-flower',
+          x: 48,
+          y: 43,
+          rotation: 12,
+          scale: 1,
+          zIndex: 23,
+        },
+        {
+          id: 'sample-jul-sandwich',
+          month: 7,
+          type: 'scrapbook',
+          content: 'sandwich-tape',
+          x: 52,
+          y: 27,
+          rotation: -6,
+          scale: 1.1,
+          tapeColor: 'kraft',
+          zIndex: 24,
+        },
+        {
+          id: 'sample-jul-sunscreen',
+          month: 7,
+          type: 'scrapbook',
+          content: 'sunscreen',
+          x: 80,
+          y: 47,
+          rotation: 4,
+          scale: 1,
+          zIndex: 22,
+        },
+        {
+          id: 'sample-jul-note1',
+          month: 7,
+          type: 'text',
+          content: 'festa con camping ⛺',
+          x: 70,
+          y: 36,
+          rotation: -3,
+          scale: 1,
+          zIndex: 18,
+        },
+        {
+          id: 'sample-jul-note2',
+          month: 7,
+          type: 'text',
+          content: 'degustazione + enoteca 🍷',
+          x: 26,
+          y: 66,
+          rotation: -6,
+          scale: 1,
+          zIndex: 18,
+        },
+      ];
+    }
+    return [];
+  }, [data.months, data.canvasStickers, selectedMonth, selectedYear]);
+
+  // Handle saving canvas stickers to MongoDB Atlas
+  const handleSaveCanvasStickers = async (updatedStickers: CanvasSticker[]) => {
+    const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
+    const existingIdx = currentMonths.findIndex((m) => m.month === selectedMonth);
+    const existingMonth = existingIdx >= 0 ? currentMonths[existingIdx] : null;
+
+    const updatedMonthObj: MonthScrapbook = {
+      month: selectedMonth,
+      name: existingMonth?.name || MONTH_NAMES_EN[selectedMonth - 1].substring(0, 3),
+      fullSpanishName: existingMonth?.fullSpanishName || MONTH_NAMES_ES[selectedMonth - 1],
+      fullEnglishName: existingMonth?.fullEnglishName || MONTH_NAMES_EN[selectedMonth - 1],
+      coverImages: existingMonth?.coverImages || [],
+      vibeText: existingMonth?.vibeText || 'Cozy moments',
+      stickers: existingMonth?.stickers || ['✨', '💛'],
+      noPicMode: existingMonth?.noPicMode,
+      emojiVibe: existingMonth?.emojiVibe,
+      checklist: existingMonth?.checklist,
+      cardBgTheme: existingMonth?.cardBgTheme,
+      canvasStickers: updatedStickers,
+    };
+
+    let newMonthsList: MonthScrapbook[];
+    if (existingIdx >= 0) {
+      newMonthsList = currentMonths.map((m, idx) => (idx === existingIdx ? updatedMonthObj : m));
+    } else {
+      newMonthsList = [...currentMonths, updatedMonthObj];
+    }
+
+    const otherStickers = (data.canvasStickers || []).filter((s) => s.month !== selectedMonth);
+    const updatedAllStickers = [...otherStickers, ...updatedStickers];
+
+    const updatedData: BeyondCodingData = {
+      ...data,
+      months: newMonthsList,
+      canvasStickers: updatedAllStickers,
+    };
+
+    setData(updatedData);
+    await saveToMongoDB(updatedData);
+  };
+
+  // Add a new canvas sticker
+  const handleAddCanvasSticker = async (newSticker: Omit<CanvasSticker, 'id' | 'month' | 'year'>) => {
+    const created: CanvasSticker = {
+      ...newSticker,
+      id: `cstk-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      month: selectedMonth,
+      year: selectedYear,
+      x: newSticker.x ?? 50,
+      y: newSticker.y ?? 50,
+      rotation: newSticker.rotation ?? Math.floor(Math.random() * 16 - 8),
+      scale: newSticker.scale ?? 1,
+      zIndex: (currentMonthCanvasStickers.length || 0) + 20,
+    };
+
+    const nextStickers = [...currentMonthCanvasStickers, created];
+    setActiveSelectedStickerId(created.id);
+    await handleSaveCanvasStickers(nextStickers);
+    confetti({ particleCount: 30, spread: 50, origin: { x: (created.x || 50) / 100, y: (created.y || 50) / 100 } });
+  };
+
+  // Delete a canvas sticker
+  const handleDeleteCanvasSticker = async (stickerId: string) => {
+    const nextStickers = currentMonthCanvasStickers.filter((s) => s.id !== stickerId);
+    if (activeSelectedStickerId === stickerId) setActiveSelectedStickerId(null);
+    await handleSaveCanvasStickers(nextStickers);
+  };
+
+  // Rotate canvas sticker
+  const handleRotateSticker = async (stickerId: string, delta: number) => {
+    const nextStickers = currentMonthCanvasStickers.map((s) =>
+      s.id === stickerId ? { ...s, rotation: ((s.rotation || 0) + delta) % 360 } : s
+    );
+    await handleSaveCanvasStickers(nextStickers);
+  };
+
+  // Scale canvas sticker
+  const handleScaleSticker = async (stickerId: string, delta: number) => {
+    const nextStickers = currentMonthCanvasStickers.map((s) => {
+      if (s.id === stickerId) {
+        const nextScale = Math.max(0.5, Math.min(2.5, Number(((s.scale || 1) + delta).toFixed(2))));
+        return { ...s, scale: nextScale };
+      }
+      return s;
+    });
+    await handleSaveCanvasStickers(nextStickers);
+  };
+
+  // Bring canvas sticker to front
+  const handleBringToFront = async (stickerId: string) => {
+    const maxZ = Math.max(20, ...currentMonthCanvasStickers.map((s) => s.zIndex || 20));
+    const nextStickers = currentMonthCanvasStickers.map((s) =>
+      s.id === stickerId ? { ...s, zIndex: maxZ + 2 } : s
+    );
+    await handleSaveCanvasStickers(nextStickers);
   };
 
   // Photos uploaded during the month being edited (days 1 to 31)
@@ -691,7 +1092,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     return list.sort((a, b) => a.day - b.day);
   }, [data.memories, coverModalMonth, selectedYear]);
 
-  // Save updated month cover photo to MongoDB Atlas
+  // Save updated month cover photo / theme to MongoDB Atlas
   const handleSaveMonthCover = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!isAdmin) {
@@ -700,17 +1101,19 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       return;
     }
 
-    if (!selectedCoverUrl) {
-      alert('Please select or upload a cover image.');
-      return;
-    }
-
     const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
     const existingIdx = currentMonths.findIndex((m) => m.month === coverModalMonth);
     const existingMonth = existingIdx >= 0 ? currentMonths[existingIdx] : null;
 
-    const otherImages = (existingMonth?.coverImages || []).filter((img) => img !== selectedCoverUrl);
-    const updatedCoverImages = [selectedCoverUrl, ...otherImages];
+    const isNoPic = coverModeTab === 'nopic' || coverNoPicMode;
+    let updatedCoverImages: string[] = [];
+
+    if (!isNoPic) {
+      if (selectedCoverUrl && selectedCoverUrl.trim()) {
+        const otherImages = (existingMonth?.coverImages || []).filter((img) => img !== selectedCoverUrl);
+        updatedCoverImages = [selectedCoverUrl, ...otherImages];
+      }
+    }
 
     const updatedMonthObj: MonthScrapbook = {
       month: coverModalMonth,
@@ -720,6 +1123,11 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       coverImages: updatedCoverImages,
       vibeText: coverVibeText || existingMonth?.vibeText || 'Cozy moments',
       stickers: coverStickers && coverStickers.length > 0 ? coverStickers : (existingMonth?.stickers || ['✨', '💛']),
+      noPicMode: isNoPic,
+      emojiVibe: coverEmojiVibe.length > 0 ? coverEmojiVibe : (existingMonth?.emojiVibe || ['✨', '💛']),
+      checklist: coverChecklist,
+      cardBgTheme: coverCardTheme,
+      canvasStickers: existingMonth?.canvasStickers || [],
     };
 
     let newMonthsList: MonthScrapbook[];
@@ -799,14 +1207,249 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     if (!isFullscreen) {
       if (plannerSheetRef.current.requestFullscreen) {
         plannerSheetRef.current.requestFullscreen().catch(() => {});
-      }
-      setIsFullscreen(true);
-    } else {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
-      setIsFullscreen(false);
+  // Dragging event handlers for canvas stickers
+  const handleStickerPointerDown = (stickerId: string, e: React.PointerEvent) => {
+    if (!isCanvasEditMode) return;
+    e.stopPropagation();
+    setActiveSelectedStickerId(stickerId);
+    setIsDraggingStickerId(stickerId);
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingStickerId || !plannerCanvasRef.current) return;
+    const rect = plannerCanvasRef.current.getBoundingClientRect();
+    const rawX = ((e.clientX - rect.left) / rect.width) * 100;
+    const rawY = ((e.clientY - rect.top) / rect.height) * 100;
+    const clampedX = Math.round(Math.max(4, Math.min(96, rawX)));
+    const clampedY = Math.round(Math.max(4, Math.min(96, rawY)));
+
+    const nextStickers = currentMonthCanvasStickers.map((s) =>
+      s.id === isDraggingStickerId ? { ...s, x: clampedX, y: clampedY } : s
+    );
+
+    const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
+    const existingIdx = currentMonths.findIndex((m) => m.month === selectedMonth);
+    if (existingIdx >= 0) {
+      currentMonths[existingIdx] = {
+        ...currentMonths[existingIdx],
+        canvasStickers: nextStickers,
+      };
+      setData({ ...data, months: currentMonths });
     }
+  };
+
+  const handleCanvasPointerUp = async () => {
+    if (isDraggingStickerId) {
+      setIsDraggingStickerId(null);
+      await handleSaveCanvasStickers(currentMonthCanvasStickers);
+    }
+  };
+
+  const renderCanvasStickerContent = (stk: CanvasSticker) => {
+    // 1. Photo sticker related to pic
+    if (stk.type === 'photo') {
+      return (
+        <div className="relative group/canvasPhoto">
+          {stk.frameStyle === 'paperclip' ? (
+            <div className="relative bg-white p-1.5 pb-3 rounded-lg shadow-lg border border-slate-200">
+              <div className="absolute -top-3.5 -left-2 z-30 drop-shadow-md select-none pointer-events-none">
+                <div className="w-3.5 h-8 border-2 border-slate-500 rounded-full bg-transparent rotate-[-15deg]" />
+              </div>
+              <div className="relative w-20 sm:w-24 h-16 sm:h-20 rounded overflow-hidden bg-slate-100">
+                <Image src={stk.content} alt={stk.label || 'Canvas sticker'} fill sizes="100px" className="object-cover" />
+              </div>
+              {stk.label && (
+                <span className="block mt-1 text-[0.6rem] font-handwriting font-bold text-center text-slate-800 leading-tight">
+                  {stk.label}
+                </span>
+              )}
+            </div>
+          ) : stk.frameStyle === 'tape' ? (
+            <div className="relative bg-white p-1 rounded-lg shadow-md border border-slate-200">
+              <div className={`absolute -top-1.5 left-1 w-6 h-2 rounded-xs shadow-2xs rotate-[-8deg] z-20 pointer-events-none ${getWashiTapeClass(stk.tapeColor || 'pink')}`} />
+              <div className={`absolute -bottom-1.5 right-1 w-6 h-2 rounded-xs shadow-2xs rotate-[6deg] z-20 pointer-events-none ${getWashiTapeClass(stk.tapeColor || 'pink')}`} />
+              <div className="relative w-20 sm:w-24 h-16 sm:h-20 rounded overflow-hidden bg-slate-100">
+                <Image src={stk.content} alt={stk.label || 'Canvas sticker'} fill sizes="100px" className="object-cover" />
+              </div>
+              {stk.label && (
+                <span className="block mt-0.5 text-[0.58rem] font-handwriting font-bold text-center text-slate-800">
+                  {stk.label}
+                </span>
+              )}
+            </div>
+          ) : stk.frameStyle === 'cutout' ? (
+            <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white ring-1 ring-black/10">
+              <div className="relative w-16 sm:w-20 h-16 sm:h-20 bg-slate-100">
+                <Image src={stk.content} alt={stk.label || 'Cutout sticker'} fill sizes="80px" className="object-cover" />
+              </div>
+            </div>
+          ) : (
+            /* Default Polaroid with Tape */
+            <div className="relative bg-white p-1.5 pb-2.5 rounded-lg shadow-lg border border-slate-200">
+              <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-2 rounded-xs shadow-2xs rotate-[-2deg] z-20 pointer-events-none ${getWashiTapeClass(stk.tapeColor || 'gold')}`} />
+              <div className="relative w-20 sm:w-24 h-16 sm:h-20 rounded overflow-hidden bg-slate-100">
+                <Image src={stk.content} alt={stk.label || 'Polaroid'} fill sizes="100px" className="object-cover" />
+              </div>
+              {stk.label && (
+                <span className="block mt-0.5 text-[0.6rem] font-handwriting font-bold text-center text-slate-800 leading-tight">
+                  {stk.label}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 2. Handwritten Doodle Text Note
+    if (stk.type === 'text') {
+      return (
+        <div className="px-2 py-0.5 rounded-xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xs border border-amber-900/15 shadow-xs">
+          <span className="font-handwriting font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 whitespace-nowrap">
+            {stk.content}
+          </span>
+        </div>
+      );
+    }
+
+    // 3. Emoji Sticker
+    if (stk.type === 'emoji') {
+      return (
+        <span className="text-2xl sm:text-3xl filter drop-shadow-md select-none block">
+          {stk.content}
+        </span>
+      );
+    }
+
+    // 4. Authentic Scrapbook Cutouts matching Image 2!
+    if (stk.type === 'scrapbook') {
+      switch (stk.content) {
+        case 'retro-camera':
+          return (
+            <div className="relative w-20 sm:w-24 bg-[#1f242b] p-1.5 rounded-xl shadow-2xl border-2 border-slate-700 text-white flex flex-col items-center">
+              <div className="w-full flex items-center justify-between px-0.5 mb-0.5">
+                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                <div className="flex gap-0.5">
+                  <div className="w-2 h-1.5 bg-slate-500 rounded-xs" />
+                  <div className="w-2 h-2 rounded-full bg-amber-400" />
+                </div>
+              </div>
+              <div className="relative w-full h-12 rounded overflow-hidden bg-slate-900 border border-slate-600">
+                <Image src="/images/art4.jpg" alt="Camera snapshot" fill sizes="80px" className="object-cover" />
+              </div>
+              <span className="text-[0.48rem] font-code text-slate-400 mt-0.5 uppercase tracking-widest font-bold">
+                NIKON 35MM
+              </span>
+            </div>
+          );
+
+        case 'phone-player':
+          return (
+            <div className="w-24 sm:w-28 bg-slate-900/95 text-white p-1.5 rounded-xl shadow-2xl border border-slate-700 backdrop-blur-md flex flex-col space-y-0.5">
+              <div className="relative w-full h-10 rounded overflow-hidden bg-slate-800">
+                <Image src="/images/art1.jpg" alt="Album artwork" fill sizes="80px" className="object-cover" />
+              </div>
+              <div className="px-0.5">
+                <p className="text-[0.55rem] font-bold font-planner-title leading-tight truncate">
+                  Adesso che fai 🎵
+                </p>
+                <p className="text-[0.45rem] text-slate-400 font-sans truncate">Vandan & friends</p>
+              </div>
+              <div className="w-full h-0.5 bg-slate-700 rounded-full overflow-hidden">
+                <div className="w-2/3 h-full bg-amber-400 rounded-full" />
+              </div>
+              <div className="flex items-center justify-between text-[0.42rem] font-code text-slate-400 px-0.5">
+                <span>2:14</span>
+                <span>3:42</span>
+              </div>
+            </div>
+          );
+
+        case 'qr-clip':
+          return (
+            <div className="relative bg-white p-1.5 rounded-xl shadow-lg border border-slate-200 flex flex-col items-center">
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-6 h-3 bg-pink-400 rounded-md border border-pink-600 shadow-xs z-30" />
+              <div className="w-9 h-9 bg-slate-100 border border-slate-300 rounded p-0.5 flex items-center justify-center">
+                <div className="w-full h-full bg-[radial-gradient(#1e293b_1.8px,transparent_1.8px)] [background-size:5px_5px]" />
+              </div>
+              <span className="text-[0.45rem] font-code font-bold text-slate-500 mt-0.5">SCAN ME</span>
+            </div>
+          );
+
+        case 'dog-polaroid':
+          return (
+            <div className="relative bg-white p-1 pb-1.5 rounded-lg shadow-lg border border-slate-200">
+              <div className="absolute -top-2.5 left-1 w-3 h-6 border-2 border-slate-400 rounded-full rotate-[-10deg] shadow-xs pointer-events-none" />
+              <div className="relative w-16 h-16 rounded overflow-hidden bg-slate-100">
+                <Image src="/images/art2.jpg" alt="Dog with paw" fill sizes="70px" className="object-cover" />
+              </div>
+              <span className="block text-[0.5rem] font-handwriting font-bold text-center text-slate-700 mt-0.5">
+                pup joy 🐾
+              </span>
+            </div>
+          );
+
+        case 'sandwich-tape':
+          return (
+            <div className="relative bg-white/95 p-1 rounded-xl shadow-md border border-amber-900/10">
+              <div className="absolute -top-1.5 left-1 w-7 h-2 washi-pattern-gold rotate-[-8deg] shadow-xs rounded-xs" />
+              <div className="w-16 h-12 rounded bg-amber-50 flex items-center justify-center text-xl">
+                🥪 🥐
+              </div>
+              <span className="block text-[0.48rem] font-handwriting font-bold text-center text-amber-900">
+                panino picnic
+              </span>
+            </div>
+          );
+
+        case 'sunscreen':
+          return (
+            <div className="w-10 sm:w-11 bg-gradient-to-b from-amber-600 to-amber-800 text-amber-100 p-1 rounded-lg shadow-lg border border-amber-500/60 flex flex-col items-center">
+              <div className="w-3 h-2 bg-amber-300 rounded-t-sm -mt-2 mb-0.5" />
+              <span className="text-[0.48rem] font-bold font-planner-title">SOLEIL</span>
+              <span className="text-[0.55rem] font-extrabold font-code text-white">30+</span>
+              <span className="text-[0.4rem] font-sans text-amber-200">protect</span>
+            </div>
+          );
+
+        case 'star-doodle':
+          return (
+            <div className="text-2xl sm:text-3xl filter drop-shadow-xs select-none">
+              ✦
+            </div>
+          );
+
+        case 'blue-flower':
+          return (
+            <div className="text-2xl sm:text-3xl filter drop-shadow-md select-none text-sky-500">
+              🌸
+            </div>
+          );
+
+        case 'croissant':
+          return (
+            <div className="relative bg-white/80 p-0.5 rounded-lg shadow-sm">
+              <span className="text-2xl select-none">🥐</span>
+            </div>
+          );
+
+        default:
+          return (
+            <div className="p-1.5 bg-white rounded-lg shadow-md">
+              <span>✨</span>
+            </div>
+          );
+      }
+    }
+
+    // 5. Custom image sticker
+    return (
+      <div className="relative w-16 sm:w-20 h-16 sm:h-20 rounded-xl overflow-hidden shadow-md bg-white p-0.5">
+        <div className="relative w-full h-full rounded overflow-hidden">
+          <Image src={stk.content} alt="Sticker" fill sizes="80px" className="object-cover" />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -1089,43 +1732,133 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       )}
                     </div>
 
-                    {/* Mini Scrapbook Photo Box */}
-                    <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700">
-                      <Image
-                        src={coverImageSrc}
-                        alt={m.name}
-                        fill
-                        sizes="100px"
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                    {/* Mini Scrapbook Box: Photo OR Cozy Emoji & Checklist */}
+                    {coverImageSrc && !m.noPicMode && !brokenMonthImages[m.month] ? (
+                      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700">
+                        <Image
+                          src={coverImageSrc}
+                          alt={m.name}
+                          fill
+                          sizes="100px"
+                          onError={() => setBrokenMonthImages((prev) => ({ ...prev, [m.month]: true }))}
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
 
-                      {/* Cute Tape Sticker on Top */}
-                      <div className="absolute top-1 left-2 w-7 h-2 bg-amber-200/90 dark:bg-amber-400/70 rotate-[-8deg] shadow-xs rounded-xs pointer-events-none" />
+                        {/* Cute Tape Sticker on Top */}
+                        <div className="absolute top-1 left-2 w-7 h-2 bg-amber-200/90 dark:bg-amber-400/70 rotate-[-8deg] shadow-xs rounded-xs pointer-events-none" />
 
-                      {/* Memory Count Badge */}
-                      {memoryCount > 0 && (
-                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.6rem] font-bold backdrop-blur-xs pointer-events-none">
-                          {memoryCount} {memoryCount === 1 ? 'pic' : 'pics'}
-                        </span>
-                      )}
+                        {/* Memory Count Badge */}
+                        {memoryCount > 0 && (
+                          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.6rem] font-bold backdrop-blur-xs pointer-events-none">
+                            {memoryCount} {memoryCount === 1 ? 'pic' : 'pics'}
+                          </span>
+                        )}
 
-                      {/* Dedicated Change Cover Photo Button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditCoverModal(m.month);
-                        }}
-                        className={`absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/85 hover:bg-amber-500 text-white backdrop-blur-xs transition-all duration-200 shadow-md z-20 cursor-pointer ${
-                          isAdmin
-                            ? 'opacity-85 hover:opacity-100 hover:scale-110'
-                            : 'opacity-0 group-hover:opacity-85 hover:opacity-100 hover:scale-110'
-                        }`}
-                        title={`Change cover photo for ${m.name} (select from uploaded photos or upload new)`}
+                        {/* Dedicated Change Cover Photo Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditCoverModal(m.month);
+                          }}
+                          className={`absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/85 hover:bg-amber-500 text-white backdrop-blur-xs transition-all duration-200 shadow-md z-20 cursor-pointer ${
+                            isAdmin
+                              ? 'opacity-85 hover:opacity-100 hover:scale-110'
+                              : 'opacity-0 group-hover:opacity-85 hover:opacity-100 hover:scale-110'
+                          }`}
+                          title={`Edit ${m.name} Cover or switch to Emoji & Checklist Mode`}
+                        >
+                          <Camera size={11} className="drop-shadow-xs" />
+                        </button>
+                      </div>
+                    ) : (
+                      /* NO PIC MODE: COZY EMOJI & CHECKLIST SCRAPBOOK CARD */
+                      <div
+                        className={`relative w-full aspect-square rounded-xl p-2 border flex flex-col justify-between overflow-hidden shadow-xs transition-all duration-200 ${getCardBgThemeClass(
+                          m.cardBgTheme
+                        )}`}
                       >
-                        <Camera size={11} className="drop-shadow-xs" />
-                      </button>
-                    </div>
+                        {/* Washi Tape Strip on Top */}
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-2 bg-amber-300/80 dark:bg-amber-400/60 rotate-[-2deg] rounded-xs shadow-2xs pointer-events-none" />
+
+                        {/* Prominent Aesthetic Emojis */}
+                        <div className="flex-1 flex flex-col items-center justify-center pt-1.5 select-none">
+                          <div className="flex items-center gap-1 text-2xl sm:text-3xl filter drop-shadow-xs hover:scale-110 transition-transform">
+                            {(m.emojiVibe && m.emojiVibe.length > 0 ? m.emojiVibe : m.stickers || ['✨', '💛']).slice(0, 3).map((em, eIdx) => (
+                              <span key={eIdx}>{em}</span>
+                            ))}
+                          </div>
+                          <span className="text-[0.6rem] font-handwriting font-bold text-amber-900/80 dark:text-amber-200/80 line-clamp-1 mt-0.5">
+                            {m.vibeText || 'Cozy vibes'}
+                          </span>
+                        </div>
+
+                        {/* Checklist Goals Text added via Admin */}
+                        <div className="border-t border-amber-900/15 dark:border-amber-100/15 pt-1 space-y-0.5">
+                          {m.checklist && m.checklist.length > 0 ? (
+                            <div className="space-y-0.5">
+                              <div className="flex items-center justify-between text-[0.55rem] font-code font-bold text-amber-800 dark:text-amber-300">
+                                <span className="flex items-center gap-0.5">
+                                  <ListTodo size={8} /> Goals
+                                </span>
+                                <span>
+                                  {m.checklist.filter((c) => c.completed).length}/{m.checklist.length}
+                                </span>
+                              </div>
+                              {/* Mini Progress Bar */}
+                              <div className="w-full h-1 bg-amber-200/60 dark:bg-amber-900/50 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-amber-500 rounded-full transition-all"
+                                  style={{
+                                    width: `${Math.round(
+                                      (m.checklist.filter((c) => c.completed).length / m.checklist.length) * 100
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                              {/* First checklist item with clickable checkbox */}
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleMonthChecklistItem(m.month, m.checklist![0].id);
+                                }}
+                                className="flex items-center gap-1 text-[0.52rem] font-handwriting truncate text-slate-800 dark:text-slate-200 cursor-pointer hover:text-indigo-600 transition-colors"
+                              >
+                                {m.checklist[0].completed ? (
+                                  <CheckSquare size={9} className="text-emerald-600 flex-shrink-0" />
+                                ) : (
+                                  <Square size={9} className="text-amber-700/70 flex-shrink-0" />
+                                )}
+                                <span className={`truncate ${m.checklist[0].completed ? 'line-through text-slate-400' : 'font-bold'}`}>
+                                  {m.checklist[0].text}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-[0.52rem] font-handwriting text-center text-amber-800/70 dark:text-amber-300/70 italic">
+                              + Add checklist
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Dedicated Admin Edit Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditCoverModal(m.month);
+                          }}
+                          className={`absolute top-1 right-1 p-1 sm:p-1.2 rounded-lg bg-slate-900/80 hover:bg-amber-500 text-white backdrop-blur-xs transition-all shadow-md z-20 cursor-pointer ${
+                            isAdmin
+                              ? 'opacity-85 hover:opacity-100 hover:scale-110'
+                              : 'opacity-0 group-hover:opacity-85 hover:opacity-100 hover:scale-110'
+                          }`}
+                          title={`Customize ${m.name} Emojis & Checklist (Admin)`}
+                        >
+                          <Pencil size={10} className="drop-shadow-xs" />
+                        </button>
+                      </div>
+                    )}
 
                     {/* Stickers Footer */}
                     <div className="flex items-center gap-1 mt-1.5 text-[0.7rem] select-none">
@@ -1160,6 +1893,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
               {/* THE CREAM PAPER PLANNER SHEET */}
               <div
+                ref={plannerCanvasRef}
+                onPointerMove={handleCanvasPointerMove}
+                onPointerUp={handleCanvasPointerUp}
                 className={`relative z-20 w-full bg-[#fdfbf7] text-slate-800 rounded-2xl shadow-2xl border border-amber-900/15 transition-all flex flex-col justify-between ${
                   isFullscreen
                     ? 'max-w-6xl h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] p-3 sm:p-5 md:p-6'
@@ -1187,7 +1923,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
                 {/* Sheet Header: Month Number & Month Name (e.g. "12 diciembre") */}
                 <div className="flex flex-wrap items-center justify-between border-b border-amber-900/15 pb-3 mb-2 gap-2 flex-shrink-0">
-                  <div className="flex items-baseline gap-2.5">
+                  <div className="flex flex-wrap items-baseline gap-2 sm:gap-2.5">
                     <span className="text-3xl sm:text-5xl font-planner-title font-extrabold text-slate-800 leading-none">
                       {String(selectedMonth).padStart(2, '0')}
                     </span>
@@ -1208,18 +1944,61 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       </span>
                     )}
 
-                    {/* Quick Month Cover Button (Only in normal view mode, hidden during fullscreen mode) */}
+                    {/* Quick Month Cover / Theme Button */}
                     {!isFullscreen && (
                       <button
                         type="button"
                         onClick={() => openEditCoverModal(selectedMonth)}
-                        className="ml-1 sm:ml-2 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
-                        title={`Change cover photo for ${MONTH_NAMES_EN[selectedMonth - 1]}`}
+                        className="ml-1 px-2.5 py-1 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                        title={`Edit ${MONTH_NAMES_EN[selectedMonth - 1]} Cover, Emojis or Checklist`}
                       >
                         <Camera size={12} className="text-amber-700" />
-                        <span className="hidden sm:inline">Cover Photo</span>
+                        <span className="hidden sm:inline">Cover / Theme</span>
                       </button>
                     )}
+
+                    {/* Canvas Stickers Studio Button (matching Image 2) */}
+                    <button
+                      type="button"
+                      onClick={() => setIsCanvasStudioOpen(true)}
+                      className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 via-rose-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-white text-[0.7rem] font-bold font-code flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                      title="Paste Stickers on Month Canvas (Photos, Cutouts, Notes)"
+                    >
+                      <Sparkles size={11} className="text-amber-100 animate-pulse" />
+                      <span>🎨 Canvas ({currentMonthCanvasStickers.length})</span>
+                    </button>
+
+                    {/* Move Stickers Mode Toggle */}
+                    {currentMonthCanvasStickers.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsCanvasEditMode(!isCanvasEditMode)}
+                        className={`px-2 py-1 rounded-xl text-[0.68rem] font-bold font-code flex items-center gap-1 cursor-pointer transition-colors ${
+                          isCanvasEditMode
+                            ? 'bg-amber-200/90 text-amber-900 ring-1 ring-amber-400'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                        title="Toggle Draggable Stickers Mode"
+                      >
+                        <Move size={10} />
+                        <span>{isCanvasEditMode ? 'Move: ON' : 'Move: OFF'}</span>
+                      </button>
+                    )}
+
+                    {/* Month Goals & Checklist Toggle Pill */}
+                    <button
+                      type="button"
+                      onClick={() => setIsMonthChecklistExpanded(!isMonthChecklistExpanded)}
+                      className="px-2.5 py-1 rounded-xl bg-amber-100/70 hover:bg-amber-200 text-amber-900 text-[0.7rem] font-bold font-code flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                      title="Toggle Month Checklist Ribbon"
+                    >
+                      <ListTodo size={12} className="text-amber-700" />
+                      <span>
+                        Goals (
+                        {(normalizedMonths[selectedMonth - 1]?.checklist || []).filter((c) => c.completed).length}/
+                        {(normalizedMonths[selectedMonth - 1]?.checklist || []).length})
+                      </span>
+                    </button>
                   </div>
 
                   {/* Navigation & Controls */}
@@ -1287,6 +2066,168 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                     </button>
                   </div>
+                </div>
+
+                {/* EXPANDABLE MONTH GOALS & CHECKLIST RIBBON */}
+                {isMonthChecklistExpanded && (
+                  <div className="relative z-20 mb-3 p-3 bg-amber-50/95 dark:bg-amber-950/70 border border-amber-300/80 dark:border-amber-800/60 rounded-2xl shadow-inner space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ListTodo size={14} className="text-amber-700 dark:text-amber-400" />
+                        <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100">
+                          {MONTH_NAMES_EN[selectedMonth - 1]} Goals & Checklist
+                        </span>
+                        <span className="text-[0.62rem] font-code px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 font-bold">
+                          {(normalizedMonths[selectedMonth - 1]?.checklist || []).filter((c) => c.completed).length} /{' '}
+                          {(normalizedMonths[selectedMonth - 1]?.checklist || []).length} completed
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openEditCoverModal(selectedMonth)}
+                        className="text-[0.68rem] text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Pencil size={10} /> Edit in Studio
+                      </button>
+                    </div>
+
+                    {/* Goals List with Clickable Checkboxes */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                      {(normalizedMonths[selectedMonth - 1]?.checklist || []).map((goal) => (
+                        <div
+                          key={goal.id}
+                          onClick={() => toggleMonthChecklistItem(selectedMonth, goal.id)}
+                          className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all cursor-pointer ${
+                            goal.completed
+                              ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-slate-500'
+                              : 'bg-white dark:bg-slate-800 border-amber-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-amber-400'
+                          }`}
+                        >
+                          {goal.completed ? (
+                            <CheckSquare size={13} className="text-emerald-600 flex-shrink-0" />
+                          ) : (
+                            <Square size={13} className="text-amber-600 flex-shrink-0" />
+                          )}
+                          <span className={`text-xs font-handwriting truncate ${goal.completed ? 'line-through text-slate-400' : 'font-bold'}`}>
+                            {goal.text}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Inline Quick Add Goal */}
+                    {isAdmin && (
+                      <div className="flex gap-2 pt-1 border-t border-amber-200/60 dark:border-amber-900/40">
+                        <input
+                          type="text"
+                          placeholder={`+ Add a new goal or to-do for ${MONTH_NAMES_EN[selectedMonth - 1]}...`}
+                          value={quickNewGoalText}
+                          onChange={(e) => setQuickNewGoalText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              addQuickMonthGoal(selectedMonth, quickNewGoalText);
+                            }
+                          }}
+                          className="flex-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-handwriting"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => addQuickMonthGoal(selectedMonth, quickNewGoalText)}
+                          className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs cursor-pointer shadow-xs"
+                        >
+                          + Add Goal
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* FREEFORM SCRAPBOOK CANVAS STICKERS LAYER (matching Image 2) */}
+                <div className="absolute inset-0 pointer-events-none z-30 overflow-visible">
+                  {currentMonthCanvasStickers.map((stk) => {
+                    const isSelected = activeSelectedStickerId === stk.id;
+                    return (
+                      <div
+                        key={stk.id}
+                        style={{
+                          left: `${stk.x}%`,
+                          top: `${stk.y}%`,
+                          transform: `translate(-50%, -50%) rotate(${stk.rotation || 0}deg) scale(${stk.scale || 1})`,
+                          zIndex: stk.zIndex || 20,
+                        }}
+                        onPointerDown={(e) => handleStickerPointerDown(stk.id, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveSelectedStickerId(isSelected ? null : stk.id);
+                        }}
+                        className={`absolute pointer-events-auto select-none transition-shadow ${
+                          isCanvasEditMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-amber-400 rounded-xl' : ''
+                        } ${isSelected ? 'ring-2 ring-indigo-500 shadow-xl' : ''}`}
+                      >
+                        {renderCanvasStickerContent(stk)}
+
+                        {/* Selected Floating Toolbar */}
+                        {isSelected && isCanvasEditMode && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-slate-900/90 text-white rounded-xl shadow-xl backdrop-blur-md text-[0.62rem] z-50 whitespace-nowrap"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleRotateSticker(stk.id, -12)}
+                              className="p-1 hover:bg-slate-800 rounded cursor-pointer"
+                              title="Rotate Left"
+                            >
+                              ⟲
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRotateSticker(stk.id, 12)}
+                              className="p-1 hover:bg-slate-800 rounded cursor-pointer"
+                              title="Rotate Right"
+                            >
+                              ⟳
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleScaleSticker(stk.id, -0.15)}
+                              className="px-1.5 py-0.5 hover:bg-slate-800 rounded cursor-pointer font-bold"
+                              title="Smaller"
+                            >
+                              −
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleScaleSticker(stk.id, 0.15)}
+                              className="px-1.5 py-0.5 hover:bg-slate-800 rounded cursor-pointer font-bold"
+                              title="Larger"
+                            >
+                              +
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleBringToFront(stk.id)}
+                              className="p-1 hover:bg-slate-800 rounded cursor-pointer"
+                              title="Bring to Front"
+                            >
+                              <Layers size={10} />
+                            </button>
+                            {isAdmin && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCanvasSticker(stk.id)}
+                                className="p-1 hover:bg-rose-600 rounded text-rose-300 hover:text-white cursor-pointer"
+                                title="Delete Sticker"
+                              >
+                                <Trash2 size={10} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Day of the Week Header Row (LUN, MAR, MIE...) */}
@@ -1461,6 +2402,47 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                                   >
                                     {resolveStickerIcon(primaryMem.sticker)}
                                   </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Day Checklist Tasks with Interactive Checkboxes */}
+                            {primaryMem.checklist && primaryMem.checklist.length > 0 && (
+                              <div
+                                className="w-full space-y-0.5 my-0.5 px-0.5 select-none"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {primaryMem.checklist.slice(0, 2).map((item) => (
+                                  <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleDayChecklistItem(primaryMem.id, item.id);
+                                    }}
+                                    className="w-full flex items-center gap-1 text-left group/dtask cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/40 rounded px-0.5 py-0.2 transition-colors"
+                                    title={item.completed ? 'Mark incomplete' : 'Mark completed'}
+                                  >
+                                    {item.completed ? (
+                                      <CheckSquare size={10} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                                    ) : (
+                                      <Square size={10} className="text-amber-700/80 dark:text-amber-400/80 flex-shrink-0" />
+                                    )}
+                                    <span
+                                      className={`text-[0.55rem] sm:text-[0.6rem] truncate leading-tight ${
+                                        item.completed
+                                          ? 'line-through text-slate-400 font-sans'
+                                          : 'text-slate-800 dark:text-slate-200 font-handwriting font-bold'
+                                      }`}
+                                    >
+                                      {item.text}
+                                    </span>
+                                  </button>
+                                ))}
+                                {primaryMem.checklist.length > 2 && (
+                                  <span className="text-[0.48rem] font-code text-amber-700 dark:text-amber-400 font-bold px-0.5 block">
+                                    +{primaryMem.checklist.length - 2} more tasks
+                                  </span>
                                 )}
                               </div>
                             )}
@@ -1725,6 +2707,46 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
             </div>
 
             <form onSubmit={handleSaveMemoryForm} className="space-y-3.5 text-xs">
+              {/* Memory Mode Switcher */}
+              <div className="flex p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setFormMode('photo')}
+                  className={`flex-1 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    formMode === 'photo'
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  }`}
+                >
+                  <Camera size={13} />
+                  <span>Photo Memory</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormMode('checklist')}
+                  className={`flex-1 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    formMode === 'checklist'
+                      ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  }`}
+                >
+                  <ListTodo size={13} />
+                  <span>Emoji & Checklist (No Pic)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormMode('hybrid')}
+                  className={`flex-1 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    formMode === 'hybrid'
+                      ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  }`}
+                >
+                  <Sparkles size={13} />
+                  <span>Both (Photo + Tasks)</span>
+                </button>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Month</label>
@@ -1760,19 +2782,117 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Sunset at the Lake, Finals done, Cafe brunch"
+                  placeholder="e.g. Sunset at the Lake, Finals done, Cafe brunch, or Daily Checklist"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-sans"
                 />
               </div>
 
+              {/* Day Checklist & Tasks Manager (No Pic or Both mode) */}
+              {(formMode === 'checklist' || formMode === 'hybrid') && (
+                <div className="space-y-2 p-3 rounded-2xl bg-amber-50/70 dark:bg-slate-800/70 border border-amber-200/80 dark:border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <ListTodo size={14} className="text-amber-600" />
+                      <span>Day Checklist & To-Dos ({formChecklist.length})</span>
+                    </label>
+                    <span className="text-[0.65rem] font-code text-slate-500">
+                      Shows directly in day cell on calendar
+                    </span>
+                  </div>
+
+                  {/* Existing tasks list */}
+                  {formChecklist.length > 0 && (
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                      {formChecklist.map((task) => (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200/60 dark:border-slate-700"
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormChecklist((prev) =>
+                                prev.map((t) => (t.id === task.id ? { ...t, completed: !t.completed } : t))
+                              )
+                            }
+                            className="flex items-center gap-2 text-left flex-1 cursor-pointer"
+                          >
+                            {task.completed ? (
+                              <CheckSquare size={13} className="text-emerald-600 flex-shrink-0" />
+                            ) : (
+                              <Square size={13} className="text-slate-400 flex-shrink-0" />
+                            )}
+                            <span
+                              className={`text-xs font-handwriting ${
+                                task.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-bold'
+                              }`}
+                            >
+                              {task.text}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormChecklist((prev) => prev.filter((t) => t.id !== task.id))
+                            }
+                            className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer"
+                            title="Remove task"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add task input */}
+                  <div className="flex gap-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="e.g. Morning walk, Read research paper, Deploy app..."
+                      value={newDayChecklistInput}
+                      onChange={(e) => setNewDayChecklistInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (newDayChecklistInput.trim()) {
+                            setFormChecklist((prev) => [
+                              ...prev,
+                              { id: `dtask-${Date.now()}`, text: newDayChecklistInput.trim(), completed: false },
+                            ]);
+                            setNewDayChecklistInput('');
+                          }
+                        }
+                      }}
+                      className="flex-1 p-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-handwriting"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newDayChecklistInput.trim()) {
+                          setFormChecklist((prev) => [
+                            ...prev,
+                            { id: `dtask-${Date.now()}`, text: newDayChecklistInput.trim(), completed: false },
+                          ]);
+                          setNewDayChecklistInput('');
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs cursor-pointer shadow-xs"
+                    >
+                      + Add Task
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Handwritten Note / Story
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="What made this moment cozy, memorable, or fun?"
                   value={formNote}
                   onChange={(e) => setFormNote(e.target.value)}
