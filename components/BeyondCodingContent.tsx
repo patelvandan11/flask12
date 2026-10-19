@@ -3190,7 +3190,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                  <span>Save to MongoDB Atlas</span>
+                  <span>Save</span>
                 </button>
               </div>
             </form>
