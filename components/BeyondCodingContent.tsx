@@ -252,6 +252,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
   const plannerSheetRef = useRef<HTMLDivElement>(null);
   const plannerCanvasRef = useRef<HTMLDivElement>(null);
+  const hasActuallyDraggedStickerRef = useRef<boolean>(false);
 
   // Global 2-second slideshow ticker for days with multiple photos
   useEffect(() => {
@@ -839,7 +840,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   // ACTIVE CANVAS STICKERS FOR CURRENT MONTH (matching Image 2)
   const currentMonthCanvasStickers: CanvasSticker[] = useMemo(() => {
     const currentMonthObj = (data.months || []).find((m) => m.month === selectedMonth);
-    if (currentMonthObj?.canvasStickers && currentMonthObj.canvasStickers.length > 0) {
+    if (currentMonthObj?.canvasStickers !== undefined && Array.isArray(currentMonthObj.canvasStickers)) {
       return currentMonthObj.canvasStickers;
     }
     const globalMatches = (data.canvasStickers || []).filter(
@@ -1223,10 +1224,12 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     e.stopPropagation();
     setActiveSelectedStickerId(stickerId);
     setIsDraggingStickerId(stickerId);
+    hasActuallyDraggedStickerRef.current = false;
   };
 
   const handleCanvasPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDraggingStickerId || !plannerCanvasRef.current) return;
+    hasActuallyDraggedStickerRef.current = true;
     const rect = plannerCanvasRef.current.getBoundingClientRect();
     const rawX = ((e.clientX - rect.left) / rect.width) * 100;
     const rawY = ((e.clientY - rect.top) / rect.height) * 100;
@@ -1239,19 +1242,39 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
 
     const currentMonths = [...(data.months && data.months.length > 0 ? data.months : normalizedMonths)];
     const existingIdx = currentMonths.findIndex((m) => m.month === selectedMonth);
-    if (existingIdx >= 0) {
-      currentMonths[existingIdx] = {
-        ...currentMonths[existingIdx],
-        canvasStickers: nextStickers,
-      };
-      setData({ ...data, months: currentMonths });
-    }
+    const existingMonth = existingIdx >= 0 ? currentMonths[existingIdx] : null;
+
+    const updatedMonthObj: MonthScrapbook = {
+      month: selectedMonth,
+      name: existingMonth?.name || MONTH_NAMES_EN[selectedMonth - 1]?.substring(0, 3) || 'Month',
+      fullSpanishName: existingMonth?.fullSpanishName || MONTH_NAMES_ES[selectedMonth - 1] || 'Mes',
+      fullEnglishName: existingMonth?.fullEnglishName || MONTH_NAMES_EN[selectedMonth - 1] || 'Month',
+      coverImages: existingMonth?.coverImages || [],
+      vibeText: existingMonth?.vibeText || 'Cozy moments',
+      stickers: existingMonth?.stickers || ['✨', '💛'],
+      noPicMode: existingMonth?.noPicMode,
+      emojiVibe: existingMonth?.emojiVibe,
+      checklist: existingMonth?.checklist,
+      cardBgTheme: existingMonth?.cardBgTheme,
+      canvasStickers: nextStickers,
+    };
+
+    const newMonthsList =
+      existingIdx >= 0
+        ? currentMonths.map((m, idx) => (idx === existingIdx ? updatedMonthObj : m))
+        : [...currentMonths, updatedMonthObj];
+
+    setData({ ...data, months: newMonthsList });
   };
 
   const handleCanvasPointerUp = async () => {
     if (isDraggingStickerId) {
+      const wasDragged = hasActuallyDraggedStickerRef.current;
       setIsDraggingStickerId(null);
-      await handleSaveCanvasStickers(currentMonthCanvasStickers);
+      hasActuallyDraggedStickerRef.current = false;
+      if (wasDragged) {
+        await handleSaveCanvasStickers(currentMonthCanvasStickers);
+      }
     }
   };
 
@@ -1913,6 +1936,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 ref={plannerCanvasRef}
                 onPointerMove={handleCanvasPointerMove}
                 onPointerUp={handleCanvasPointerUp}
+                onClick={() => {
+                  if (activeSelectedStickerId) setActiveSelectedStickerId(null);
+                }}
                 className={`relative z-20 w-full bg-[#fdfbf7] text-slate-800 rounded-2xl shadow-2xl border border-amber-900/15 transition-all flex flex-col justify-between ${
                   isFullscreen
                     ? 'max-w-6xl h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] p-3 sm:p-5 md:p-6'
@@ -2182,7 +2208,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                           left: `${stk.x}%`,
                           top: `${stk.y}%`,
                           transform: `translate(-50%, -50%) rotate(${stk.rotation || 0}deg) scale(${stk.scale || 1})`,
-                          zIndex: stk.zIndex || 20,
+                          zIndex: isSelected ? 50 : (stk.zIndex || 20),
                         }}
                         onPointerDown={(e) => {
                           if (isAdmin) handleStickerPointerDown(stk.id, e);
@@ -2202,59 +2228,102 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         {/* Selected Floating Toolbar - Admin Only */}
                         {isSelected && isCanvasEditMode && isAdmin && (
                           <div
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onPointerUp={(e) => e.stopPropagation()}
                             onClick={(e) => e.stopPropagation()}
-                            className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-slate-900/90 text-white rounded-xl shadow-xl backdrop-blur-md text-[0.62rem] z-50 whitespace-nowrap"
+                            style={{
+                              transform: `translateX(-50%) rotate(-${stk.rotation || 0}deg) scale(${1 / (stk.scale || 1)})`,
+                              transformOrigin: (stk.y ?? 50) < 14 ? 'top center' : 'bottom center',
+                            }}
+                            className={`absolute left-1/2 flex items-center gap-1 p-1 bg-slate-900/95 text-white rounded-xl shadow-2xl backdrop-blur-md text-xs z-[60] whitespace-nowrap border border-white/20 select-none cursor-default ${
+                              (stk.y ?? 50) < 14 ? 'top-full mt-2.5' : '-top-12'
+                            }`}
                           >
                             <button
                               type="button"
-                              onClick={() => handleRotateSticker(stk.id, -12)}
-                              className="p-1 hover:bg-slate-800 rounded cursor-pointer"
-                              title="Rotate Left"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRotateSticker(stk.id, -15);
+                              }}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 active:scale-90 text-white font-bold text-sm transition-all cursor-pointer shadow-xs"
+                              title="Rotate Left (-15°)"
                             >
                               ⟲
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleRotateSticker(stk.id, 12)}
-                              className="p-1 hover:bg-slate-800 rounded cursor-pointer"
-                              title="Rotate Right"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRotateSticker(stk.id, 15);
+                              }}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 active:scale-90 text-white font-bold text-sm transition-all cursor-pointer shadow-xs"
+                              title="Rotate Right (+15°)"
                             >
                               ⟳
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleScaleSticker(stk.id, -0.15)}
-                              className="px-1.5 py-0.5 hover:bg-slate-800 rounded cursor-pointer font-bold"
-                              title="Smaller"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleScaleSticker(stk.id, -0.15);
+                              }}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 active:scale-90 text-white font-bold text-sm transition-all cursor-pointer shadow-xs"
+                              title="Smaller (−)"
                             >
                               −
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleScaleSticker(stk.id, 0.15)}
-                              className="px-1.5 py-0.5 hover:bg-slate-800 rounded cursor-pointer font-bold"
-                              title="Larger"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleScaleSticker(stk.id, 0.15);
+                              }}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 active:scale-90 text-white font-bold text-sm transition-all cursor-pointer shadow-xs"
+                              title="Larger (+)"
                             >
                               +
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleBringToFront(stk.id)}
-                              className="p-1 hover:bg-slate-800 rounded cursor-pointer"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBringToFront(stk.id);
+                              }}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 active:scale-90 text-white transition-all cursor-pointer shadow-xs"
                               title="Bring to Front"
                             >
-                              <Layers size={10} />
+                              <Layers size={13} />
                             </button>
-                            {isAdmin && (
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteCanvasSticker(stk.id)}
-                                className="p-1 hover:bg-rose-600 rounded text-rose-300 hover:text-white cursor-pointer"
-                                title="Delete Sticker"
-                              >
-                                <Trash2 size={10} />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCanvasSticker(stk.id);
+                              }}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-950/80 hover:bg-rose-600 active:scale-90 text-rose-200 hover:text-white transition-all cursor-pointer shadow-xs"
+                              title="Delete Sticker"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
                         )}
                       </div>
