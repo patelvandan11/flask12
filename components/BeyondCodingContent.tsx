@@ -1207,6 +1207,14 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     if (!isFullscreen) {
       if (plannerSheetRef.current.requestFullscreen) {
         plannerSheetRef.current.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
+
   // Dragging event handlers for canvas stickers
   const handleStickerPointerDown = (stickerId: string, e: React.PointerEvent) => {
     if (!isCanvasEditMode) return;
@@ -3383,152 +3391,448 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               </div>
             </div>
 
-            {/* SECTION 1: Photos uploaded during this month (Days 1 to 31) */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 font-planner-title text-xs sm:text-sm">
-                  <Sparkles size={14} className="text-amber-500" />
-                  <span>
-                    Photos Uploaded in {MONTH_NAMES_EN[coverModalMonth - 1]} (Days 1–{new Date(selectedYear, coverModalMonth, 0).getDate()})
-                  </span>
-                </label>
-                <span className="text-[0.68rem] font-code px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold">
-                  {modalMonthPhotos.length} {modalMonthPhotos.length === 1 ? 'photo uploaded' : 'photos uploaded'}
-                </span>
-              </div>
+            {/* Mode Switcher: Photo Cover vs Aesthetic Emoji & Checklist Mode */}
+            <div className="flex p-1 rounded-2xl bg-amber-100/70 dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => {
+                  setCoverModeTab('photo');
+                  setCoverNoPicMode(false);
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold font-planner-title flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  coverModeTab === 'photo'
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <Camera size={14} />
+                <span>🖼️ Photo Cover Mode</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCoverModeTab('nopic');
+                  setCoverNoPicMode(true);
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold font-planner-title flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  coverModeTab === 'nopic'
+                    ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <Sparkles size={14} />
+                <span>📝 Emoji & Checklist Mode (No Pic)</span>
+              </button>
+            </div>
 
-              {modalMonthPhotos.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-2.5 bg-amber-50/40 dark:bg-slate-800/40 rounded-2xl border border-amber-900/10 dark:border-slate-800">
-                  {modalMonthPhotos.map((photo, pIdx) => {
-                    const isChosen = selectedCoverUrl === photo.url;
-                    return (
-                      <div
-                        key={pIdx}
-                        onClick={() => setSelectedCoverUrl(photo.url)}
-                        className={`group/item relative rounded-xl overflow-hidden border p-1.5 transition-all cursor-pointer ${
-                          isChosen
-                            ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-950/60 ring-2 ring-amber-400 shadow-md scale-102'
-                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-amber-300 hover:scale-101'
-                        }`}
-                      >
-                        <div className="relative w-full h-24 sm:h-28 rounded-lg overflow-hidden bg-slate-100">
-                          <Image
-                            src={photo.url}
-                            alt={photo.title}
-                            fill
-                            sizes="(max-width: 640px) 140px, 180px"
-                            className="object-cover group-hover/item:scale-105 transition-transform"
-                          />
-                          <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.62rem] font-bold backdrop-blur-xs">
-                            Day {photo.day}
-                          </span>
-                          {isChosen && (
-                            <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white font-code text-[0.62rem] font-bold shadow-xs flex items-center gap-0.5">
-                              <Check size={10} /> Active Cover
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-1 px-1 flex items-center justify-between text-[0.68rem]">
-                          <span className="font-handwriting font-bold truncate max-w-[110px] text-slate-800 dark:text-slate-200">
-                            {photo.title}
-                          </span>
-                          <span
-                            className={`text-[0.65rem] font-bold ${
-                              isChosen ? 'text-amber-600 dark:text-amber-400 font-extrabold' : 'text-slate-400'
+            {/* TAB 1: PHOTO COVER MODE */}
+            {coverModeTab === 'photo' && (
+              <div className="space-y-4">
+                {/* SECTION 1: Photos uploaded during this month (Days 1 to 31) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 font-planner-title text-xs sm:text-sm">
+                      <Sparkles size={14} className="text-amber-500" />
+                      <span>
+                        Photos Uploaded in {MONTH_NAMES_EN[coverModalMonth - 1]} (Days 1–{new Date(selectedYear, coverModalMonth, 0).getDate()})
+                      </span>
+                    </label>
+                    <span className="text-[0.68rem] font-code px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold">
+                      {modalMonthPhotos.length} {modalMonthPhotos.length === 1 ? 'photo uploaded' : 'photos uploaded'}
+                    </span>
+                  </div>
+
+                  {modalMonthPhotos.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-2.5 bg-amber-50/40 dark:bg-slate-800/40 rounded-2xl border border-amber-900/10 dark:border-slate-800">
+                      {modalMonthPhotos.map((photo, pIdx) => {
+                        const isChosen = selectedCoverUrl === photo.url;
+                        return (
+                          <div
+                            key={pIdx}
+                            onClick={() => setSelectedCoverUrl(photo.url)}
+                            className={`group/item relative rounded-xl overflow-hidden border p-1.5 transition-all cursor-pointer ${
+                              isChosen
+                                ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-950/60 ring-2 ring-amber-400 shadow-md scale-102'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-amber-300 hover:scale-101'
                             }`}
                           >
-                            {isChosen ? 'Selected' : 'Select'}
+                            <div className="relative w-full h-24 sm:h-28 rounded-lg overflow-hidden bg-slate-100">
+                              <Image
+                                src={photo.url}
+                                alt={photo.title}
+                                fill
+                                sizes="(max-width: 640px) 140px, 180px"
+                                className="object-cover group-hover/item:scale-105 transition-transform"
+                              />
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-slate-900/80 text-white font-code text-[0.62rem] font-bold backdrop-blur-xs">
+                                Day {photo.day}
+                              </span>
+                              {isChosen && (
+                                <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white font-code text-[0.62rem] font-bold shadow-xs flex items-center gap-0.5">
+                                  <Check size={10} /> Active Cover
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 px-1 flex items-center justify-between text-[0.68rem]">
+                              <span className="font-handwriting font-bold truncate max-w-[110px] text-slate-800 dark:text-slate-200">
+                                {photo.title}
+                              </span>
+                              <span
+                                className={`text-[0.65rem] font-bold ${
+                                  isChosen ? 'text-amber-600 dark:text-amber-400 font-extrabold' : 'text-slate-400'
+                                }`}
+                              >
+                                {isChosen ? 'Selected' : 'Select'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-dashed border-amber-300/80 dark:border-slate-700 text-center space-y-2">
+                      <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300 text-base">
+                        No memory photos uploaded for {MONTH_NAMES_EN[coverModalMonth - 1]} yet (Days 1–{new Date(selectedYear, coverModalMonth, 0).getDate()}).
+                      </p>
+                      <p className="text-[0.7rem] text-slate-400 font-sans">
+                        You can upload a custom cover photo below, or switch to <strong>Emoji & Checklist Mode</strong> above!
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* SECTION 2: Upload or enter custom URL */}
+                <div className="space-y-2.5 p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 font-planner-title text-xs sm:text-sm">
+                    <Camera size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>Upload New Cover Photo (Drag & Drop or File)</span>
+                  </label>
+
+                  <ImageDropzone
+                    value={selectedCoverUrl}
+                    onChange={(uploadedUrl) => {
+                      if (uploadedUrl) {
+                        setSelectedCoverUrl(uploadedUrl);
+                      }
+                    }}
+                    label={`Upload Cover Photo for ${MONTH_NAMES_EN[coverModalMonth - 1]}`}
+                  />
+
+                  <div className="flex gap-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="Or paste image URL (e.g. /images/art1.jpg or Cloudinary URL)"
+                      value={customCoverUrlInput}
+                      onChange={(e) => setCustomCoverUrlInput(e.target.value)}
+                      className="flex-1 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-code"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (customCoverUrlInput.trim()) {
+                          setSelectedCoverUrl(customCoverUrlInput.trim());
+                          setCustomCoverUrlInput('');
+                        }
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-xs"
+                    >
+                      Apply URL
+                    </button>
+                  </div>
+                </div>
+
+                {/* SECTION 3: Quick Preset Portfolio Photos */}
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block text-[0.7rem] font-planner-title">
+                    Quick Preset Portfolio Artwork & Photos:
+                  </label>
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {[
+                      { url: '/images/vandan_lake.png', label: 'Lake' },
+                      { url: '/images/vandan.jpg', label: 'Sunlight Tree' },
+                      { url: '/images/art1.jpg', label: 'Autumn Tree' },
+                      { url: '/images/art2.jpg', label: 'Travel Books' },
+                      { url: '/images/art3.jpg', label: 'Scatter Plot' },
+                      { url: '/images/art4.jpg', label: 'Sunset Trees' },
+                      { url: '/images/art5.jpg', label: 'Art 5' },
+                      { url: '/images/art6.jpg', label: 'Art 6' },
+                      { url: '/images/vaan.jpg', label: 'Portrait' },
+                    ].map((preset, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedCoverUrl(preset.url)}
+                        className={`relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                          selectedCoverUrl === preset.url
+                            ? 'ring-2 ring-amber-500 scale-105 border-amber-500 shadow-xs'
+                            : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100'
+                        }`}
+                        title={preset.label}
+                      >
+                        <Image src={preset.url} alt={preset.label} fill sizes="48px" className="object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: EMOJI & CHECKLIST MODE (NO PIC) */}
+            {coverModeTab === 'nopic' && (
+              <div className="space-y-4">
+                {/* Info Alert */}
+                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs flex items-start gap-2.5">
+                  <span className="text-xl">✨</span>
+                  <div>
+                    <h4 className="font-bold font-planner-title text-amber-900 dark:text-amber-300">
+                      Cozy No-Picture Mode Active for {MONTH_NAMES_EN[coverModalMonth - 1]}
+                    </h4>
+                    <p className="text-[0.72rem] font-handwriting text-slate-700 dark:text-slate-300">
+                      When a month has no photos, it renders as a cozy bullet journal card with custom mood emojis, interactive checklist goals, and authentic stationery paper!
+                    </p>
+                  </div>
+                </div>
+
+                {/* 1. Emoji Vibe Selector */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 dark:text-slate-200 font-planner-title text-xs sm:text-sm flex items-center gap-1.5">
+                      <span>😊 Month Mood Emojis</span>
+                      <span className="text-[0.68rem] font-code text-amber-600 font-normal">
+                        ({coverEmojiVibe.length} active)
+                      </span>
+                    </label>
+                    <span className="text-[0.65rem] font-handwriting text-slate-500">
+                      tap emoji to remove or add
+                    </span>
+                  </div>
+
+                  {/* Active Selected Emojis */}
+                  <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-amber-50/50 dark:bg-slate-900 border border-amber-900/10">
+                    {coverEmojiVibe.map((em, eIdx) => (
+                      <span
+                        key={eIdx}
+                        onClick={() => setCoverEmojiVibe((prev) => prev.filter((_, idx) => idx !== eIdx))}
+                        className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-lg flex items-center gap-1 cursor-pointer hover:bg-rose-50 hover:border-rose-300 shadow-2xs group transition-all"
+                        title="Click to remove"
+                      >
+                        <span>{em}</span>
+                        <X size={10} className="text-slate-400 group-hover:text-rose-500" />
+                      </span>
+                    ))}
+                    {coverEmojiVibe.length === 0 && (
+                      <span className="text-xs text-slate-400 font-handwriting">
+                        No emojis selected yet — choose from presets or palette below!
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Quick Preset Vibes */}
+                  <div>
+                    <span className="text-[0.68rem] font-code font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                      Quick Aesthetic Vibe Presets:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { label: '🍂 Autumn Study', emojis: ['🍂', '☕', '📚'], text: 'autumn study season 🍂' },
+                        { label: '☕ Cozy Coffee', emojis: ['☕', '🥐', '✨'], text: 'cozy coffee mornings ☕' },
+                        { label: '🌸 Spring Blossom', emojis: ['🌸', '🍃', '☀️'], text: 'cherry blossom vibes 🌸' },
+                        { label: '☀️ Summer Sun', emojis: ['☀️', '🍉', '🌊'], text: 'summer sunshine & joy ☀️' },
+                        { label: '❄️ Winter Warmth', emojis: ['❄️', '🧣', '🕯️'], text: 'winter tea & candles ❄️' },
+                        { label: '🎨 Creative Studio', emojis: ['🎨', '🎧', '✨'], text: 'creative flow & art 🎨' },
+                      ].map((preset, pIdx) => (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => {
+                            setCoverEmojiVibe(preset.emojis);
+                            setCoverVibeText(preset.text);
+                          }}
+                          className="px-2.5 py-1 rounded-xl bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-handwriting font-bold transition-colors cursor-pointer"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 36+ Clickable Aesthetic Emoji Palette */}
+                  <div>
+                    <span className="text-[0.68rem] font-code font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                      Tap to Add Aesthetic Emojis:
+                    </span>
+                    <div className="grid grid-cols-8 sm:grid-cols-12 gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-32 overflow-y-auto">
+                      {[
+                        '🌸', '☕', '✨', '💛', '🍂', '🥐', '🎧', '📖', '🎨', '🌿', '🕯️', '⛺',
+                        '🐾', '🥪', '☀️', '🌊', '🍉', '🍎', '✏️', '🧣', '❄️', '🧶', '🍓', '🪴',
+                        '🚲', '🌻', '🌙', '🥑', '🥞', '🍵', '🐶', '🐱', '📸', '🏷️', '💌', '🥂'
+                      ].map((em) => (
+                        <button
+                          key={em}
+                          type="button"
+                          onClick={() => {
+                            if (!coverEmojiVibe.includes(em)) {
+                              setCoverEmojiVibe((prev) => [...prev, em]);
+                            }
+                          }}
+                          className="h-8 rounded-lg flex items-center justify-center text-lg hover:scale-120 hover:bg-amber-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                          title={`Add ${em}`}
+                        >
+                          {em}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Handwritten Vibe Tagline */}
+                  <div>
+                    <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1 font-planner-title text-xs">
+                      Handwritten Month Tagline / Vibe
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. cozy study days, seaside holiday, creative season ✨"
+                      value={coverVibeText}
+                      onChange={(e) => setCoverVibeText(e.target.value)}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-handwriting text-base"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Monthly Goals & Checklist Manager */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 dark:text-slate-200 font-planner-title text-xs sm:text-sm flex items-center gap-1.5">
+                      <ListTodo size={14} className="text-amber-600" />
+                      <span>Monthly Goals & Checklist</span>
+                      <span className="text-[0.68rem] font-code text-slate-500 font-normal">
+                        ({coverChecklist.filter((c) => c.completed).length}/{coverChecklist.length} completed)
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Add Goal Input */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={`+ Add a new goal or to-do for ${MONTH_NAMES_EN[coverModalMonth - 1]}...`}
+                      value={newMonthGoalInput}
+                      onChange={(e) => setNewMonthGoalInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (newMonthGoalInput.trim()) {
+                            setCoverChecklist((prev) => [
+                              ...prev,
+                              { id: `goal-${Date.now()}`, text: newMonthGoalInput.trim(), completed: false },
+                            ]);
+                            setNewMonthGoalInput('');
+                          }
+                        }
+                      }}
+                      className="flex-1 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-handwriting"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newMonthGoalInput.trim()) {
+                          setCoverChecklist((prev) => [
+                            ...prev,
+                            { id: `goal-${Date.now()}`, text: newMonthGoalInput.trim(), completed: false },
+                          ]);
+                          setNewMonthGoalInput('');
+                        }
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs cursor-pointer shadow-xs"
+                    >
+                      + Add Goal
+                    </button>
+                  </div>
+
+                  {/* Checklist Items List */}
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                    {coverChecklist.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 gap-2"
+                      >
+                        <div
+                          onClick={() => {
+                            setCoverChecklist((prev) =>
+                              prev.map((g) => (g.id === item.id ? { ...g, completed: !g.completed } : g))
+                            );
+                          }}
+                          className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+                        >
+                          {item.completed ? (
+                            <CheckSquare size={14} className="text-emerald-600 flex-shrink-0" />
+                          ) : (
+                            <Square size={14} className="text-amber-600 flex-shrink-0" />
+                          )}
+                          <span
+                            className={`text-xs font-handwriting truncate ${
+                              item.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-bold'
+                            }`}
+                          >
+                            {item.text}
                           </span>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => setCoverChecklist((prev) => prev.filter((g) => g.id !== item.id))}
+                          className="p-1 hover:bg-rose-100 dark:hover:bg-rose-950/60 rounded text-slate-400 hover:text-rose-600 cursor-pointer"
+                          title="Delete goal"
+                        >
+                          <Trash2 size={12} />
+                        </button>
                       </div>
-                    );
-                  })}
+                    ))}
+                    {coverChecklist.length === 0 && (
+                      <p className="text-xs text-slate-400 font-handwriting text-center py-2">
+                        No goals added yet. Add goals above to display on this month's card!
+                      </p>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-dashed border-amber-300/80 dark:border-slate-700 text-center space-y-2">
-                  <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300 text-base">
-                    No memory photos uploaded for {MONTH_NAMES_EN[coverModalMonth - 1]} yet (Days 1–{new Date(selectedYear, coverModalMonth, 0).getDate()}).
-                  </p>
-                  <p className="text-[0.7rem] text-slate-400 font-sans">
-                    You can upload a custom cover photo below, or add photos to any day of {MONTH_NAMES_EN[coverModalMonth - 1]} on the planner calendar!
-                  </p>
+
+                {/* 3. Paper Background Theme Palette */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 font-planner-title text-xs sm:text-sm flex items-center justify-between">
+                    <span>Stationery Paper Background Theme</span>
+                    <span className="text-[0.68rem] font-code font-bold text-amber-600 uppercase">
+                      active: {coverCardTheme}
+                    </span>
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { id: 'cream', name: 'Warm Cream', bg: 'bg-[#fdfbf7]', border: 'border-amber-300' },
+                      { id: 'pink', name: 'Sakura Pink', bg: 'bg-[#fff1f2]', border: 'border-pink-300' },
+                      { id: 'mint', name: 'Sage Mint', bg: 'bg-[#ecfdf5]', border: 'border-emerald-300' },
+                      { id: 'lavender', name: 'Lavender', bg: 'bg-[#faf5ff]', border: 'border-purple-300' },
+                      { id: 'peach', name: 'Warm Peach', bg: 'bg-[#fff7ed]', border: 'border-orange-300' },
+                      { id: 'sky', name: 'Sky Blue', bg: 'bg-[#f0f9ff]', border: 'border-sky-300' },
+                      { id: 'amber', name: 'Golden Amber', bg: 'bg-[#fefce8]', border: 'border-amber-400' },
+                    ].map((theme) => (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() => setCoverCardTheme(theme.id as any)}
+                        className={`p-2 rounded-xl border flex items-center gap-2 transition-all cursor-pointer ${
+                          coverCardTheme === theme.id
+                            ? 'ring-2 ring-amber-500 border-amber-500 shadow-sm'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-amber-300'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded-md ${theme.bg} ${theme.border} border shadow-2xs`} />
+                        <span className="text-[0.68rem] font-planner-title font-bold text-slate-800 dark:text-slate-200">
+                          {theme.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* SECTION 2: Upload or enter custom URL */}
-            <div className="space-y-2.5 p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
-              <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 font-planner-title text-xs sm:text-sm">
-                <Camera size={14} className="text-indigo-600 dark:text-indigo-400" />
-                <span>Upload New Cover Photo (Drag & Drop or File)</span>
-              </label>
-
-              <ImageDropzone
-                value={selectedCoverUrl}
-                onChange={(uploadedUrl) => {
-                  if (uploadedUrl) {
-                    setSelectedCoverUrl(uploadedUrl);
-                  }
-                }}
-                label={`Upload Cover Photo for ${MONTH_NAMES_EN[coverModalMonth - 1]}`}
-              />
-
-              <div className="flex gap-2 pt-1">
-                <input
-                  type="text"
-                  placeholder="Or paste image URL (e.g. /images/art1.jpg or Cloudinary URL)"
-                  value={customCoverUrlInput}
-                  onChange={(e) => setCustomCoverUrlInput(e.target.value)}
-                  className="flex-1 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-code"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (customCoverUrlInput.trim()) {
-                      setSelectedCoverUrl(customCoverUrlInput.trim());
-                      setCustomCoverUrlInput('');
-                    }
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-xs"
-                >
-                  Apply URL
-                </button>
               </div>
-            </div>
-
-            {/* SECTION 3: Quick Preset Portfolio Photos */}
-            <div className="space-y-1.5">
-              <label className="font-bold text-slate-700 dark:text-slate-300 block text-[0.7rem] font-planner-title">
-                Quick Preset Portfolio Artwork & Photos:
-              </label>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                {[
-                  { url: '/images/vandan_lake.png', label: 'Lake' },
-                  { url: '/images/vandan.jpg', label: 'Sunlight Tree' },
-                  { url: '/images/art1.jpg', label: 'Autumn Tree' },
-                  { url: '/images/art2.jpg', label: 'Travel Books' },
-                  { url: '/images/art3.jpg', label: 'Scatter Plot' },
-                  { url: '/images/art4.jpg', label: 'Sunset Trees' },
-                  { url: '/images/art5.jpg', label: 'Art 5' },
-                  { url: '/images/art6.jpg', label: 'Art 6' },
-                  { url: '/images/vaan.jpg', label: 'Portrait' },
-                ].map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setSelectedCoverUrl(preset.url)}
-                    className={`relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden border transition-all cursor-pointer ${
-                      selectedCoverUrl === preset.url
-                        ? 'ring-2 ring-amber-500 scale-105 border-amber-500 shadow-xs'
-                        : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100'
-                    }`}
-                    title={preset.label}
-                  >
-                    <Image src={preset.url} alt={preset.label} fill sizes="48px" className="object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
 
             {/* SECTION 4: Live Scrapbook Card Preview */}
             <div className="p-3 sm:p-4 rounded-2xl bg-amber-50/60 dark:bg-slate-800/50 border border-amber-900/15 dark:border-slate-700 flex flex-wrap sm:flex-nowrap items-center justify-between gap-4">
@@ -3539,36 +3843,84 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 <p className="text-xs font-handwriting text-slate-700 dark:text-slate-300 text-sm">
                   This is how {MONTH_NAMES_EN[coverModalMonth - 1]} will display in your 12-month overview grid.
                 </p>
-                {selectedCoverUrl && (
+                {coverModeTab === 'photo' && selectedCoverUrl && (
                   <p className="text-[0.68rem] font-code text-slate-500 dark:text-slate-400 truncate max-w-xs">
                     Image: {selectedCoverUrl}
                   </p>
                 )}
+                {coverModeTab === 'nopic' && (
+                  <p className="text-[0.68rem] font-code text-amber-700 dark:text-amber-400 font-bold">
+                    Theme: {coverCardTheme} &middot; {coverEmojiVibe.join(' ')} &middot; {coverChecklist.length} goals
+                  </p>
+                )}
               </div>
 
-              <div className="w-24 sm:w-28 p-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 shadow-md flex flex-col pointer-events-none rotate-[1.5deg] flex-shrink-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100">
-                    {MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              {/* Dynamic Live Card Preview */}
+              {coverModeTab === 'nopic' ? (
+                /* Emoji & Checklist Card Preview */
+                <div
+                  className={`w-32 sm:w-36 p-2 rounded-2xl border-2 shadow-md flex flex-col justify-between pointer-events-none rotate-[1.5deg] flex-shrink-0 ${getCardBgThemeClass(
+                    coverCardTheme
+                  )}`}
+                >
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-2 washi-pattern-gold shadow-2xs rotate-[-3deg] rounded-xs" />
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold font-planner-title">
+                      {MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)}
+                    </span>
+                    <span className="text-[0.6rem] font-code text-amber-700 font-bold">
+                      {coverChecklist.filter((c) => c.completed).length}/{coverChecklist.length}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 text-base my-1">
+                    {coverEmojiVibe.slice(0, 3).map((em, idx) => (
+                      <span key={idx}>{em}</span>
+                    ))}
+                  </div>
+                  <p className="text-[0.55rem] font-handwriting font-bold truncate text-center mb-1">
+                    {coverVibeText || 'Cozy moments'}
+                  </p>
+                  <div className="w-full h-1 bg-amber-200/80 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-500 rounded-full"
+                      style={{
+                        width: `${
+                          coverChecklist.length > 0
+                            ? Math.round(
+                                (coverChecklist.filter((c) => c.completed).length / coverChecklist.length) * 100
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 border border-amber-900/20">
-                  {selectedCoverUrl ? (
-                    <Image src={selectedCoverUrl} alt="Cover preview" fill sizes="100px" className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 font-sans">
-                      No image
-                    </div>
-                  )}
-                  <div className="absolute top-1 left-2 w-6 h-2 bg-amber-200/90 rotate-[-8deg] shadow-xs rounded-xs" />
+              ) : (
+                /* Polaroid Photo Card Preview */
+                <div className="w-24 sm:w-28 p-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 shadow-md flex flex-col pointer-events-none rotate-[1.5deg] flex-shrink-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100">
+                      {MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)}
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  </div>
+                  <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 border border-amber-900/20">
+                    {selectedCoverUrl ? (
+                      <Image src={selectedCoverUrl} alt="Cover preview" fill sizes="100px" className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 font-sans">
+                        No image
+                      </div>
+                    )}
+                    <div className="absolute top-1 left-2 w-6 h-2 bg-amber-200/90 rotate-[-8deg] shadow-xs rounded-xs" />
+                  </div>
+                  <div className="flex items-center gap-1 mt-1 text-[0.65rem] select-none">
+                    {coverStickers?.slice(0, 3).map((stk, sIdx) => (
+                      <span key={sIdx}>{stk}</span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 mt-1 text-[0.65rem] select-none">
-                  {coverStickers?.slice(0, 3).map((stk, sIdx) => (
-                    <span key={sIdx}>{stk}</span>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -3583,15 +3935,443 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               <button
                 type="button"
                 onClick={handleSaveMonthCover}
-                disabled={isSaving || !selectedCoverUrl}
+                disabled={isSaving || (coverModeTab === 'photo' && !selectedCoverUrl)}
                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 <span>
                   {isAdmin
-                    ? `Save ${MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)} Cover (MongoDB Atlas)`
+                    ? `Save ${MONTH_NAMES_EN[coverModalMonth - 1].substring(0, 3)} ${
+                        coverModeTab === 'nopic' ? 'Mood & Goals' : 'Cover'
+                      } (MongoDB Atlas)`
                     : 'Log in as Admin to Save'}
                 </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* FREEFORM CANVAS STICKERS STUDIO MODAL (MATCHING IMAGE 2) */}
+      {/* ========================================================= */}
+      {isCanvasStudioOpen && (
+        <div className="fixed inset-0 z-[4750] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-[#fdfbf7] dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl p-5 sm:p-7 space-y-4 border border-amber-900/20 dark:border-slate-800 max-h-[92vh] overflow-y-auto rotate-[-0.3deg]">
+            {/* Top Washi Tape Accents */}
+            <div className="absolute -top-3 left-10 w-24 h-4 washi-pattern-gold rotate-[-3deg] shadow-xs rounded-xs pointer-events-none opacity-90" />
+            <div className="absolute -top-3 right-16 w-20 h-4 washi-pattern-pink rotate-[4deg] shadow-xs rounded-xs pointer-events-none opacity-90" />
+
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-amber-900/15 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🎨</span>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold font-planner-title text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    Month Canvas Sticker Studio
+                    <span className="text-amber-500 font-normal text-xs font-handwriting">
+                      ✦ {MONTH_NAMES_EN[selectedMonth - 1]} collage
+                    </span>
+                  </h3>
+                  <p className="text-xs font-handwriting text-slate-500 dark:text-slate-400">
+                    Paste polaroids, scrapbook cutouts, doodle notes & stickers anywhere on your monthly calendar canvas
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCanvasStudioOpen(false)}
+                className="w-8 h-8 rounded-full bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Studio Navigation Tabs */}
+            <div className="flex flex-wrap sm:flex-nowrap gap-1 p-1 bg-amber-100/60 dark:bg-slate-800/80 rounded-2xl border border-amber-900/10 dark:border-slate-700 text-xs font-bold font-planner-title">
+              <button
+                type="button"
+                onClick={() => setCanvasStudioTab('photo')}
+                className={`flex-1 py-1.5 px-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  canvasStudioTab === 'photo'
+                    ? 'bg-white dark:bg-slate-900 text-amber-900 dark:text-amber-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <Camera size={13} />
+                <span>Photos ("Related to Pic")</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCanvasStudioTab('cutouts')}
+                className={`flex-1 py-1.5 px-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  canvasStudioTab === 'cutouts'
+                    ? 'bg-white dark:bg-slate-900 text-amber-900 dark:text-amber-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <Sparkles size={13} />
+                <span>Scrapbook Cutouts</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCanvasStudioTab('notes')}
+                className={`flex-1 py-1.5 px-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  canvasStudioTab === 'notes'
+                    ? 'bg-white dark:bg-slate-900 text-amber-900 dark:text-amber-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <span>✍️ Notes</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCanvasStudioTab('emojis')}
+                className={`flex-1 py-1.5 px-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  canvasStudioTab === 'emojis'
+                    ? 'bg-white dark:bg-slate-900 text-amber-900 dark:text-amber-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <span>😊 Emojis</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCanvasStudioTab('upload')}
+                className={`flex-1 py-1.5 px-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  canvasStudioTab === 'upload'
+                    ? 'bg-white dark:bg-slate-900 text-amber-900 dark:text-amber-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <span>📤 Custom URL</span>
+              </button>
+            </div>
+
+            {/* TAB 1: PHOTO STICKER ("Related to Pic") */}
+            {canvasStudioTab === 'photo' && (
+              <div className="space-y-3">
+                <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300">
+                  Select a photo memory from {MONTH_NAMES_EN[selectedMonth - 1]} or presets, pick a frame style (washi tape, paperclip, or cutout), and stamp it freely anywhere on the month canvas!
+                </p>
+
+                {/* Framing Style Choice */}
+                <div>
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1 font-planner-title text-xs">
+                    Choose Polaroid Framing Style
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { id: 'polaroid', name: 'Polaroid + Tape', icon: '🖼️' },
+                      { id: 'paperclip', name: 'With Paperclip', icon: '📎' },
+                      { id: 'tape', name: 'Angled Washi Tape', icon: '📐' },
+                      { id: 'cutout', name: 'Clean Cutout', icon: '✂️' },
+                    ].map((fmt) => (
+                      <button
+                        key={fmt.id}
+                        type="button"
+                        onClick={() => setCanvasFrameStyle(fmt.id as any)}
+                        className={`p-2 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                          canvasFrameStyle === fmt.id
+                            ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 ring-2 ring-amber-400'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-amber-300'
+                        }`}
+                      >
+                        <span className="text-sm">{fmt.icon}</span>
+                        <span className="text-[0.68rem] font-bold text-slate-800 dark:text-slate-200">
+                          {fmt.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Optional Caption */}
+                <div>
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1 font-planner-title text-xs">
+                    Handwritten Caption / Note on Polaroid
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. golden hour ✨, lake days, beautiful sunset"
+                    value={canvasDoodleInput}
+                    onChange={(e) => setCanvasDoodleInput(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-handwriting text-sm"
+                  />
+                </div>
+
+                {/* Select Photo from Month Memories */}
+                <div>
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1.5 font-planner-title text-xs">
+                    Select Photo from {MONTH_NAMES_EN[selectedMonth - 1]} or Presets:
+                  </label>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 max-h-40 overflow-y-auto p-2 bg-amber-50/40 dark:bg-slate-800/40 rounded-2xl border border-amber-900/10">
+                    {[
+                      '/images/vandan_lake.png',
+                      '/images/vandan.jpg',
+                      '/images/art1.jpg',
+                      '/images/art2.jpg',
+                      '/images/art3.jpg',
+                      '/images/art4.jpg',
+                      '/images/art5.jpg',
+                      '/images/art6.jpg',
+                      '/images/vaan.jpg',
+                    ].map((imgUrl, iIdx) => (
+                      <div
+                        key={iIdx}
+                        onClick={() => setCanvasSelectedPhoto(imgUrl)}
+                        className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                          (canvasSelectedPhoto || '/images/vandan_lake.png') === imgUrl
+                            ? 'border-amber-500 ring-2 ring-amber-400 scale-105 shadow-md'
+                            : 'border-slate-200 dark:border-slate-700 hover:scale-102'
+                        }`}
+                      >
+                        <Image src={imgUrl} alt="Choice" fill sizes="70px" className="object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stamp Action Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const chosen = canvasSelectedPhoto || '/images/vandan_lake.png';
+                    handleAddCanvasSticker({
+                      type: 'photo',
+                      content: chosen,
+                      frameStyle: canvasFrameStyle,
+                      tapeColor: stickerStudioTapeColor,
+                      label: canvasDoodleInput.trim() || undefined,
+                      x: 35 + Math.floor(Math.random() * 30),
+                      y: 35 + Math.floor(Math.random() * 30),
+                      rotation: Math.floor(Math.random() * 16 - 8),
+                      scale: 1,
+                    });
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 hover:from-amber-600 hover:to-pink-600 text-white font-bold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
+                >
+                  <Sparkles size={16} />
+                  <span>+ Stamp Polaroid onto Month Canvas</span>
+                </button>
+              </div>
+            )}
+
+            {/* TAB 2: SCRAPBOOK CUTOUTS (Matching Image 2 "Luglio 2025") */}
+            {canvasStudioTab === 'cutouts' && (
+              <div className="space-y-3">
+                <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300">
+                  Authentic vintage scrapbook elements inspired by your journal reference! Tap any cutout to stamp it immediately onto your canvas.
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto p-1">
+                  {[
+                    { id: 'retro-camera', title: 'Vintage 35mm Camera', icon: '📷', sub: 'Retro black film camera' },
+                    { id: 'phone-player', title: 'Music Player (Adesso che fai)', icon: '📱', sub: 'Cozy Spotify track card' },
+                    { id: 'qr-clip', title: 'QR Clip Badge', icon: '📎', sub: 'Paperclip with scan card' },
+                    { id: 'dog-polaroid', title: 'Pup Joy Polaroid', icon: '🐾', sub: 'Mini dog snapshot + clip' },
+                    { id: 'sandwich-tape', title: 'Panino Picnic Tape', icon: '🥪', sub: 'Lunch treats with gold tape' },
+                    { id: 'sunscreen', title: 'French Soleil SPF 30+', icon: '☀️', sub: 'Summer protection tube' },
+                    { id: 'star-doodle', title: 'Gold Doodle Star', icon: '✦', sub: 'Hand-drawn sparkle star' },
+                    { id: 'blue-flower', title: 'Pastel Cherry Blossom', icon: '🌸', sub: 'Cozy pressed flower' },
+                    { id: 'croissant', title: 'Bakery Croissant', icon: '🥐', sub: 'Fresh butter croissant' },
+                  ].map((cutout) => (
+                    <button
+                      key={cutout.id}
+                      type="button"
+                      onClick={() => {
+                        handleAddCanvasSticker({
+                          type: 'scrapbook',
+                          content: cutout.id,
+                          x: 35 + Math.floor(Math.random() * 30),
+                          y: 35 + Math.floor(Math.random() * 30),
+                          rotation: Math.floor(Math.random() * 16 - 8),
+                          scale: 1,
+                        });
+                      }}
+                      className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-slate-700/50 transition-all flex flex-col items-center text-center gap-1 shadow-2xs hover:shadow-md hover:scale-102 cursor-pointer group"
+                    >
+                      <span className="text-3xl group-hover:scale-115 transition-transform">{cutout.icon}</span>
+                      <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-100 mt-1">
+                        {cutout.title}
+                      </span>
+                      <span className="text-[0.62rem] font-sans text-slate-400 leading-tight">
+                        {cutout.sub}
+                      </span>
+                      <span className="mt-1 text-[0.6rem] font-code font-bold text-amber-600 dark:text-amber-400">
+                        + Stamp Cutout
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: HANDWRITTEN DOODLE NOTES */}
+            {canvasStudioTab === 'notes' && (
+              <div className="space-y-3">
+                <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300">
+                  Stamp cute handwritten doodle captions and memories across your month calendar (like "mero & more", "degustazione", or your own words).
+                </p>
+
+                <div>
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block mb-1 font-planner-title text-xs">
+                    Write Custom Handwritten Note
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. mero & more, degustazione 🍷, festa con camping ⛺"
+                    value={canvasDoodleInput}
+                    onChange={(e) => setCanvasDoodleInput(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-900/15 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-handwriting text-base"
+                  />
+                </div>
+
+                {/* Preset Quotes from Reference Screenshot */}
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1.5 font-planner-title text-xs">
+                    Quick Italian & Scrapbook Script Presets:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      'mero & more',
+                      'degustazione + enoteca 🍷',
+                      'festa con camping ⛺',
+                      'tante tantissime ortiche 🌿',
+                      'colazione da tris ☕🥐',
+                      'weekend getaway 🚂',
+                      'cozy rainy afternoon 🌧️',
+                      'summer sunset ✨',
+                    ].map((phrase) => (
+                      <button
+                        key={phrase}
+                        type="button"
+                        onClick={() => {
+                          setCanvasDoodleInput(phrase);
+                          handleAddCanvasSticker({
+                            type: 'text',
+                            content: phrase,
+                            x: 35 + Math.floor(Math.random() * 30),
+                            y: 35 + Math.floor(Math.random() * 30),
+                            rotation: Math.floor(Math.random() * 12 - 6),
+                            scale: 1,
+                          });
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-handwriting text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        + {phrase}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (canvasDoodleInput.trim()) {
+                      handleAddCanvasSticker({
+                        type: 'text',
+                        content: canvasDoodleInput.trim(),
+                        x: 35 + Math.floor(Math.random() * 30),
+                        y: 35 + Math.floor(Math.random() * 30),
+                        rotation: Math.floor(Math.random() * 12 - 6),
+                        scale: 1,
+                      });
+                    }
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
+                >
+                  <span>+ Stamp Note on Canvas</span>
+                </button>
+              </div>
+            )}
+
+            {/* TAB 4: AESTHETIC EMOJIS PALETTE */}
+            {canvasStudioTab === 'emojis' && (
+              <div className="space-y-3">
+                <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300">
+                  Tap any cozy stationery emoji to stamp it onto the month canvas!
+                </p>
+
+                <div className="grid grid-cols-8 sm:grid-cols-12 gap-2 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-amber-900/15 dark:border-slate-700 max-h-64 overflow-y-auto">
+                  {[
+                    '🌸', '☕', '✨', '💛', '🥐', '🎧', '📖', '🎨', '🌿', '🕯️', '⛺', '🐾',
+                    '🥪', '☀️', '🌊', '🍉', '🍎', '✏️', '🧣', '❄️', '🧶', '🍓', '🪴', '🚲',
+                    '🌻', '🌙', '🥑', '🥞', '🍵', '🐶', '🐱', '📸', '🏷️', '💌', '🥂', '🍦',
+                    '🏖️', '🧳', '🏕️', '🍕', '🍰', '🍩', '🍒', '🍇', '🍋', '🥨', '🥞', '🥯'
+                  ].map((em) => (
+                    <button
+                      key={em}
+                      type="button"
+                      onClick={() => {
+                        handleAddCanvasSticker({
+                          type: 'emoji',
+                          content: em,
+                          x: 30 + Math.floor(Math.random() * 40),
+                          y: 30 + Math.floor(Math.random() * 40),
+                          rotation: Math.floor(Math.random() * 16 - 8),
+                          scale: 1,
+                        });
+                      }}
+                      className="h-10 rounded-xl flex items-center justify-center text-2xl hover:scale-125 hover:bg-amber-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
+                      title={`Stamp ${em}`}
+                    >
+                      {em}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: CUSTOM IMAGE / URL */}
+            {canvasStudioTab === 'upload' && (
+              <div className="space-y-3">
+                <p className="text-xs font-handwriting text-slate-600 dark:text-slate-300">
+                  Paste any custom image URL to stamp as a freeform canvas sticker.
+                </p>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Paste image URL (e.g. /images/art3.jpg or Web URL)"
+                    value={canvasCustomImageUrl}
+                    onChange={(e) => setCanvasCustomImageUrl(e.target.value)}
+                    className="flex-1 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-code text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (canvasCustomImageUrl.trim()) {
+                        handleAddCanvasSticker({
+                          type: 'photo',
+                          content: canvasCustomImageUrl.trim(),
+                          frameStyle: canvasFrameStyle,
+                          tapeColor: stickerStudioTapeColor,
+                          x: 50,
+                          y: 50,
+                        });
+                        setCanvasCustomImageUrl('');
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-xs"
+                  >
+                    + Stamp Custom
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Footer Helper & Done */}
+            <div className="pt-2 border-t border-amber-900/15 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span className="text-[0.68rem] font-handwriting text-amber-800 dark:text-amber-400">
+                💡 Tip: Turn on <strong>Move: ON</strong> in the sheet header to drag, rotate (⟲ ⟳), and scale (− +) stickers!
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsCanvasStudioOpen(false)}
+                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold cursor-pointer shadow-xs transition-colors"
+              >
+                Done Styling Canvas
               </button>
             </div>
           </div>
