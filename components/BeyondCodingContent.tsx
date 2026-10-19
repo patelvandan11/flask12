@@ -46,6 +46,7 @@ import {
   RotateCw,
   Paperclip,
 } from 'lucide-react';
+import { Graduate } from 'next/font/google';
 
 interface BeyondCodingContentProps {
   initialData?: BeyondCodingData;
@@ -89,6 +90,8 @@ const STICKER_ICONS: Record<string, string> = {
   hibiscus: '🌺',
   tea: '🍵',
   rainbow: '🌈',
+  Graduate: '🎓',
+  bored: '😐',
 };
 
 const resolveStickerIcon = (stickerKey?: string): string => {
