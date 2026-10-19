@@ -224,7 +224,7 @@ export default function HomeHeroSection({
               <Code2 size={14} /> LeetCode ↗
             </a>
             <Link href="/beyond-coding" className="cyber-btn-secondary text-xs px-4 py-2">
-              <Sparkles size={14} /> Beyond Code ✨
+              <Sparkles size={14} /> Life Logs ✨
             </Link>
             <a href="#contact" className="cyber-btn-secondary text-xs px-4 py-2">
               <Send size={14} /> Contact →

@@ -171,8 +171,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const { isAdmin, openAdminModal } = useAdmin();
   const [data, setData] = useState<BeyondCodingData>(initialData || {
     year: 2026,
-    title: 'Beyond Coding — Digital Scrapbook & Planner',
-    subtitle: 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys beyond software engineering.',
+    title: 'Life Logs — Digital Scrapbook & Planner',
+    subtitle: 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys — personal life logs.',
     months: [],
     memories: [],
   });
@@ -1541,10 +1541,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-base sm:text-lg font-bold font-planner-title tracking-wide text-slate-800 dark:text-slate-100">
-                  Calander 
+                  Life Logs
                 </h1>
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/50 font-handwriting text-sm font-bold">
-                  Digital Life Planner ✨
+                  Digital Life Planner & Memories ✨
                 </span>
               </div>
             </div>
@@ -1669,7 +1669,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
           <div className="border-t border-slate-200/70 dark:border-slate-800/70 pt-2 flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs sm:text-sm font-handwriting">
             <span className="text-amber-500 font-sans text-xs">✦</span>
             <p className="leading-snug">
-              {data.subtitle || 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys beyond software engineering.'}
+              {data.subtitle || 'A soft, cozy memory calendar capturing everyday moments, art, travels, and personal life logs.'}
             </p>
           </div>
         </div>

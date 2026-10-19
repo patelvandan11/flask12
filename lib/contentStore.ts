@@ -96,8 +96,8 @@ export async function saveExplorationsData(data: any[]) {
 export async function getBeyondCodingData(): Promise<BeyondCodingData> {
   return loadCollectionData<BeyondCodingData>('beyond_coding', 'beyond_config', {
     year: 2026,
-    title: 'Beyond Coding — Digital Scrapbook & Planner',
-    subtitle: 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys beyond software engineering.',
+    title: 'Life Logs — Digital Scrapbook & Planner',
+    subtitle: 'A soft, cozy memory calendar capturing everyday moments, art, travels, and little joys — personal life logs.',
     months: [],
     memories: [],
   });
