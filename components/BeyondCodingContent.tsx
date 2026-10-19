@@ -142,18 +142,18 @@ const getCardBgThemeClass = (theme?: string) => {
 };
 
 const DEFAULT_MONTH_EMOJIS: Record<number, string[]> = {
-  1: ['❄️', '☕', '✨'],
-  2: ['💌', '🍫', '🕯️'],
-  3: ['🌱', '☀️', '🌸'],
-  4: ['🌷', '🚲', '📖'],
-  5: ['🌻', '🎨', '🍵'],
-  6: ['🏖️', '🌊', '🍉'],
-  7: ['☀️', '🍦', '🏕️'],
-  8: ['🌴', '✈️', '📸'],
-  9: ['🍂', '🎒', '📚'],
-  10: ['🎃', '🍁', '☕'],
-  11: ['🥧', '🧶', '✨'],
-  12: ['🎄', '🎁', '❄️'],
+  1: ['❄️'],
+  2: ['💌'],
+  3: ['🌱'],
+  4: ['🌷'],
+  5: ['🌻'],
+  6: ['🏖️'],
+  7: ['☀️'],
+  8: ['🌴'],
+  9: ['🍂'],
+  10: ['🎃'],
+  11: ['🍁'],
+  12: ['🎄'],
 };
 
 const DEFAULT_MONTH_GOALS: Record<number, string[]> = {
@@ -238,7 +238,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
   const [customCoverUrlInput, setCustomCoverUrlInput] = useState<string>('');
   const [coverVibeText, setCoverVibeText] = useState<string>('');
   const [coverStickers, setCoverStickers] = useState<string[]>([]);
-  const [coverEmojiVibe, setCoverEmojiVibe] = useState<string[]>(['✨', '💛', '☕']);
+  const [coverEmojiVibe, setCoverEmojiVibe] = useState<string[]>(['✨']);
   const [coverChecklist, setCoverChecklist] = useState<MonthChecklistItem[]>([]);
   const [newMonthGoalInput, setNewMonthGoalInput] = useState<string>('');
   const [coverCardTheme, setCoverCardTheme] = useState<'cream' | 'pink' | 'mint' | 'lavender' | 'peach' | 'sky' | 'amber'>('cream');
@@ -636,7 +636,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       const monthNum = i + 1;
       const existing = (data.months || []).find((m) => m.month === monthNum);
       const cover = getMonthCoverImage(monthNum);
-      const defaultEmojis = DEFAULT_MONTH_EMOJIS[monthNum] || ['✨', '💛', '☕'];
+      const defaultEmojis = DEFAULT_MONTH_EMOJIS[monthNum] || ['✨'];
       const defaultGoals = (DEFAULT_MONTH_GOALS[monthNum] || ['Cozy moments', 'Daily joy']).map(
         (g, idx) => ({ id: `g-${monthNum}-${idx}`, text: g, completed: false })
       );
@@ -646,16 +646,19 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       );
 
       if (existing) {
+        const resolvedEmoji =
+          existing.emojiVibe && existing.emojiVibe.length > 0
+            ? [existing.emojiVibe[0]]
+            : existing.stickers && existing.stickers.length > 0
+            ? [existing.stickers[0]]
+            : defaultEmojis;
+
         return {
           ...existing,
           coverImages: hasValidPhoto ? [cover] : [],
           noPicMode: existing.noPicMode !== undefined ? existing.noPicMode : !hasValidPhoto,
-          emojiVibe:
-            existing.emojiVibe && existing.emojiVibe.length > 0
-              ? existing.emojiVibe
-              : existing.stickers && existing.stickers.length > 0
-              ? existing.stickers
-              : defaultEmojis,
+          emojiVibe: resolvedEmoji,
+          stickers: resolvedEmoji,
           checklist:
             existing.checklist !== undefined && Array.isArray(existing.checklist)
               ? existing.checklist
@@ -692,17 +695,16 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setCoverNoPicMode(isNoPic);
     setCoverModeTab(isNoPic ? 'nopic' : 'photo');
     setCoverVibeText(existingMonth?.vibeText || 'Cozy moments');
-    const defaultEmojis = DEFAULT_MONTH_EMOJIS[monthNum] || ['✨', '💛', '☕'];
-    setCoverStickers(
-      existingMonth?.stickers && existingMonth.stickers.length > 0 ? existingMonth.stickers : defaultEmojis
-    );
-    setCoverEmojiVibe(
+    const defaultEmojis = DEFAULT_MONTH_EMOJIS[monthNum] || ['✨'];
+    const chosenEmoji =
       existingMonth?.emojiVibe && existingMonth.emojiVibe.length > 0
-        ? existingMonth.emojiVibe
+        ? [existingMonth.emojiVibe[0]]
         : existingMonth?.stickers && existingMonth.stickers.length > 0
-        ? existingMonth.stickers
-        : defaultEmojis
-    );
+        ? [existingMonth.stickers[0]]
+        : defaultEmojis;
+
+    setCoverStickers(chosenEmoji);
+    setCoverEmojiVibe(chosenEmoji);
     setCoverChecklist(
       existingMonth?.checklist !== undefined && Array.isArray(existingMonth.checklist)
         ? existingMonth.checklist
@@ -723,17 +725,16 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
     setCoverNoPicMode(isNoPic);
     setCoverModeTab(isNoPic ? 'nopic' : 'photo');
     setCoverVibeText(existingMonth?.vibeText || 'Cozy moments');
-    const defaultEmojis = DEFAULT_MONTH_EMOJIS[newMonth] || ['✨', '💛', '☕'];
-    setCoverStickers(
-      existingMonth?.stickers && existingMonth.stickers.length > 0 ? existingMonth.stickers : defaultEmojis
-    );
-    setCoverEmojiVibe(
+    const defaultEmojis = DEFAULT_MONTH_EMOJIS[newMonth] || ['✨'];
+    const chosenEmoji =
       existingMonth?.emojiVibe && existingMonth.emojiVibe.length > 0
-        ? existingMonth.emojiVibe
+        ? [existingMonth.emojiVibe[0]]
         : existingMonth?.stickers && existingMonth.stickers.length > 0
-        ? existingMonth.stickers
-        : defaultEmojis
-    );
+        ? [existingMonth.stickers[0]]
+        : defaultEmojis;
+
+    setCoverStickers(chosenEmoji);
+    setCoverEmojiVibe(chosenEmoji);
     setCoverChecklist(
       existingMonth?.checklist !== undefined && Array.isArray(existingMonth.checklist)
         ? existingMonth.checklist
@@ -1125,9 +1126,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
       fullEnglishName: existingMonth?.fullEnglishName || MONTH_NAMES_EN[coverModalMonth - 1],
       coverImages: updatedCoverImages,
       vibeText: coverVibeText || existingMonth?.vibeText || 'Cozy moments',
-      stickers: coverStickers && coverStickers.length > 0 ? coverStickers : (existingMonth?.stickers || ['✨', '💛']),
+      stickers: coverEmojiVibe.length > 0 ? [coverEmojiVibe[0]] : (existingMonth?.stickers && existingMonth.stickers.length > 0 ? [existingMonth.stickers[0]] : ['✨']),
       noPicMode: isNoPic,
-      emojiVibe: coverEmojiVibe.length > 0 ? coverEmojiVibe : (existingMonth?.emojiVibe || ['✨', '💛']),
+      emojiVibe: coverEmojiVibe.length > 0 ? [coverEmojiVibe[0]] : (existingMonth?.emojiVibe && existingMonth.emojiVibe.length > 0 ? [existingMonth.emojiVibe[0]] : ['✨']),
       checklist: coverChecklist,
       cardBgTheme: coverCardTheme,
       canvasStickers: existingMonth?.canvasStickers || [],
@@ -1812,12 +1813,10 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         {/* Washi Tape Strip on Top */}
                         <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-2 bg-amber-300/80 dark:bg-amber-400/60 rotate-[-2deg] rounded-xs shadow-2xs pointer-events-none" />
 
-                        {/* Prominent Aesthetic Emojis */}
+                        {/* Prominent Aesthetic Signature Emoji (Single) */}
                         <div className="flex-1 flex flex-col items-center justify-center pt-1.5 select-none">
-                          <div className="flex items-center gap-1 text-2xl sm:text-3xl filter drop-shadow-xs hover:scale-110 transition-transform">
-                            {(m.emojiVibe && m.emojiVibe.length > 0 ? m.emojiVibe : m.stickers || ['✨', '💛']).slice(0, 3).map((em, eIdx) => (
-                              <span key={eIdx}>{em}</span>
-                            ))}
+                          <div className="text-3xl sm:text-4xl filter drop-shadow-xs hover:scale-110 transition-transform">
+                            <span>{(m.emojiVibe && m.emojiVibe[0]) || (m.stickers && m.stickers[0]) || '✨'}</span>
                           </div>
                           <span className="text-[0.6rem] font-handwriting font-bold text-amber-900/80 dark:text-amber-200/80 line-clamp-1 mt-0.5">
                             {m.vibeText || 'Cozy vibes'}
@@ -1900,11 +1899,9 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                       </div>
                     )}
 
-                    {/* Stickers Footer */}
-                    <div className="flex items-center gap-1 mt-1.5 text-[0.7rem] select-none">
-                      {m.stickers?.slice(0, 3).map((stk, sIdx) => (
-                        <span key={sIdx}>{stk}</span>
-                      ))}
+                    {/* Single Signature Emoji Footer */}
+                    <div className="flex items-center justify-center mt-1.5 text-xs sm:text-sm select-none">
+                      <span>{(m.stickers && m.stickers[0]) || (m.emojiVibe && m.emojiVibe[0]) || '✨'}</span>
                     </div>
                   </div>
                 );
@@ -3717,94 +3714,118 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                   </div>
                 </div>
 
-                {/* 1. Emoji Vibe Selector */}
+                {/* 1. Emoji Vibe Selector (Single Signature Emoji) */}
                 <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="font-bold text-slate-800 dark:text-slate-200 font-planner-title text-xs sm:text-sm flex items-center gap-1.5">
-                      <span>😊 Month Mood Emojis</span>
+                      <span>😊 Signature Month Emoji</span>
                       <span className="text-[0.68rem] font-code text-amber-600 font-normal">
-                        ({coverEmojiVibe.length} active)
+                        ({coverEmojiVibe.length > 0 ? '1 selected' : 'none'})
                       </span>
                     </label>
                     <span className="text-[0.65rem] font-handwriting text-slate-500">
-                      tap emoji to remove or add
+                      pick 1 signature mood emoji
                     </span>
                   </div>
 
-                  {/* Active Selected Emojis */}
-                  <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-amber-50/50 dark:bg-slate-900 border border-amber-900/10">
-                    {coverEmojiVibe.map((em, eIdx) => (
-                      <span
-                        key={eIdx}
-                        onClick={() => setCoverEmojiVibe((prev) => prev.filter((_, idx) => idx !== eIdx))}
-                        className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-lg flex items-center gap-1 cursor-pointer hover:bg-rose-50 hover:border-rose-300 shadow-2xs group transition-all"
-                        title="Click to remove"
-                      >
-                        <span>{em}</span>
-                        <X size={10} className="text-slate-400 group-hover:text-rose-500" />
-                      </span>
-                    ))}
-                    {coverEmojiVibe.length === 0 && (
+                  {/* Active Selected Emoji Display */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/50 dark:bg-slate-900 border border-amber-900/10">
+                    {coverEmojiVibe.length > 0 && coverEmojiVibe[0] ? (
+                      <div className="flex items-center gap-3">
+                        <span className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 border-2 border-amber-400 dark:border-amber-600 text-2xl flex items-center justify-center shadow-xs">
+                          {coverEmojiVibe[0]}
+                        </span>
+                        <div>
+                          <span className="text-xs font-bold font-planner-title text-slate-800 dark:text-slate-200 block">
+                            Active Emoji: {coverEmojiVibe[0]}
+                          </span>
+                          <span className="text-[0.68rem] font-handwriting text-slate-500">
+                            Tap any emoji or preset below to switch
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
                       <span className="text-xs text-slate-400 font-handwriting">
-                        No emojis selected yet — choose from presets or palette below!
+                        No emoji selected — choose 1 from presets or palette below!
                       </span>
+                    )}
+                    {coverEmojiVibe.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCoverEmojiVibe([])}
+                        className="text-xs font-code text-rose-500 hover:text-rose-700 hover:underline px-2 py-1 rounded cursor-pointer"
+                      >
+                        Clear
+                      </button>
                     )}
                   </div>
 
-                  {/* Quick Preset Vibes */}
+                  {/* Quick Preset Vibes (Single Emoji) */}
                   <div>
                     <span className="text-[0.68rem] font-code font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Quick Aesthetic Vibe Presets:
+                      Quick Aesthetic Presets (1 Emoji):
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {[
-                        { label: '🍂 Autumn Study', emojis: ['🍂', '☕', '📚'], text: 'autumn study season 🍂' },
-                        { label: '☕ Cozy Coffee', emojis: ['☕', '🥐', '✨'], text: 'cozy coffee mornings ☕' },
-                        { label: '🌸 Spring Blossom', emojis: ['🌸', '🍃', '☀️'], text: 'cherry blossom vibes 🌸' },
-                        { label: '☀️ Summer Sun', emojis: ['☀️', '🍉', '🌊'], text: 'summer sunshine & joy ☀️' },
-                        { label: '❄️ Winter Warmth', emojis: ['❄️', '🧣', '🕯️'], text: 'winter tea & candles ❄️' },
-                        { label: '🎨 Creative Studio', emojis: ['🎨', '🎧', '✨'], text: 'creative flow & art 🎨' },
-                      ].map((preset, pIdx) => (
-                        <button
-                          key={pIdx}
-                          type="button"
-                          onClick={() => {
-                            setCoverEmojiVibe(preset.emojis);
-                            setCoverVibeText(preset.text);
-                          }}
-                          className="px-2.5 py-1 rounded-xl bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-handwriting font-bold transition-colors cursor-pointer"
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
+                        { label: '🍂 Autumn', emoji: '🍂', text: 'autumn study season 🍂' },
+                        { label: '☕ Cozy Coffee', emoji: '☕', text: 'cozy coffee mornings ☕' },
+                        { label: '🌸 Spring Blossom', emoji: '🌸', text: 'cherry blossom vibes 🌸' },
+                        { label: '☀️ Summer Sun', emoji: '☀️', text: 'summer sunshine & joy ☀️' },
+                        { label: '❄️ Winter Warmth', emoji: '❄️', text: 'winter tea & candles ❄️' },
+                        { label: '🎨 Creative Studio', emoji: '🎨', text: 'creative flow & art 🎨' },
+                      ].map((preset, pIdx) => {
+                        const isSelected = coverEmojiVibe[0] === preset.emoji;
+                        return (
+                          <button
+                            key={pIdx}
+                            type="button"
+                            onClick={() => {
+                              setCoverEmojiVibe([preset.emoji]);
+                              setCoverVibeText(preset.text);
+                            }}
+                            className={`px-2.5 py-1 rounded-xl text-xs font-handwriting font-bold transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-amber-400 text-amber-950 shadow-xs ring-2 ring-amber-500 font-black'
+                                : 'bg-amber-100/70 hover:bg-amber-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* 36+ Clickable Aesthetic Emoji Palette */}
+                  {/* 36+ Clickable Aesthetic Emoji Palette (Single Selection) */}
                   <div>
                     <span className="text-[0.68rem] font-code font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Tap to Add Aesthetic Emojis:
+                      Tap to Choose 1 Signature Emoji:
                     </span>
                     <div className="grid grid-cols-8 sm:grid-cols-12 gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-32 overflow-y-auto">
                       {[
                         '🌸', '☕', '✨', '💛', '🍂', '🥐', '🎧', '📖', '🎨', '🌿', '🕯️', '⛺',
                         '🐾', '🥪', '☀️', '🌊', '🍉', '🍎', '✏️', '🧣', '❄️', '🧶', '🍓', '🪴',
-                        '🚲', '🌻', '🌙', '🥑', '🥞', '🍵', '🐶', '🐱', '📸', '🏷️', '💌', '🥂','💻','🧑‍💻'
-                      ].map((em) => (
-                        <button
-                          key={em}
-                          type="button"
-                          onClick={() => {
-                            if (!coverEmojiVibe.includes(em)) {
-                              setCoverEmojiVibe((prev) => [...prev, em]);
-                            }
-                          }}
-                          className="h-8 rounded-lg flex items-center justify-center text-lg hover:scale-120 hover:bg-amber-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
-                          title={`Add ${em}`}
-                        >
-                          {em}
-                        </button>
-                      ))}
+                        '🚲', '🌻', '🌙', '🥑', '🥞', '🍵', '🐶', '🐱', '📸', '🏷️', '💌', '🥂', '💻', '🧑‍💻'
+                      ].map((em) => {
+                        const isSelected = coverEmojiVibe[0] === em;
+                        return (
+                          <button
+                            key={em}
+                            type="button"
+                            onClick={() => {
+                              setCoverEmojiVibe([em]);
+                            }}
+                            className={`h-8 rounded-lg flex items-center justify-center text-lg transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-amber-300 dark:bg-amber-600 scale-110 shadow-xs ring-2 ring-amber-500'
+                                : 'hover:scale-120 hover:bg-amber-100 dark:hover:bg-slate-800'
+                            }`}
+                            title={`Select ${em}`}
+                          >
+                            {em}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -3993,7 +4014,7 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                 )}
                 {coverModeTab === 'nopic' && (
                   <p className="text-[0.68rem] font-code text-amber-700 dark:text-amber-400 font-bold">
-                    Theme: {coverCardTheme} &middot; {coverEmojiVibe.join(' ')} &middot; {coverChecklist.length} goals
+                    Theme: {coverCardTheme} &middot; Emoji: {coverEmojiVibe[0] || 'None'} &middot; {coverChecklist.length} goals
                   </p>
                 )}
               </div>
@@ -4017,10 +4038,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                         : 'No goals'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-center gap-1 text-base my-1">
-                    {coverEmojiVibe.slice(0, 3).map((em, idx) => (
-                      <span key={idx}>{em}</span>
-                    ))}
+                  <div className="flex items-center justify-center text-3xl my-1 select-none">
+                    <span>{coverEmojiVibe[0] || '✨'}</span>
                   </div>
                   <p className="text-[0.55rem] font-handwriting font-bold truncate text-center mb-1">
                     {coverVibeText || 'Cozy moments'}
@@ -4057,10 +4076,8 @@ export default function BeyondCodingContent({ initialData }: BeyondCodingContent
                     )}
                     <div className="absolute top-1 left-2 w-6 h-2 bg-amber-200/90 rotate-[-8deg] shadow-xs rounded-xs" />
                   </div>
-                  <div className="flex items-center gap-1 mt-1 text-[0.65rem] select-none">
-                    {coverStickers?.slice(0, 3).map((stk, sIdx) => (
-                      <span key={sIdx}>{stk}</span>
-                    ))}
+                  <div className="flex items-center justify-center mt-1 text-xs select-none">
+                    <span>{(coverEmojiVibe && coverEmojiVibe[0]) || (coverStickers && coverStickers[0]) || '✨'}</span>
                   </div>
                 </div>
               )}
